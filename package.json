@@ -14,6 +14,8 @@
     "@react-navigation/bottom-tabs": "^7.15.5",
     "@react-navigation/elements": "^2.9.10",
     "@react-navigation/native": "^7.1.33",
+    "@rn-primitives/alert-dialog": "^1.4.0",
+    "@rn-primitives/dropdown-menu": "^1.4.0",
     "@rn-primitives/portal": "^1.4.0",
     "@rn-primitives/slot": "^1.4.0",
     "@tanstack/react-query": "^5.99.0",
