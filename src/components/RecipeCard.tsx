@@ -17,7 +17,7 @@ function MetaDot() {
   return <View className="h-0.5 w-0.5 rounded-full bg-neutral-300" />;
 }
 
-type PopularRecipeCardProps = {
+export type RecipeCardProps = {
   title: string;
   description: string;
   author: string;
@@ -35,7 +35,7 @@ type PopularRecipeCardProps = {
   className?: string;
 };
 
-export default function PopularRecipeCard({
+export default function RecipeCard({
   title,
   description,
   author,
@@ -51,7 +51,7 @@ export default function PopularRecipeCard({
   onPress,
   onChangeFavourite,
   className,
-}: PopularRecipeCardProps) {
+}: RecipeCardProps) {
   const [internalFavourite, setInternalFavourite] = React.useState(false);
   const favourite = isFavourite ?? internalFavourite;
 
@@ -91,10 +91,7 @@ export default function PopularRecipeCard({
       <View className="px-4 pb-4 pt-3">
         <View className="flex-row items-start justify-between gap-3">
           <View className="flex-1">
-            <Text
-              className="text-lg font-bold text-foreground"
-              numberOfLines={1}
-            >
+            <Text className="text-lg font-bold text-foreground" numberOfLines={1}>
               {title}
             </Text>
             <Text
@@ -162,3 +159,4 @@ export default function PopularRecipeCard({
     </PressableCard>
   );
 }
+

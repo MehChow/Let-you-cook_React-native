@@ -1,4 +1,4 @@
-import { Notifications } from "@/components/Icon";
+import { HasNotifications, NoNotifications } from "@/components/Icon";
 import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,10 @@ export default function HomeHeader({
   onPressNotifications,
   className,
 }: HomeHeaderProps) {
+  // In the real app this will be toggled by state; for now the home page shows
+  // only the "no notification" variant as requested.
+  const hasNotifications = false;
+
   return (
     <View className={cn("flex-row items-center justify-between", className)}>
       <View className="flex-1 pr-3">
@@ -28,9 +32,22 @@ export default function HomeHeader({
         accessibilityRole="button"
         accessibilityLabel="Notifications"
         onPress={onPressNotifications}
-        className="h-10 w-10 items-center justify-center rounded-full bg-white/60 active:opacity-80"
+        className="relative h-10 w-10 items-center justify-center rounded-full bg-sage-200 active:opacity-80"
       >
-        <Icon as={Notifications} className="size-5 text-foreground" />
+        <Icon
+          as={hasNotifications ? HasNotifications : NoNotifications}
+          className={cn(
+            "size-5",
+            hasNotifications ? "text-sage-600" : "text-sage-500"
+          )}
+        />
+
+        {hasNotifications ? (
+          <View
+            className="absolute h-2 w-2 rounded-full bg-accent-500"
+            style={{ right: 2, top: 2 }}
+          />
+        ) : null}
       </Pressable>
     </View>
   );

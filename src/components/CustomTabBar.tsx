@@ -6,12 +6,13 @@ import {
   User as UserIcon,
 } from "@/components/Icon";
 import { Icon } from "@/components/ui/icon";
+import { colors } from "@/util/twColor";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const FOCUSED = "#064e3b";
-const MUTED = "#6b7280";
+const ACTIVE = colors.sage[600];
+const INACTIVE = colors.sage[400];
 
 function TabRouteIcon({
   routeName,
@@ -20,7 +21,7 @@ function TabRouteIcon({
   routeName: string;
   focused: boolean;
 }) {
-  const color = focused ? FOCUSED : MUTED;
+  const color = focused ? ACTIVE : INACTIVE;
   const fill = focused ? color : "transparent";
   switch (routeName) {
     case "index":
@@ -83,8 +84,8 @@ export default function CustomTabBar({
                 <Text
                   className={`max-w-full text-[11px] ${
                     isFocused
-                      ? "font-semibold text-emerald-900"
-                      : "font-normal text-gray-500"
+                      ? "font-semibold text-sage-600"
+                      : "font-normal text-sage-400"
                   }`}
                   numberOfLines={1}
                 >
@@ -99,7 +100,7 @@ export default function CustomTabBar({
           accessibilityRole="button"
           accessibilityLabel="Add recipe"
           onPress={() => navigation.navigate("add-recipe")}
-          className="absolute left-1/2 z-2 h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-emerald-800 active:opacity-90"
+          className="absolute left-1/2 z-2 h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-sage-600 active:opacity-90"
           style={[{ top: -20 }, fabElevationStyle]}
         >
           <Icon

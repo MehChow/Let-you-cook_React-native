@@ -4,9 +4,10 @@ import { ScrollView, View } from "react-native";
 import { Grid } from "@/components/Icon";
 import CategoryCarousel from "@/features/home/CategoryCarousel";
 import HomeHeader from "@/features/home/HomeHeader";
-import PopularRecipeCard from "@/features/home/PopularRecipeCard";
+import RecipeCard from "@/components/RecipeCard";
 import TodaySpecialCard from "@/features/home/TodaySpecialCard";
 import { useCategoryStore } from "@/features/home/categoryStore";
+import { useFavourites } from "@/hooks/useFavourites";
 import {
   categories,
   homeGreeting,
@@ -23,8 +24,17 @@ export default function HomeScreen() {
   const router = useRouter();
   const selectedCategoryId = useCategoryStore((s) => s.selectedCategoryId);
   const setSelectedCategoryId = useCategoryStore((s) => s.setSelectedCategoryId);
-  const [favourites, setFavourites] = React.useState<Record<string, boolean>>(
-    {}
+  const { isFavourite, setFavourite } = useFavourites();
+
+  const categoryItems = React.useMemo(
+    () =>
+      categories.map((c) => ({
+        id: c.id,
+        label: c.label,
+        placeholderColorClass: c.placeholderColorClass,
+        imageSource: c.imageThumb,
+      })),
+    []
   );
 
   return (
@@ -66,12 +76,7 @@ export default function HomeScreen() {
           />
           <CategoryCarousel
             className=""
-            items={categories.map((c) => ({
-              id: c.id,
-              label: c.label,
-              placeholderColorClass: c.placeholderColorClass,
-              imageSource: c.imageThumb,
-            }))}
+            items={categoryItems}
             selectedId={selectedCategoryId ?? undefined}
             onSelect={(id) =>
               setSelectedCategoryId(selectedCategoryId === id ? null : id)
@@ -87,7 +92,7 @@ export default function HomeScreen() {
           />
           <View className="gap-4">
             {popularRecipes.map((r) => (
-              <PopularRecipeCard
+              <RecipeCard
                 key={r.id}
                 title={r.title}
                 description={r.description}
@@ -100,10 +105,8 @@ export default function HomeScreen() {
                 tag={r.tag}
                 imagePlaceholderClass={r.imagePlaceholderClass}
                 imageSource={r.image}
-                isFavourite={Boolean(favourites[r.id])}
-                onChangeFavourite={(next) =>
-                  setFavourites((prev) => ({ ...prev, [r.id]: next }))
-                }
+                isFavourite={isFavourite(r.id)}
+                onChangeFavourite={(next) => setFavourite(r.id, next)}
               />
             ))}
           </View>
