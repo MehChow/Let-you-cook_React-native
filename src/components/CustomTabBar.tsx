@@ -5,6 +5,7 @@ import {
   Search as SearchIcon,
   User as UserIcon,
 } from "@/components/Icon";
+import { Icon } from "@/components/ui/icon";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -23,15 +24,15 @@ function TabRouteIcon({
   const fill = focused ? color : "transparent";
   switch (routeName) {
     case "index":
-      return <HomeIcon size={24} color={color} fill={fill} />;
+      return <Icon as={HomeIcon} size={24} color={color} fill={fill} />;
     case "search":
-      return <SearchIcon size={24} color={color} fill={fill} />;
+      return <Icon as={SearchIcon} size={24} color={color} fill={fill} />;
     case "favourites":
-      return <FavoriteIcon size={24} color={color} fill={fill} />;
+      return <Icon as={FavoriteIcon} size={24} color={color} fill={fill} />;
     case "profile":
-      return <UserIcon size={24} color={color} fill={fill} />;
+      return <Icon as={UserIcon} size={24} color={color} fill={fill} />;
     default:
-      return <HomeIcon size={24} color={color} fill={fill} />;
+      return <Icon as={HomeIcon} size={24} color={color} fill={fill} />;
   }
 }
 
@@ -101,7 +102,8 @@ export default function CustomTabBar({
           className="absolute left-1/2 z-2 h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-emerald-800 active:opacity-90"
           style={[{ top: -20 }, fabElevationStyle]}
         >
-          <Add
+          <Icon
+            as={Add}
             size={32}
             color="white"
             fill={addTabFocused ? "white" : "transparent"}

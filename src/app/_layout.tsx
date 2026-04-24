@@ -13,7 +13,23 @@ export default function RootLayout() {
     <ThemeProvider value={NAV_THEME[theme ?? "light"]}>
       <StatusBar style={theme === "dark" ? "light" : "dark"} />
       <Stack initialRouteName="(tabs)">
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="(tabs)"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="modal"
+          options={{
+            presentation: "formSheet",
+            sheetAllowedDetents: [0.7],
+            // Prevent the scroll view "pull down" gesture from being interpreted
+            // as a sheet drag-to-dismiss.
+            sheetExpandsWhenScrolledToEdge: false,
+            sheetCornerRadius: 24,
+          }}
+        />
       </Stack>
       <PortalHost />
     </ThemeProvider>
