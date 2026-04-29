@@ -1,10 +1,6 @@
 import * as React from "react";
 import { View } from "react-native";
-import {
-  Gesture,
-  GestureDetector,
-  type GestureTouchEvent,
-} from "react-native-gesture-handler";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
   useAnimatedStyle,
@@ -22,6 +18,33 @@ function roundToStep(value: number, step: number) {
   "worklet";
   if (step <= 0) return value;
   return Math.round(value / step) * step;
+}
+
+function valueToPxWorklet(
+  value: number,
+  min: number,
+  max: number,
+  width: number
+) {
+  "worklet";
+  if (!width || max === min) return 0;
+  const ratio = (clamp(value, min, max) - min) / (max - min);
+  return ratio * width;
+}
+
+function pxToValueWorklet(
+  px: number,
+  min: number,
+  max: number,
+  width: number,
+  step: number
+) {
+  "worklet";
+  if (!width || max === min) return min;
+  const ratio = clamp(px / width, 0, 1);
+  const raw = min + ratio * (max - min);
+  const stepped = roundToStep(raw, step);
+  return clamp(stepped, min, max);
 }
 
 type RangeSliderProps = {
@@ -59,39 +82,61 @@ export default function RangeSlider({
 }: RangeSliderProps) {
   const widthRef = React.useRef(0);
   const lastValueRef = React.useRef<Range>(value);
-  lastValueRef.current = value;
+  const isDraggingRef = React.useRef(false);
+  const pendingValueRef = React.useRef<Range | null>(null);
+  const rafRef = React.useRef<number | null>(null);
 
   const leftPx = useSharedValue(0);
   const rightPx = useSharedValue(0);
+  const leftValue = useSharedValue(value[0]);
+  const rightValue = useSharedValue(value[1]);
+  const widthSv = useSharedValue(0);
+  const minSv = useSharedValue(min);
+  const maxSv = useSharedValue(max);
+  const stepSv = useSharedValue(step);
+  const minGapSv = useSharedValue(Math.max(minGap, step));
+  const lastEmittedLeft = useSharedValue(value[0]);
+  const lastEmittedRight = useSharedValue(value[1]);
+  const isDraggingSv = useSharedValue(false);
 
-  const pxToValue = React.useCallback(
-    (px: number) => {
-      const w = widthRef.current;
-      if (!w || max === min) return min;
-      const ratio = clamp(px / w, 0, 1);
-      const raw = min + ratio * (max - min);
-      const stepped = roundToStep(raw, step);
-      return clamp(stepped, min, max);
-    },
-    [max, min, step]
-  );
+  const setDraggingState = React.useCallback((next: boolean) => {
+    isDraggingRef.current = next;
+  }, []);
 
-  const valueToPx = React.useCallback(
-    (v: number) => {
-      const w = widthRef.current;
-      if (!w || max === min) return 0;
-      const ratio = (clamp(v, min, max) - min) / (max - min);
-      return ratio * w;
-    },
-    [max, min]
-  );
+  React.useEffect(() => {
+    minSv.value = min;
+    maxSv.value = max;
+    stepSv.value = step;
+    minGapSv.value = Math.max(minGap, step);
+  }, [max, maxSv, min, minGap, minGapSv, minSv, step, stepSv]);
 
   const syncFromValue = React.useCallback(() => {
+    if (isDraggingRef.current) return;
     const w = widthRef.current;
     if (!w) return;
-    leftPx.value = valueToPx(value[0]);
-    rightPx.value = valueToPx(value[1]);
-  }, [leftPx, rightPx, value, valueToPx]);
+    const minV = min;
+    const maxV = max;
+    const nextLeft = clamp(value[0], minV, maxV);
+    const nextRight = clamp(value[1], minV, maxV);
+    leftValue.value = nextLeft;
+    rightValue.value = nextRight;
+    lastEmittedLeft.value = nextLeft;
+    lastEmittedRight.value = nextRight;
+    lastValueRef.current = [nextLeft, nextRight];
+    leftPx.value = valueToPxWorklet(nextLeft, minV, maxV, w);
+    rightPx.value = valueToPxWorklet(nextRight, minV, maxV, w);
+  }, [
+    isDraggingRef,
+    leftPx,
+    leftValue,
+    max,
+    min,
+    rightPx,
+    rightValue,
+    value,
+    lastEmittedLeft,
+    lastEmittedRight,
+  ]);
 
   React.useEffect(() => {
     syncFromValue();
@@ -107,37 +152,42 @@ export default function RangeSlider({
     [onChange]
   );
 
-  const minGapValue = Math.max(minGap, step);
+  const flushQueuedEmit = React.useCallback(() => {
+    rafRef.current = null;
+    const next = pendingValueRef.current;
+    if (!next) return;
+    pendingValueRef.current = null;
+    emitChange(next);
+  }, [emitChange]);
 
-  const onLeftDrag = React.useCallback(
-    (e: GestureTouchEvent, startPx: number) => {
-      const w = widthRef.current;
-      if (!w) return;
-      const nextPx = clamp(startPx + e.translationX, 0, rightPx.value);
-      const nextVal = pxToValue(nextPx);
-      const maxAllowed = lastValueRef.current[1] - minGapValue;
-      const clampedVal = clamp(nextVal, min, maxAllowed);
-      const finalPx = valueToPx(clampedVal);
-      leftPx.value = finalPx;
-      runOnJS(emitChange)([clampedVal, lastValueRef.current[1]]);
+  const queueEmitChange = React.useCallback(
+    (next: Range) => {
+      pendingValueRef.current = next;
+      if (rafRef.current != null) return;
+      rafRef.current = requestAnimationFrame(flushQueuedEmit);
     },
-    [emitChange, leftPx, min, minGapValue, pxToValue, rightPx, valueToPx]
+    [flushQueuedEmit]
   );
 
-  const onRightDrag = React.useCallback(
-    (e: GestureTouchEvent, startPx: number) => {
-      const w = widthRef.current;
-      if (!w) return;
-      const nextPx = clamp(startPx + e.translationX, leftPx.value, w);
-      const nextVal = pxToValue(nextPx);
-      const minAllowed = lastValueRef.current[0] + minGapValue;
-      const clampedVal = clamp(nextVal, minAllowed, max);
-      const finalPx = valueToPx(clampedVal);
-      rightPx.value = finalPx;
-      runOnJS(emitChange)([lastValueRef.current[0], clampedVal]);
+  const emitChangeImmediate = React.useCallback(
+    (next: Range) => {
+      pendingValueRef.current = null;
+      if (rafRef.current != null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
+      emitChange(next);
     },
-    [emitChange, leftPx, max, minGapValue, pxToValue, rightPx, valueToPx]
+    [emitChange]
   );
+
+  React.useEffect(() => {
+    return () => {
+      if (rafRef.current != null) {
+        cancelAnimationFrame(rafRef.current);
+      }
+    };
+  }, []);
 
   const leftStart = useSharedValue(0);
   const rightStart = useSharedValue(0);
@@ -146,23 +196,131 @@ export default function RangeSlider({
     return Gesture.Pan()
       .hitSlop({ top: 14, bottom: 14, left: 18, right: 18 })
       .onBegin(() => {
+        isDraggingSv.value = true;
+        runOnJS(setDraggingState)(true);
         leftStart.value = leftPx.value;
       })
       .onUpdate((e) => {
-        runOnJS(onLeftDrag)(e, leftStart.value);
+        const w = widthSv.value;
+        if (!w) return;
+        const nextPx = clamp(
+          leftStart.value + e.translationX,
+          0,
+          rightPx.value
+        );
+        const nextVal = pxToValueWorklet(
+          nextPx,
+          minSv.value,
+          maxSv.value,
+          w,
+          stepSv.value
+        );
+        const maxAllowed = rightValue.value - minGapSv.value;
+        const clampedVal = clamp(nextVal, minSv.value, maxAllowed);
+        leftValue.value = clampedVal;
+        leftPx.value = valueToPxWorklet(
+          clampedVal,
+          minSv.value,
+          maxSv.value,
+          w
+        );
+        if (
+          clampedVal !== lastEmittedLeft.value ||
+          rightValue.value !== lastEmittedRight.value
+        ) {
+          lastEmittedLeft.value = clampedVal;
+          lastEmittedRight.value = rightValue.value;
+          runOnJS(queueEmitChange)([clampedVal, rightValue.value]);
+        }
+      })
+      .onFinalize(() => {
+        isDraggingSv.value = false;
+        runOnJS(setDraggingState)(false);
+        runOnJS(emitChangeImmediate)([leftValue.value, rightValue.value]);
       });
-  }, [leftPx, leftStart, onLeftDrag]);
+  }, [
+    emitChangeImmediate,
+    isDraggingSv,
+    leftPx,
+    leftStart,
+    leftValue,
+    maxSv,
+    minGapSv,
+    minSv,
+    rightPx,
+    rightValue,
+    stepSv,
+    widthSv,
+    lastEmittedLeft,
+    lastEmittedRight,
+    queueEmitChange,
+    setDraggingState,
+  ]);
 
   const rightGesture = React.useMemo(() => {
     return Gesture.Pan()
       .hitSlop({ top: 14, bottom: 14, left: 18, right: 18 })
       .onBegin(() => {
+        isDraggingSv.value = true;
+        runOnJS(setDraggingState)(true);
         rightStart.value = rightPx.value;
       })
       .onUpdate((e) => {
-        runOnJS(onRightDrag)(e, rightStart.value);
+        const w = widthSv.value;
+        if (!w) return;
+        const nextPx = clamp(
+          rightStart.value + e.translationX,
+          leftPx.value,
+          w
+        );
+        const nextVal = pxToValueWorklet(
+          nextPx,
+          minSv.value,
+          maxSv.value,
+          w,
+          stepSv.value
+        );
+        const minAllowed = leftValue.value + minGapSv.value;
+        const clampedVal = clamp(nextVal, minAllowed, maxSv.value);
+        rightValue.value = clampedVal;
+        rightPx.value = valueToPxWorklet(
+          clampedVal,
+          minSv.value,
+          maxSv.value,
+          w
+        );
+        if (
+          leftValue.value !== lastEmittedLeft.value ||
+          clampedVal !== lastEmittedRight.value
+        ) {
+          lastEmittedLeft.value = leftValue.value;
+          lastEmittedRight.value = clampedVal;
+          runOnJS(queueEmitChange)([leftValue.value, clampedVal]);
+        }
+      })
+      .onFinalize(() => {
+        isDraggingSv.value = false;
+        runOnJS(setDraggingState)(false);
+        runOnJS(emitChangeImmediate)([leftValue.value, rightValue.value]);
       });
-  }, [onRightDrag, rightPx, rightStart]);
+  }, [
+    emitChangeImmediate,
+    isDraggingSv,
+    leftPx,
+    leftValue,
+    maxSv,
+    minGapSv,
+    minSv,
+    rightPx,
+    rightStart,
+    rightValue,
+    stepSv,
+    widthSv,
+    lastEmittedLeft,
+    lastEmittedRight,
+    queueEmitChange,
+    setDraggingState,
+  ]);
 
   const activeStyle = useAnimatedStyle(() => {
     const left = Math.min(leftPx.value, rightPx.value);
@@ -187,7 +345,9 @@ export default function RangeSlider({
     <View
       className={className}
       onLayout={(e) => {
-        widthRef.current = e.nativeEvent.layout.width;
+        const width = e.nativeEvent.layout.width;
+        widthRef.current = width;
+        widthSv.value = width;
         syncFromValue();
       }}
       style={{
@@ -278,4 +438,3 @@ export default function RangeSlider({
     </View>
   );
 }
-

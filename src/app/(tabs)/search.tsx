@@ -6,7 +6,11 @@ import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
 import CategoryCarousel from "@/features/home/CategoryCarousel";
 import { useCategoryStore } from "@/features/home/categoryStore";
-import { categories, mockAvatar, popularRecipes } from "@/features/home/mockData";
+import {
+  categories,
+  mockAvatar,
+  popularRecipes,
+} from "@/features/home/mockData";
 import { useSearchFilterStore } from "@/features/search/filterStore";
 import { useSearchDerived } from "@/features/search/hooks/useSearchDerived";
 import { cn } from "@/lib/utils";
@@ -15,13 +19,21 @@ import * as React from "react";
 import { FlatList, Pressable, ScrollView, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const RECENT_SEARCHES = ["All", "healthy", "tiramisu", "snacks", "vegan", "cake"];
+const RECENT_SEARCHES = [
+  "healthy",
+  "tiramisu",
+  "snacks",
+  "vegan",
+  "cake",
+];
 
 export default function SearchScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const selectedCategoryId = useCategoryStore((s) => s.selectedCategoryId);
-  const setSelectedCategoryId = useCategoryStore((s) => s.setSelectedCategoryId);
+  const setSelectedCategoryId = useCategoryStore(
+    (s) => s.setSelectedCategoryId
+  );
 
   const [searchText, setSearchText] = React.useState("");
   const [favourites, setFavourites] = React.useState<Record<string, boolean>>(
@@ -53,16 +65,18 @@ export default function SearchScreen() {
     [caloriesRange, cookingTime, servingsRange, sortBy]
   );
 
-  const { appliedCount, filteredRecipes, activeFilterChips } = useSearchDerived({
-    recipes: popularRecipes,
-    searchText,
-    selectedCategoryLabel,
-    filters,
-    setSortBy,
-    setCookingTime,
-    setCalories,
-    setServings,
-  });
+  const { appliedCount, filteredRecipes, activeFilterChips } = useSearchDerived(
+    {
+      recipes: popularRecipes,
+      searchText,
+      selectedCategoryLabel,
+      filters,
+      setSortBy,
+      setCookingTime,
+      setCalories,
+      setServings,
+    }
+  );
 
   const categoryItems = React.useMemo(
     () =>
@@ -160,16 +174,13 @@ export default function SearchScreen() {
               contentContainerClassName="gap-2"
             >
               {RECENT_SEARCHES.map((label) => {
-                const isAll = label.toLowerCase() === "all";
                 const isActive =
-                  (isAll && searchText.trim().length === 0) ||
-                  (!isAll &&
-                    searchText.trim().toLowerCase() === label.toLowerCase());
+                  searchText.trim().toLowerCase() === label.toLowerCase();
                 return (
                   <Pressable
                     key={label}
                     accessibilityRole="button"
-                    onPress={() => setSearchText(isAll ? "" : label)}
+                    onPress={() => setSearchText(label)}
                     className="active:opacity-80"
                   >
                     <Chip

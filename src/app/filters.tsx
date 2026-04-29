@@ -177,16 +177,18 @@ export default function FiltersScreen() {
               </Text>
             }
           />
-          <RangeSlider
-            min={FILTER_DEFAULTS.calories[0]}
-            max={FILTER_DEFAULTS.calories[1]}
-            step={50}
-            minGap={50}
-            value={calories}
-            onChange={setCalories}
-            activeTrackColor="#426159"
-            thumbBorderColor="#426159"
-          />
+          <View className="px-1.5">
+            <RangeSlider
+              min={FILTER_DEFAULTS.calories[0]}
+              max={FILTER_DEFAULTS.calories[1]}
+              step={50}
+              minGap={50}
+              value={calories}
+              onChange={setCalories}
+              activeTrackColor="#426159"
+              thumbBorderColor="#426159"
+            />
+          </View>
           <View className="flex-row items-center justify-between">
             <Text className="text-[10px] font-medium text-muted-foreground">
               {FILTER_DEFAULTS.calories[0]} kcal
@@ -206,16 +208,18 @@ export default function FiltersScreen() {
               </Text>
             }
           />
-          <RangeSlider
-            min={FILTER_DEFAULTS.servings[0]}
-            max={FILTER_DEFAULTS.servings[1]}
-            step={1}
-            minGap={1}
-            value={servings}
-            onChange={setServings}
-            activeTrackColor="#426159"
-            thumbBorderColor="#426159"
-          />
+          <View className="px-1.5">
+            <RangeSlider
+              min={FILTER_DEFAULTS.servings[0]}
+              max={FILTER_DEFAULTS.servings[1]}
+              step={1}
+              minGap={1}
+              value={servings}
+              onChange={setServings}
+              activeTrackColor="#426159"
+              thumbBorderColor="#426159"
+            />
+          </View>
           <View className="flex-row items-center justify-between">
             <Text className="text-[10px] font-medium text-muted-foreground">
               {FILTER_DEFAULTS.servings[0]} person
