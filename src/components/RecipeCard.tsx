@@ -52,14 +52,24 @@ export default function RecipeCard({
   onChangeFavourite,
   className,
 }: RecipeCardProps) {
-  const [internalFavourite, setInternalFavourite] = React.useState(false);
-  const favourite = isFavourite ?? internalFavourite;
+  const [internalFavourite, setInternalFavourite] = React.useState<boolean>(
+    () => Boolean(isFavourite)
+  );
+
+  // Keep internal state in sync when the card is used in "controlled" mode.
+  React.useEffect(() => {
+    if (isFavourite !== undefined) {
+      setInternalFavourite(Boolean(isFavourite));
+    }
+  }, [isFavourite]);
+
+  const favourite = internalFavourite;
 
   const toggleFavourite = React.useCallback(() => {
-    const next = !favourite;
+    const next = !internalFavourite;
     setInternalFavourite(next);
     onChangeFavourite?.(next);
-  }, [favourite, onChangeFavourite]);
+  }, [internalFavourite, onChangeFavourite]);
 
   return (
     <PressableCard
@@ -73,6 +83,8 @@ export default function RecipeCard({
           source={imageSource}
           contentFit="cover"
           className="w-full"
+          cachePolicy="memory-disk"
+          transition={150}
           style={{ aspectRatio: 16 / 9 }}
         />
       ) : (

@@ -13,6 +13,7 @@ import {
 } from "@/features/home/mockData";
 import { useSearchFilterStore } from "@/features/search/filterStore";
 import { useSearchDerived } from "@/features/search/hooks/useSearchDerived";
+import { useFavourites } from "@/hooks/useFavourites";
 import { cn } from "@/lib/utils";
 import { useRouter } from "expo-router";
 import * as React from "react";
@@ -36,9 +37,7 @@ export default function SearchScreen() {
   );
 
   const [searchText, setSearchText] = React.useState("");
-  const [favourites, setFavourites] = React.useState<Record<string, boolean>>(
-    {}
-  );
+  const { favourites, isFavourite, setFavourite } = useFavourites();
 
   const selectedCategoryLabel = React.useMemo(() => {
     if (!selectedCategoryId) return null;
@@ -104,14 +103,12 @@ export default function SearchScreen() {
           tag={r.tag}
           imagePlaceholderClass={r.imagePlaceholderClass}
           imageSource={r.image}
-          isFavourite={Boolean(favourites[r.id])}
-          onChangeFavourite={(next) =>
-            setFavourites((prev) => ({ ...prev, [r.id]: next }))
-          }
+          isFavourite={isFavourite(r.id)}
+          onChangeFavourite={(next) => setFavourite(r.id, next)}
         />
       </View>
     ),
-    [favourites]
+    [isFavourite, setFavourite]
   );
 
   return (
@@ -121,6 +118,7 @@ export default function SearchScreen() {
         data={filteredRecipes}
         keyExtractor={(item) => item.id}
         renderItem={renderRecipe}
+        extraData={favourites}
         ItemSeparatorComponent={() => <View className="h-4" />}
         ListHeaderComponent={
           <View className="gap-5 px-5 pt-4">
