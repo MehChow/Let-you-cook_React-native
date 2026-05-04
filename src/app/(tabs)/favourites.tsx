@@ -22,10 +22,7 @@ export default function FavouritesScreen() {
 
   const header = React.useMemo(
     () => (
-      <View
-        className="mb-4 flex-row items-center justify-between px-5"
-        style={{ paddingTop: Math.max(insets.top, 12) }}
-      >
+      <View className="mt-4 flex-row items-center justify-between px-5">
         <Text className="text-2xl font-bold text-foreground">My favorites</Text>
         <FavouriteViewModeToggle mode={viewMode} onModeChange={setViewMode} />
       </View>
@@ -48,12 +45,8 @@ export default function FavouritesScreen() {
   );
 
   const renderGridItem = React.useCallback(
-    ({
-      item: r,
-    }: {
-      item: (typeof popularRecipes)[number];
-    }) => (
-      <View className="mb-4 px-5">
+    ({ item: r }: { item: (typeof popularRecipes)[number] }) => (
+      <View className="mt-4 px-5">
         <RecipeCard
           title={r.title}
           description={r.description}
@@ -75,12 +68,8 @@ export default function FavouritesScreen() {
   );
 
   const renderListItem = React.useCallback(
-    ({
-      item: r,
-    }: {
-      item: (typeof popularRecipes)[number];
-    }) => (
-      <View className="px-5">
+    ({ item: r }: { item: (typeof popularRecipes)[number] }) => (
+      <View className="mt-4 px-5">
         <RecipeFavouriteRowCard
           title={r.title}
           timeMin={r.timeMin}
@@ -105,9 +94,6 @@ export default function FavouritesScreen() {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={empty}
         renderItem={viewMode === "grid" ? renderGridItem : renderListItem}
-        ItemSeparatorComponent={
-          () => <View className="h-4" />
-        }
         contentContainerStyle={{
           paddingBottom: Math.max(insets.bottom, 12) + 110,
         }}

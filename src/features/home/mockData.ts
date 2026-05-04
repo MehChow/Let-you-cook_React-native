@@ -29,6 +29,12 @@ export const homeGreeting = {
   subtitle: "Are you cooking or being cooked?",
 };
 
+export const profileUser = {
+  displayName: "Mehhh",
+  location: "Hong Kong",
+  bio: ["Walking the tightrope~~~", "Love cooking"],
+} as const;
+
 export const todaySpecial: HomeRecipe = {
   id: "today-1",
   title: "Juicy pepper wings",
@@ -121,5 +127,25 @@ export const popularRecipes: HomeRecipe[] = [
     tag: "Dessert",
     imagePlaceholderClass: "bg-warning-200",
     image: require("../../../assets/mock/popular_recipe_2.webp"),
+  },
+];
+
+/** Recipes shown on the profile grid (Mehhh); ratings chosen so average ≈ 4.6 with four items. */
+export const myRecipes: HomeRecipe[] = [
+  popularRecipes[0],
+  popularRecipes[1],
+  todaySpecial,
+  {
+    id: "mine-4",
+    title: "Garden salad bowl",
+    author: "Mehhh",
+    description: "Fresh greens with a light dressing.",
+    timeMin: 15,
+    calories: 220,
+    serving: "2",
+    rating: 4.5,
+    tag: "Lunch",
+    imagePlaceholderClass: "bg-sage-200",
+    image: require("../../../assets/mock/categories/lunch-thumb.jpg"),
   },
 ];
