@@ -20,13 +20,7 @@ import * as React from "react";
 import { FlatList, Pressable, ScrollView, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const RECENT_SEARCHES = [
-  "healthy",
-  "tiramisu",
-  "snacks",
-  "vegan",
-  "cake",
-];
+const RECENT_SEARCHES = ["healthy", "tiramisu", "snacks", "vegan", "cake"];
 
 export default function SearchScreen() {
   const insets = useSafeAreaInsets();

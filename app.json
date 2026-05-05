@@ -33,7 +33,13 @@
           }
         }
       ],
-      "expo-image"
+      "expo-image",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow LetYouCook to access your photos to add recipe images."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

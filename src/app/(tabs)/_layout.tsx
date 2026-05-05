@@ -38,13 +38,6 @@ export default function TabLayout() {
       />
 
       <Tabs.Screen
-        name="add-recipe"
-        options={{
-          title: "Add Recipe",
-        }}
-      />
-
-      <Tabs.Screen
         name="favourites"
         options={{
           title: "Favourites",

@@ -67,6 +67,39 @@
   --radius-xl: calc(var(--radius) + 4px);
 
   --spacing-hairline: hairlineWidth();
+
+  /* Inter — loaded in src/app/_layout.tsx via useFonts (keys must match these strings) */
+  --font-sans: "Inter-Regular";
+}
+
+/*
+ * React Native does not pick font files by numeric font-weight alone. Map Tailwind
+ * weight utilities to the Inter faces loaded in the root layout so font-semibold /
+ * font-bold etc. render correctly on native. See: https://docs.uniwind.dev/faq
+ */
+@utility font-normal {
+  font-family: "Inter-Regular";
+  font-weight: 400;
+}
+
+@utility font-medium {
+  font-family: "Inter-Medium";
+  font-weight: 500;
+}
+
+@utility font-semibold {
+  font-family: "Inter-SemiBold";
+  font-weight: 600;
+}
+
+@utility font-bold {
+  font-family: "Inter-Bold";
+  font-weight: 700;
+}
+
+@utility font-extrabold {
+  font-family: "Inter-ExtraBold";
+  font-weight: 800;
 }
 
 @layer theme {
