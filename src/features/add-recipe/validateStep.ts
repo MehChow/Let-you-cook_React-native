@@ -1,5 +1,6 @@
 import type { FieldPath, UseFormSetError } from "react-hook-form";
 import type { z } from "zod";
+import { isZodValidationEnabled } from "@/config/validation";
 import type { AddRecipeFormValues } from "./schema";
 import { WIZARD_STEP_SCHEMAS } from "./schema";
 
@@ -7,6 +8,7 @@ export function validateWizardStep(
   step: number,
   values: AddRecipeFormValues
 ): { ok: true } | { ok: false; error: z.ZodError } {
+  if (!isZodValidationEnabled) return { ok: true };
   const schema = WIZARD_STEP_SCHEMAS[step];
   const parsed = schema.safeParse(values);
   if (parsed.success) return { ok: true };

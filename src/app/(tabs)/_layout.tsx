@@ -19,8 +19,6 @@ export default function TabLayout() {
           borderTopWidth: 0,
           elevation: 0,
         },
-        // Prevent content overlap with the status bar.
-        sceneStyle: { paddingTop: insets.top },
       }}
     >
       <Tabs.Screen

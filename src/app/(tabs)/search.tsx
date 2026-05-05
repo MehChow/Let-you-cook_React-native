@@ -18,7 +18,10 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "expo-router";
 import * as React from "react";
 import { FlatList, Pressable, ScrollView, TextInput, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 const RECENT_SEARCHES = ["healthy", "tiramisu", "snacks", "vegan", "cake"];
 
@@ -106,7 +109,7 @@ export default function SearchScreen() {
   );
 
   return (
-    <View className="flex-1 bg-sage-100">
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#dce4e2" }}>
       <FlatList
         showsVerticalScrollIndicator={false}
         data={filteredRecipes}
@@ -254,6 +257,6 @@ export default function SearchScreen() {
           paddingBottom: Math.max(insets.bottom, 12) + 110,
         }}
       />
-    </View>
+    </SafeAreaView>
   );
 }

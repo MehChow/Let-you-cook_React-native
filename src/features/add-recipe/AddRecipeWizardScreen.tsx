@@ -1,23 +1,4 @@
-import { BasicsSection } from "@/features/add-recipe/sections/BasicsSection";
-import { CaloriesSection } from "@/features/add-recipe/sections/CaloriesSection";
-import { CookingStepsSection } from "@/features/add-recipe/sections/CookingStepsSection";
-import { ImagesSection } from "@/features/add-recipe/sections/ImagesSection";
-import { IngredientsSection } from "@/features/add-recipe/sections/IngredientsSection";
-import { ReminderSection } from "@/features/add-recipe/sections/ReminderSection";
-import {
-  addRecipeFormSchema,
-  type AddRecipeFormValues,
-} from "@/features/add-recipe/schema";
-import { PreviewHintBanner } from "@/features/add-recipe/wizard/PreviewHintBanner";
-import { SectionPreviewCard } from "@/features/add-recipe/wizard/SectionPreviewCard";
-import { WizardFooterActions } from "@/features/add-recipe/wizard/WizardFooterActions";
-import { WizardStepHeader } from "@/features/add-recipe/wizard/WizardStepHeader";
-import { WizardStepIndicator } from "@/features/add-recipe/wizard/WizardStepIndicator";
-import { WizardTopBar } from "@/features/add-recipe/wizard/WizardTopBar";
-import {
-  applyZodIssuesToForm,
-  validateWizardStep,
-} from "@/features/add-recipe/validateStep";
+import { isZodValidationEnabled } from "@/config/validation";
 import {
   MAX_COOKING_STEPS,
   MAX_INGREDIENTS,
@@ -27,22 +8,30 @@ import {
   WIZARD_STEP_PRETITLE_KEYS,
   WIZARD_STEP_TITLES,
 } from "@/features/add-recipe/constants";
+import {
+  addRecipeFormSchema,
+  type AddRecipeFormValues,
+} from "@/features/add-recipe/schema";
+import { BasicsSection } from "@/features/add-recipe/sections/BasicsSection";
+import { CaloriesSection } from "@/features/add-recipe/sections/CaloriesSection";
+import { CookingStepsSection } from "@/features/add-recipe/sections/CookingStepsSection";
+import { ImagesSection } from "@/features/add-recipe/sections/ImagesSection";
+import { IngredientsSection } from "@/features/add-recipe/sections/IngredientsSection";
+import { ReminderSection } from "@/features/add-recipe/sections/ReminderSection";
+import {
+  applyZodIssuesToForm,
+  validateWizardStep,
+} from "@/features/add-recipe/validateStep";
+import { PreviewHintBanner } from "@/features/add-recipe/wizard/PreviewHintBanner";
+import { SectionPreviewCard } from "@/features/add-recipe/wizard/SectionPreviewCard";
+import { WizardFooterActions } from "@/features/add-recipe/wizard/WizardFooterActions";
+import { WizardStepHeader } from "@/features/add-recipe/wizard/WizardStepHeader";
+import { WizardStepIndicator } from "@/features/add-recipe/wizard/WizardStepIndicator";
+import { WizardTopBar } from "@/features/add-recipe/wizard/WizardTopBar";
 import { router } from "expo-router";
-import {
-  useCallback,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
-import {
-  Alert,
-  BackHandler,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  View,
-} from "react-native";
+import { Alert, BackHandler, Keyboard, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const defaultValues: AddRecipeFormValues = {
@@ -98,6 +87,7 @@ function renderPreviewSection(stepIndex: number): ReactNode {
 export function AddRecipeWizardScreen() {
   const [step, setStep] = useState(0);
   const [isPreview, setIsPreview] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   const methods = useForm<AddRecipeFormValues>({
     defaultValues,
@@ -107,7 +97,10 @@ export function AddRecipeWizardScreen() {
 
   const { getValues, setError, clearErrors, formState } = methods;
 
-  const ingredients = useWatch({ control: methods.control, name: "ingredients" });
+  const ingredients = useWatch({
+    control: methods.control,
+    name: "ingredients",
+  });
   const cookingSteps = useWatch({
     control: methods.control,
     name: "cookingSteps",
@@ -119,18 +112,14 @@ export function AddRecipeWizardScreen() {
       return;
     }
     if (formState.isDirty) {
-      Alert.alert(
-        "Discard changes?",
-        "Your recipe draft will be lost.",
-        [
-          { text: "Keep editing", style: "cancel" },
-          {
-            text: "Discard",
-            style: "destructive",
-            onPress: () => router.back(),
-          },
-        ]
-      );
+      Alert.alert("Discard changes?", "Your recipe draft will be lost.", [
+        { text: "Keep editing", style: "cancel" },
+        {
+          text: "Discard",
+          style: "destructive",
+          onPress: () => router.back(),
+        },
+      ]);
     } else {
       router.back();
     }
@@ -152,6 +141,19 @@ export function AddRecipeWizardScreen() {
     return () => sub.remove();
   }, [step, isPreview, attemptExit]);
 
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", (e) => {
+      setKeyboardHeight(e.endCoordinates?.height ?? 0);
+    });
+    const hideSub = Keyboard.addListener("keyboardDidHide", () => {
+      setKeyboardHeight(0);
+    });
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
   const goNext = useCallback(() => {
     clearErrors();
     const values = getValues();
@@ -168,14 +170,24 @@ export function AddRecipeWizardScreen() {
   const finishRecipe = useCallback(() => {
     clearErrors();
     const values = getValues();
-    const parsed = addRecipeFormSchema.safeParse(values);
-    if (!parsed.success) {
-      applyZodIssuesToForm(parsed.error, setError);
+    if (isZodValidationEnabled) {
+      const parsed = addRecipeFormSchema.safeParse(values);
+      if (!parsed.success) {
+        applyZodIssuesToForm(parsed.error, setError);
+        return;
+      }
+      Alert.alert(
+        "Recipe saved (demo)",
+        `Saved “${parsed.data.recipeName}” locally in this build — API wiring comes later.`,
+        [{ text: "OK", onPress: () => router.back() }]
+      );
       return;
     }
     Alert.alert(
       "Recipe saved (demo)",
-      `Saved “${parsed.data.recipeName}” locally in this build — API wiring comes later.`,
+      `Saved “${
+        values.recipeName || "Untitled recipe"
+      }” locally in this build — API wiring comes later.`,
       [{ text: "OK", onPress: () => router.back() }]
     );
   }, [clearErrors, getValues, setError]);
@@ -209,96 +221,105 @@ export function AddRecipeWizardScreen() {
     step === 2
       ? `${ingredients?.length ?? 0} / ${MAX_INGREDIENTS}`
       : step === 3
-        ? `${cookingSteps?.length ?? 0} / ${MAX_COOKING_STEPS}`
-        : undefined;
+      ? `${cookingSteps?.length ?? 0} / ${MAX_COOKING_STEPS}`
+      : undefined;
 
   const primaryLabel = isPreview
     ? step < TOTAL_WIZARD_STEPS - 1
       ? "Continue"
       : "Save recipe"
     : step < TOTAL_WIZARD_STEPS - 1
-      ? "Continue"
-      : "Save recipe";
+    ? "Continue"
+    : "Save recipe";
 
   return (
     <FormProvider {...methods}>
-      <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-          keyboardVerticalOffset={Platform.OS === "ios" ? 8 : 0}
-        >
-          <View className="flex-1 bg-sage-100">
-            <WizardTopBar
-              title={isPreview ? "Preview" : "Create Recipe"}
-              previewActive={isPreview}
-              onExit={attemptExit}
-              onTogglePreview={() => {
-                if (isPreview) setIsPreview(false);
-                else setIsPreview(true);
-              }}
-            />
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: "#dce4e2" }}
+        edges={["top"]}
+      >
+        <View style={{ flex: 1 }}>
+          <WizardTopBar
+            title={isPreview ? "Preview" : "Create Recipe"}
+            previewActive={isPreview}
+            onExit={attemptExit}
+            onTogglePreview={() => {
+              if (isPreview) setIsPreview(false);
+              else setIsPreview(true);
+            }}
+          />
 
-            {!isPreview ? <WizardStepIndicator currentStepIndex={step} /> : null}
+          {!isPreview ? <WizardStepIndicator currentStepIndex={step} /> : null}
 
-            {isPreview ? (
-              <>
-                <PreviewHintBanner />
-                <ScrollView
-                  className="flex-1"
-                  keyboardShouldPersistTaps="handled"
-                  contentContainerStyle={{ paddingBottom: 24 }}
-                >
-                  {SECTION_PREVIEW_TITLES.map((title, i) => (
-                    <SectionPreviewCard
-                      key={title}
-                      title={title}
-                      onPress={() => {
-                        setStep(i);
-                        setIsPreview(false);
-                      }}
-                    >
-                      {renderPreviewSection(i)}
-                    </SectionPreviewCard>
-                  ))}
-                </ScrollView>
-              </>
-            ) : step === 1 ? (
-              <View className="flex-1 px-4">
-                <WizardStepHeader
-                  preTitle={`STEP ${step + 1} — ${WIZARD_STEP_PRETITLE_KEYS[step]}`}
-                  title={WIZARD_STEP_TITLES[step]}
-                  description={WIZARD_STEP_DESCRIPTIONS[step]}
-                  counterLabel={counterLabel}
-                />
-                <ImagesSection mode="edit" />
-              </View>
-            ) : step === 3 ? (
-              <View className="flex-1 px-4">
-                <WizardStepHeader
-                  preTitle={`STEP ${step + 1} — ${WIZARD_STEP_PRETITLE_KEYS[step]}`}
-                  title={WIZARD_STEP_TITLES[step]}
-                  description={WIZARD_STEP_DESCRIPTIONS[step]}
-                  counterLabel={counterLabel}
-                />
-                <CookingStepsSection mode="edit" />
-              </View>
-            ) : (
+          {isPreview ? (
+            <>
+              <PreviewHintBanner />
               <ScrollView
-                className="flex-1 px-4"
+                className="flex-1"
                 keyboardShouldPersistTaps="handled"
-                contentContainerStyle={{ paddingBottom: 24 }}
+                contentContainerStyle={{
+                  paddingBottom: keyboardHeight > 0 ? keyboardHeight + 120 : 0,
+                }}
               >
-                <WizardStepHeader
-                  preTitle={`STEP ${step + 1} — ${WIZARD_STEP_PRETITLE_KEYS[step]}`}
-                  title={WIZARD_STEP_TITLES[step]}
-                  description={WIZARD_STEP_DESCRIPTIONS[step]}
-                  counterLabel={counterLabel}
-                />
-                {renderWizardStep(step)}
+                {SECTION_PREVIEW_TITLES.map((title, i) => (
+                  <SectionPreviewCard
+                    key={title}
+                    title={title}
+                    onPress={() => {
+                      setStep(i);
+                      setIsPreview(false);
+                    }}
+                  >
+                    {renderPreviewSection(i)}
+                  </SectionPreviewCard>
+                ))}
               </ScrollView>
-            )}
+            </>
+          ) : step === 1 ? (
+            <View className="flex-1 px-4">
+              <WizardStepHeader
+                preTitle={`STEP ${step + 1} — ${
+                  WIZARD_STEP_PRETITLE_KEYS[step]
+                }`}
+                title={WIZARD_STEP_TITLES[step]}
+                description={WIZARD_STEP_DESCRIPTIONS[step]}
+                counterLabel={counterLabel}
+              />
+              <ImagesSection mode="edit" />
+            </View>
+          ) : step === 3 ? (
+            <View className="flex-1 px-4">
+              <WizardStepHeader
+                preTitle={`STEP ${step + 1} — ${
+                  WIZARD_STEP_PRETITLE_KEYS[step]
+                }`}
+                title={WIZARD_STEP_TITLES[step]}
+                description={WIZARD_STEP_DESCRIPTIONS[step]}
+                counterLabel={counterLabel}
+              />
+              <CookingStepsSection mode="edit" />
+            </View>
+          ) : (
+            <ScrollView
+              className="flex-1 px-4"
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{
+                paddingBottom: keyboardHeight > 0 ? keyboardHeight + 120 : 0,
+              }}
+            >
+              <WizardStepHeader
+                preTitle={`STEP ${step + 1} — ${
+                  WIZARD_STEP_PRETITLE_KEYS[step]
+                }`}
+                title={WIZARD_STEP_TITLES[step]}
+                description={WIZARD_STEP_DESCRIPTIONS[step]}
+                counterLabel={counterLabel}
+              />
+              {renderWizardStep(step)}
+            </ScrollView>
+          )}
 
+          <View style={{ marginBottom: keyboardHeight }}>
             <WizardFooterActions
               showStepBack={isPreview ? true : step > 0}
               primaryLabel={primaryLabel}
@@ -306,7 +327,7 @@ export function AddRecipeWizardScreen() {
               onPrimary={onPrimaryFooter}
             />
           </View>
-        </KeyboardAvoidingView>
+        </View>
       </SafeAreaView>
     </FormProvider>
   );

@@ -8,7 +8,10 @@ import { mockAvatar, popularRecipes } from "@/features/home/mockData";
 import { useFavourites } from "@/hooks/useFavourites";
 import * as React from "react";
 import { FlatList, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 export default function FavouritesScreen() {
   const insets = useSafeAreaInsets();
@@ -85,7 +88,7 @@ export default function FavouritesScreen() {
   );
 
   return (
-    <View className="flex-1 bg-sage-100">
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#dce4e2" }}>
       {header}
       <FlatList
         data={favouritedRecipes}
@@ -98,6 +101,6 @@ export default function FavouritesScreen() {
           paddingBottom: Math.max(insets.bottom, 12) + 110,
         }}
       />
-    </View>
+    </SafeAreaView>
   );
 }

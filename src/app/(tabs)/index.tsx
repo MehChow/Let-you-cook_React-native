@@ -2,12 +2,11 @@ import SectionHeader from "@/components/SectionHeader";
 import { ScrollView, View } from "react-native";
 
 import { Grid } from "@/components/Icon";
+import RecipeCard from "@/components/RecipeCard";
 import CategoryCarousel from "@/features/home/CategoryCarousel";
 import HomeHeader from "@/features/home/HomeHeader";
-import RecipeCard from "@/components/RecipeCard";
 import TodaySpecialCard from "@/features/home/TodaySpecialCard";
 import { useCategoryStore } from "@/features/home/categoryStore";
-import { useFavourites } from "@/hooks/useFavourites";
 import {
   categories,
   homeGreeting,
@@ -15,15 +14,21 @@ import {
   popularRecipes,
   todaySpecial,
 } from "@/features/home/mockData";
-import * as React from "react";
+import { useFavourites } from "@/hooks/useFavourites";
 import { useRouter } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as React from "react";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 export default function HomeScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const selectedCategoryId = useCategoryStore((s) => s.selectedCategoryId);
-  const setSelectedCategoryId = useCategoryStore((s) => s.setSelectedCategoryId);
+  const setSelectedCategoryId = useCategoryStore(
+    (s) => s.setSelectedCategoryId
+  );
   const { isFavourite, setFavourite } = useFavourites();
 
   const categoryItems = React.useMemo(
@@ -38,7 +43,7 @@ export default function HomeScreen() {
   );
 
   return (
-    <View className="flex-1 bg-sage-100">
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#dce4e2" }}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerClassName="px-5 gap-5"
@@ -112,6 +117,6 @@ export default function HomeScreen() {
           </View>
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
