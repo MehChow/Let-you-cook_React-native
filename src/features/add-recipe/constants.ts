@@ -7,6 +7,7 @@ export const MAX_RECIPE_NAME_LENGTH = 120;
 
 export const MAX_INGREDIENTS = 20;
 export const MAX_COOKING_STEPS = 15;
+export const MAX_RECIPE_IMAGES = 9;
 
 export const MIN_SERVING = 1;
 export const MAX_SERVING = 99;
@@ -42,7 +43,7 @@ export const WIZARD_STEP_TITLES = [
 
 export const WIZARD_STEP_DESCRIPTIONS: (string | undefined)[] = [
   undefined,
-  "Tap an image to set it as the cover (green border). Maximum up to 9 images.",
+  "The first image is your thumbnail. Drag to reorder.",
   undefined,
   undefined,
   undefined,

@@ -8,8 +8,10 @@ Code Style and Structure:
 
 - Write concise, type-safe TypeScript code.
 - Use functional components and hooks over class components.
+- Use arrow function instead of normal function declaration.
 - Ensure components are modular, reusable, and maintainable.
 - Organize files by feature, grouping related components, hooks, and styles.
+- Import and use libraries from React directly (e.g., `import { useEffect } from "react"`)
 
 Naming Conventions:
 

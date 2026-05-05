@@ -17,7 +17,7 @@ export function WizardStepHeader({
   counterLabel,
 }: WizardStepHeaderProps) {
   return (
-    <View className="pt-3 pb-6 gap-1">
+    <View className="py-3 gap-1">
       <View className="flex-row items-start justify-between gap-2">
         <Text className="text-xs font-bold uppercase tracking-wide text-neutral-500">
           {preTitle}
@@ -30,7 +30,7 @@ export function WizardStepHeader({
       </View>
       <Text className="text-lg font-bold">{title}</Text>
       {description ? (
-        <Text className="text-[10px] font-semibold text-neutral-400">
+        <Text className=" text-[12px] font-semibold text-neutral-400">
           {description}
         </Text>
       ) : null}

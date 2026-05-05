@@ -28,7 +28,12 @@ import {
   WIZARD_STEP_TITLES,
 } from "@/features/add-recipe/constants";
 import { router } from "expo-router";
-import * as React from "react";
+import {
+  useCallback,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import {
   Alert,
@@ -45,15 +50,14 @@ const defaultValues: AddRecipeFormValues = {
   description: "",
   cookTimeMinutes: "",
   servings: "",
-  thumbnailUri: "",
-  secondaryImageUri: "",
+  recipeImageUris: [],
   ingredients: [{ name: "", quantity: "" }],
   cookingSteps: [{ instruction: "", imageUri: "" }],
   chefNotes: "",
   nutritionMode: "ai",
 };
 
-function renderWizardStep(step: number): React.ReactNode {
+function renderWizardStep(step: number): ReactNode {
   switch (step) {
     case 0:
       return <BasicsSection mode="edit" />;
@@ -72,7 +76,7 @@ function renderWizardStep(step: number): React.ReactNode {
   }
 }
 
-function renderPreviewSection(stepIndex: number): React.ReactNode {
+function renderPreviewSection(stepIndex: number): ReactNode {
   switch (stepIndex) {
     case 0:
       return <BasicsSection mode="preview" />;
@@ -92,8 +96,8 @@ function renderPreviewSection(stepIndex: number): React.ReactNode {
 }
 
 export function AddRecipeWizardScreen() {
-  const [step, setStep] = React.useState(0);
-  const [isPreview, setIsPreview] = React.useState(false);
+  const [step, setStep] = useState(0);
+  const [isPreview, setIsPreview] = useState(false);
 
   const methods = useForm<AddRecipeFormValues>({
     defaultValues,
@@ -109,7 +113,7 @@ export function AddRecipeWizardScreen() {
     name: "cookingSteps",
   });
 
-  const attemptExit = React.useCallback(() => {
+  const attemptExit = useCallback(() => {
     if (isPreview) {
       setIsPreview(false);
       return;
@@ -132,7 +136,7 @@ export function AddRecipeWizardScreen() {
     }
   }, [formState.isDirty, isPreview]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const sub = BackHandler.addEventListener("hardwareBackPress", () => {
       if (isPreview) {
         setIsPreview(false);
@@ -148,7 +152,7 @@ export function AddRecipeWizardScreen() {
     return () => sub.remove();
   }, [step, isPreview, attemptExit]);
 
-  const goNext = React.useCallback(() => {
+  const goNext = useCallback(() => {
     clearErrors();
     const values = getValues();
     const result = validateWizardStep(step, values);
@@ -161,7 +165,7 @@ export function AddRecipeWizardScreen() {
     }
   }, [clearErrors, getValues, setError, step]);
 
-  const finishRecipe = React.useCallback(() => {
+  const finishRecipe = useCallback(() => {
     clearErrors();
     const values = getValues();
     const parsed = addRecipeFormSchema.safeParse(values);
@@ -176,7 +180,7 @@ export function AddRecipeWizardScreen() {
     );
   }, [clearErrors, getValues, setError]);
 
-  const onPrimaryFooter = React.useCallback(() => {
+  const onPrimaryFooter = useCallback(() => {
     if (isPreview) {
       setIsPreview(false);
       if (step < TOTAL_WIZARD_STEPS - 1) {
@@ -193,7 +197,7 @@ export function AddRecipeWizardScreen() {
     }
   }, [finishRecipe, goNext, isPreview, step]);
 
-  const onFooterBack = React.useCallback(() => {
+  const onFooterBack = useCallback(() => {
     if (isPreview) {
       setIsPreview(false);
       return;
@@ -259,6 +263,16 @@ export function AddRecipeWizardScreen() {
                   ))}
                 </ScrollView>
               </>
+            ) : step === 1 ? (
+              <View className="flex-1 px-4">
+                <WizardStepHeader
+                  preTitle={`STEP ${step + 1} — ${WIZARD_STEP_PRETITLE_KEYS[step]}`}
+                  title={WIZARD_STEP_TITLES[step]}
+                  description={WIZARD_STEP_DESCRIPTIONS[step]}
+                  counterLabel={counterLabel}
+                />
+                <ImagesSection mode="edit" />
+              </View>
             ) : step === 3 ? (
               <View className="flex-1 px-4">
                 <WizardStepHeader

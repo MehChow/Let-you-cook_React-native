@@ -4,6 +4,7 @@ import {
   MAX_COOKING_STEPS,
   MAX_DESCRIPTION_LENGTH,
   MAX_INGREDIENTS,
+  MAX_RECIPE_IMAGES,
   MAX_RECIPE_NAME_LENGTH,
   MAX_SERVING,
   MAX_STEP_INSTRUCTION_LENGTH,
@@ -96,9 +97,17 @@ export const basicsStepSchema = z.object({
   servings: servingsSchema,
 });
 
+const recipeImageRowSchema = z.object({
+  uri: z.string().min(1),
+  /** Stable identity for list reorder (RHF field `id` changes on `replace`). */
+  clientKey: z.string().min(1),
+});
+
 export const imagesStepSchema = z.object({
-  thumbnailUri: z.string().min(1, "Add a cover image"),
-  secondaryImageUri: z.string().optional(),
+  recipeImageUris: z
+    .array(recipeImageRowSchema)
+    .min(1, "Add at least one recipe image")
+    .max(MAX_RECIPE_IMAGES, `You can add up to ${MAX_RECIPE_IMAGES} images`),
 });
 
 export const ingredientsStepSchema = z.object({

@@ -1,12 +1,12 @@
 import { Text } from "@/components/ui/text";
 import type { LucideIcon } from "lucide-react-native";
-import * as React from "react";
+import type { ComponentType, ReactNode } from "react";
 import { View } from "react-native";
 
 export interface LabeledFieldProps {
   label: string;
   icon: LucideIcon;
-  children: React.ReactNode;
+  children: ReactNode;
   errorMessage?: string;
 }
 
@@ -16,7 +16,7 @@ export function LabeledField({
   children,
   errorMessage,
 }: LabeledFieldProps) {
-  const IconMark = IconComponent as React.ComponentType<{
+  const IconMark = IconComponent as ComponentType<{
     size?: number;
     color?: string;
   }>;

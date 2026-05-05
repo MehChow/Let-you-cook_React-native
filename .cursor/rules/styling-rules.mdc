@@ -1,0 +1,7 @@
+---
+alwaysApply: true
+---
+
+Zod validation text style:
+
+- Use `text-[11px] font-medium text-danger-500` for all error messages.
