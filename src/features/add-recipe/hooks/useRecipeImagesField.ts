@@ -53,7 +53,7 @@ export function useRecipeImagesField() {
   const contentWidth = screenWidth - RECIPE_IMAGES_EDIT_CONTENT_GUTTER;
   const previewWidth = screenWidth - RECIPE_IMAGES_PREVIEW_CONTENT_GUTTER;
 
-  const { control } = useFormContext<AddRecipeFormValues>();
+  const { control, clearErrors } = useFormContext<AddRecipeFormValues>();
   const { errors } = useFormState({ control });
   const previewImages = useWatch({ control, name: "recipeImageUris" });
 
@@ -109,6 +109,12 @@ export function useRecipeImagesField() {
       );
     }
   }, [append, fields.length]);
+
+  useEffect(() => {
+    if (fields.length > 0 && errors.recipeImageUris) {
+      clearErrors("recipeImageUris");
+    }
+  }, [clearErrors, errors.recipeImageUris, fields.length]);
 
   const removeByClientKey = useCallback(
     (clientKey: string) => {
