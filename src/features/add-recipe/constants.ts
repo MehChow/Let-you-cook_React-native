@@ -5,7 +5,8 @@ export const MAX_STEP_INSTRUCTION_LENGTH = 200;
 export const MAX_CHEF_NOTES_LENGTH = 200;
 export const MAX_RECIPE_NAME_LENGTH = 120;
 
-export const MAX_INGREDIENTS = 20;
+export const MAX_INGREDIENTS = 30;
+export const MAX_INGREDIENT_GROUPS = 5;
 export const MAX_COOKING_STEPS = 15;
 export const MAX_RECIPE_IMAGES = 9;
 
@@ -35,7 +36,7 @@ export const WIZARD_STEP_PRETITLE_KEYS = [
 export const WIZARD_STEP_TITLES = [
   "What are you cooking today?",
   "Show us your dish",
-  "Ingredients",
+  "What goes in the dish?",
   "Cooking steps",
   "Reminder",
   "Nutritional information",
@@ -44,7 +45,7 @@ export const WIZARD_STEP_TITLES = [
 export const WIZARD_STEP_DESCRIPTIONS: (string | undefined)[] = [
   undefined,
   "The first image is your thumbnail. Drag to reorder.",
-  undefined,
+  "Organize your ingredients into groups for better readability.",
   undefined,
   undefined,
   undefined,

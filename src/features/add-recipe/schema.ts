@@ -4,6 +4,7 @@ import {
   MAX_COOKING_STEPS,
   MAX_DESCRIPTION_LENGTH,
   MAX_INGREDIENTS,
+  MAX_INGREDIENT_GROUPS,
   MAX_RECIPE_IMAGES,
   MAX_RECIPE_NAME_LENGTH,
   MAX_SERVING,
@@ -61,8 +62,45 @@ export const servingsSchema = z
   });
 
 export const ingredientRowSchema = z.object({
-  name: z.string().trim().min(1, "Ingredient name required"),
-  quantity: z.string().trim().min(1, "Quantity required"),
+  // Lenient rows: allow empty strings; required-ness is enforced at the step level
+  // so we can ignore fully-blank rows and only block partial ones.
+  name: z
+    .string()
+    .trim()
+    .max(50, "Ingredient name must be 50 characters or fewer"),
+  quantityAmount: z
+    .string()
+    .trim()
+    .superRefine((val, ctx) => {
+      // Validate amount only when user entered something.
+      if (!val) return;
+      // Accept: integers, decimals, fractions, mixed fractions (no spaces)
+      // 7, 1.5, 1/2, 1-1/2
+      if (/\s/.test(val)) {
+        ctx.addIssue({
+          code: "custom",
+          message: "No spaces (e.g., 7, 1.5, 1/2, 1-1/2)",
+        });
+        return;
+      }
+      const re = /^(\d+(?:\.\d+)?|\d+\/\d+|\d+-\d+\/\d+)$/;
+      if (!re.test(val)) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Use 7, 1.5, 1/2, or 1-1/2",
+        });
+      }
+    }),
+  quantityUnit: z.enum(["ml", "g", "cup"]),
+});
+
+export const ingredientGroupSchema = z.object({
+  groupName: z
+    .string()
+    .trim()
+    .min(1, "Group name required")
+    .max(50, "Group name must be 50 characters or fewer"),
+  items: z.array(ingredientRowSchema).min(1, "Add at least one ingredient"),
 });
 
 export const cookingStepSchema = z.object({
@@ -110,12 +148,70 @@ export const imagesStepSchema = z.object({
     .max(MAX_RECIPE_IMAGES, `You can add up to ${MAX_RECIPE_IMAGES} images`),
 });
 
-export const ingredientsStepSchema = z.object({
-  ingredients: z
-    .array(ingredientRowSchema)
-    .min(1, "Add at least one ingredient")
-    .max(MAX_INGREDIENTS),
-});
+export const ingredientsStepSchema = z
+  .object({
+    ingredientGroups: z
+      .array(ingredientGroupSchema)
+      .min(1, "Add at least one group")
+      .max(MAX_INGREDIENT_GROUPS),
+  })
+  .superRefine((val, ctx) => {
+    const groups = val.ingredientGroups ?? [];
+    const totalIngredients = groups.reduce(
+      (sum, g) => sum + (g.items?.length ?? 0),
+      0
+    );
+    if (totalIngredients > MAX_INGREDIENTS) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["ingredientGroups"],
+        message: `You can add up to ${MAX_INGREDIENTS} ingredients`,
+      });
+    }
+
+    let hasAnyCompleteIngredient = false;
+
+    for (let gi = 0; gi < groups.length; gi++) {
+      const items = groups[gi]?.items ?? [];
+      for (let ii = 0; ii < items.length; ii++) {
+        const row = items[ii];
+        const name = row?.name?.trim() ?? "";
+        const quantityAmount = row?.quantityAmount?.trim() ?? "";
+
+        if (!name && !quantityAmount) {
+          // fully blank row: ignore
+          continue;
+        }
+
+        if (!name) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["ingredientGroups", gi, "items", ii, "name"],
+            message: "Ingredient name required",
+          });
+        }
+        if (!quantityAmount) {
+          ctx.addIssue({
+            code: "custom",
+            path: ["ingredientGroups", gi, "items", ii, "quantityAmount"],
+            message: "Amount required",
+          });
+        }
+
+        if (name && quantityAmount) {
+          hasAnyCompleteIngredient = true;
+        }
+      }
+    }
+
+    if (!hasAnyCompleteIngredient) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["ingredientGroups"],
+        message: "Fill in at least one ingredient (name and amount).",
+      });
+    }
+  });
 
 export const cookingStepsStepSchema = z.object({
   cookingSteps: z

@@ -70,7 +70,7 @@ export function ImagesSection({ mode }: ImagesSectionProps) {
       scrollEnabled={!gridDragging}
       nestedScrollEnabled
     >
-      <View className="gap-3 pb-6">
+      <View className="gap-1 pb-6">
         {fields.length === 0 ? (
           <CarouselPlaceholder width={contentWidth} onPress={onAppendImage} />
         ) : (
@@ -89,7 +89,7 @@ export function ImagesSection({ mode }: ImagesSectionProps) {
         )}
 
         {imagesError ? (
-          <Text className="text-[11px] font-medium text-danger-500">
+          <Text className="pl-1 text-[11px] font-medium text-danger-500">
             {imagesError}
           </Text>
         ) : null}
@@ -240,7 +240,7 @@ function CarouselSlide({
           contentFit="cover"
         />
         {isThumb ? (
-          <View className="absolute right-4 top-4 rounded-full bg-sage-600 px-3 py-1">
+          <View className="absolute right-3 top-3 rounded-full bg-sage-600 px-3 py-1">
             <Text className="text-xs font-semibold text-white">Thumbnail</Text>
           </View>
         ) : null}

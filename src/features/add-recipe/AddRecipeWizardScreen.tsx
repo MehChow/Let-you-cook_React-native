@@ -40,7 +40,12 @@ const defaultValues: AddRecipeFormValues = {
   cookTimeMinutes: "",
   servings: "",
   recipeImageUris: [],
-  ingredients: [{ name: "", quantity: "" }],
+  ingredientGroups: [
+    {
+      groupName: "Group name",
+      items: [{ name: "", quantityAmount: "", quantityUnit: "g" }],
+    },
+  ],
   cookingSteps: [{ instruction: "", imageUri: "" }],
   chefNotes: "",
   nutritionMode: "ai",
@@ -95,11 +100,11 @@ export function AddRecipeWizardScreen() {
     reValidateMode: "onChange",
   });
 
-  const { getValues, setError, clearErrors, formState } = methods;
+  const { getValues, setError, clearErrors, formState, setValue } = methods;
 
-  const ingredients = useWatch({
+  const ingredientGroups = useWatch({
     control: methods.control,
-    name: "ingredients",
+    name: "ingredientGroups",
   });
   const cookingSteps = useWatch({
     control: methods.control,
@@ -156,16 +161,32 @@ export function AddRecipeWizardScreen() {
 
   const goNext = useCallback(() => {
     clearErrors();
+    if (step === 2) {
+      const valuesBefore = getValues();
+      const groups = valuesBefore.ingredientGroups ?? [];
+      const keep = groups.filter((g) =>
+        (g.items ?? []).some(
+          (row) =>
+            Boolean(row.name?.trim()) && Boolean(row.quantityAmount?.trim())
+        )
+      );
+      // Keep at least one group so the user always has somewhere to type.
+      setValue("ingredientGroups", keep.length > 0 ? keep : groups, {
+        shouldDirty: true,
+      });
+    }
+
     const values = getValues();
     const result = validateWizardStep(step, values);
     if (!result.ok) {
       applyZodIssuesToForm(result.error, setError);
+
       return;
     }
     if (step < TOTAL_WIZARD_STEPS - 1) {
       setStep((s) => s + 1);
     }
-  }, [clearErrors, getValues, setError, step]);
+  }, [clearErrors, getValues, setError, setValue, step]);
 
   const finishRecipe = useCallback(() => {
     clearErrors();
@@ -219,7 +240,10 @@ export function AddRecipeWizardScreen() {
 
   const counterLabel =
     step === 2
-      ? `${ingredients?.length ?? 0} / ${MAX_INGREDIENTS}`
+      ? `${(ingredientGroups ?? []).reduce(
+          (sum, g) => sum + (g.items?.length ?? 0),
+          0
+        )} / ${MAX_INGREDIENTS}`
       : step === 3
       ? `${cookingSteps?.length ?? 0} / ${MAX_COOKING_STEPS}`
       : undefined;
@@ -286,6 +310,18 @@ export function AddRecipeWizardScreen() {
                 counterLabel={counterLabel}
               />
               <ImagesSection mode="edit" />
+            </View>
+          ) : step === 2 ? (
+            <View className="flex-1 px-4">
+              <WizardStepHeader
+                preTitle={`STEP ${step + 1} — ${
+                  WIZARD_STEP_PRETITLE_KEYS[step]
+                }`}
+                title={WIZARD_STEP_TITLES[step]}
+                description={WIZARD_STEP_DESCRIPTIONS[step]}
+                counterLabel={undefined}
+              />
+              <IngredientsSection mode="edit" />
             </View>
           ) : step === 3 ? (
             <View className="flex-1 px-4">
