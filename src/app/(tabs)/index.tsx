@@ -43,12 +43,15 @@ export default function HomeScreen() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#dce4e2" }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#dce4e2" }}
+      edges={["top", "left", "right"]}
+    >
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerClassName="px-5 gap-5"
         contentContainerStyle={{
-          paddingBottom: Math.max(insets.bottom, 12) + 110,
+          paddingBottom: 16,
         }}
       >
         <HomeHeader

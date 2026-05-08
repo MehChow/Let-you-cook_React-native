@@ -33,7 +33,10 @@ export default function ProfileScreen() {
   const recipeListBottomPadding = Math.max(insets.bottom, 12) + 110;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#52796f" }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#52796f" }}
+      edges={["top", "left", "right"]}
+    >
       <View className="bg-sage-500 px-5 pt-8 pb-6">
         <UserHeader user={profileUser} avatarSource={mockAvatar} />
         <ProfileMetadata

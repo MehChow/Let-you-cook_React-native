@@ -109,7 +109,10 @@ export default function SearchScreen() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#dce4e2" }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#dce4e2" }}
+      edges={["top", "left", "right"]}
+    >
       <FlatList
         showsVerticalScrollIndicator={false}
         data={filteredRecipes}
@@ -254,7 +257,7 @@ export default function SearchScreen() {
           </View>
         }
         contentContainerStyle={{
-          paddingBottom: Math.max(insets.bottom, 12) + 110,
+          paddingBottom: 16,
         }}
       />
     </SafeAreaView>
