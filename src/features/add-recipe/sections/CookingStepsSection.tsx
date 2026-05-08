@@ -18,6 +18,8 @@ import { Alert, Pressable, TextInput, View } from "react-native";
 
 export interface CookingStepsSectionProps {
   mode: "edit" | "preview";
+  bottomContentPadding?: number;
+  keyboardHeight?: number;
 }
 
 async function pickStepImage(): Promise<string | null> {
@@ -37,7 +39,11 @@ async function pickStepImage(): Promise<string | null> {
   return result.assets[0].uri;
 }
 
-export function CookingStepsSection({ mode }: CookingStepsSectionProps) {
+export function CookingStepsSection({
+  mode,
+  bottomContentPadding,
+  keyboardHeight,
+}: CookingStepsSectionProps) {
   const { control, setValue } = useFormContext<AddRecipeFormValues>();
   const { fields, append, remove, move } = useFieldArray({
     control,
@@ -79,6 +85,9 @@ export function CookingStepsSection({ mode }: CookingStepsSectionProps) {
       className="flex-1"
       style={{ flexGrow: 1 }}
       showsVerticalScrollIndicator={false}
+      contentContainerStyle={{
+        paddingBottom: bottomContentPadding ?? 24,
+      }}
     >
       <NestableDraggableFlatList
         data={fields}

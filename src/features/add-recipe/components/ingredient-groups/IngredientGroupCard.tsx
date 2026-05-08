@@ -4,7 +4,7 @@ import { Text } from "@/components/ui/text";
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
 import { useMemo, useState } from "react";
 import { Controller, useFieldArray, type Control } from "react-hook-form";
-import { Pressable, TextInput, View } from "react-native";
+import { Pressable, TextInput, View, findNodeHandle } from "react-native";
 import { IngredientRow } from "./IngredientRow";
 
 export const IngredientGroupCard = ({
@@ -13,12 +13,14 @@ export const IngredientGroupCard = ({
   canAddIngredient,
   onRemoveGroup,
   showRemoveGroup,
+  onAnyInputFocus,
 }: {
   control: Control<AddRecipeFormValues>;
   groupIndex: number;
   canAddIngredient: boolean;
   onRemoveGroup: () => void;
   showRemoveGroup: boolean;
+  onAnyInputFocus?: (node: number | null) => void;
 }) => {
   const { fields, append, remove } = useFieldArray({
     control,
@@ -59,6 +61,7 @@ export const IngredientGroupCard = ({
                     returnKeyType="done"
                     placeholder={fallbackName}
                     placeholderTextColor="#a3a3a3"
+                    onFocus={(e) => onAnyInputFocus?.(findNodeHandle(e.target))}
                     onSubmitEditing={commitGroupName}
                     onBlur={commitGroupName}
                     maxLength={50}
@@ -120,6 +123,7 @@ export const IngredientGroupCard = ({
               itemIndex={itemIndex}
               onRemove={() => remove(itemIndex)}
               removeDisabled={itemIndex === 0}
+              onAnyInputFocus={onAnyInputFocus}
             />
           ))}
         </View>

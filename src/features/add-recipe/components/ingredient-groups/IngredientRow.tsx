@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/select";
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
 import { Controller, type Control } from "react-hook-form";
-import { Pressable, TextInput, View } from "react-native";
+import { Pressable, TextInput, View, findNodeHandle } from "react-native";
 
 const UNIT_OPTIONS = ["ml", "g", "cup"] as const;
 const unitOption = (u: (typeof UNIT_OPTIONS)[number]) => ({
@@ -23,12 +23,14 @@ export const IngredientRow = ({
   itemIndex,
   onRemove,
   removeDisabled,
+  onAnyInputFocus,
 }: {
   control: Control<AddRecipeFormValues>;
   groupIndex: number;
   itemIndex: number;
   onRemove: () => void;
   removeDisabled: boolean;
+  onAnyInputFocus?: (node: number | null) => void;
 }) => {
   return (
     <View className="flex-row items-center gap-2">
@@ -42,6 +44,12 @@ export const IngredientRow = ({
               value={f.value}
               onChangeText={(t) => f.onChange(t.slice(0, 50))}
               onBlur={f.onBlur}
+              onFocus={(e) =>
+                onAnyInputFocus?.(
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  ((e.nativeEvent as any)?.target as number | undefined) ?? null
+                )
+              }
               underlineColorAndroid="transparent"
               placeholder="Sugar"
               placeholderTextColor="#a3a3a3"
@@ -73,6 +81,13 @@ export const IngredientRow = ({
                 value={f.value}
                 onChangeText={(t) => f.onChange(t.replace(/\s+/g, ""))}
                 onBlur={f.onBlur}
+                onFocus={(e) =>
+                  onAnyInputFocus?.(
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    ((e.nativeEvent as any)?.target as number | undefined) ??
+                      null
+                  )
+                }
                 underlineColorAndroid="transparent"
                 placeholder="30"
                 placeholderTextColor="#a3a3a3"

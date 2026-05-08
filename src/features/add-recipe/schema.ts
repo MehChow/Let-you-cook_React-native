@@ -16,50 +16,15 @@ export const servingsSchema = z
   .string()
   .trim()
   .min(1, "Servings are required")
-  .superRefine((val, ctx) => {
-    // 1. Guard: If empty, stop here so .min(1) takes over
-    if (!val) return;
-
-    const single = /^(\d+)$/.exec(val);
-    const range = /^(\d+)-(\d+)$/.exec(val);
-
-    // 2. Validate Single Number
-    if (single) {
-      const n = Number.parseInt(single[1]!, 10);
-      if (n < MIN_SERVING || n > MAX_SERVING) {
-        ctx.addIssue({
-          code: "custom", // Use the string literal here
-          message: `Amount must be between ${MIN_SERVING} and ${MAX_SERVING}`,
-        });
-      }
-      return;
-    }
-
-    // 3. Validate Range
-    if (range) {
-      const a = Number.parseInt(range[1]!, 10);
-      const b = Number.parseInt(range[2]!, 10);
-
-      if (a < MIN_SERVING || b > MAX_SERVING) {
-        ctx.addIssue({
-          code: "custom",
-          message: `Range must be between ${MIN_SERVING} and ${MAX_SERVING}`,
-        });
-      } else if (a >= b) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Range start must be less than end (e.g., 2-4)",
-        });
-      }
-      return;
-    }
-
-    // 4. Fallback for invalid characters/format
-    ctx.addIssue({
-      code: "custom",
-      message: "Enter a number or range (e.g., 4 or 3-5)",
-    });
-  });
+  .pipe(
+    z
+      .string()
+      .regex(/^\d+$/, "Use a whole number")
+      .refine((v) => {
+        const n = Number.parseInt(v, 10);
+        return n >= MIN_SERVING && n <= MAX_SERVING;
+      }, `Amount must be between ${MIN_SERVING} and ${MAX_SERVING}`)
+  );
 
 export const ingredientRowSchema = z.object({
   // Lenient rows: allow empty strings; required-ness is enforced at the step level

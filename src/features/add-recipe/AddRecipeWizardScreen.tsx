@@ -93,6 +93,7 @@ export function AddRecipeWizardScreen() {
   const [step, setStep] = useState(0);
   const [isPreview, setIsPreview] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [footerHeight, setFooterHeight] = useState(0);
 
   const methods = useForm<AddRecipeFormValues>({
     defaultValues,
@@ -256,6 +257,11 @@ export function AddRecipeWizardScreen() {
     ? "Continue"
     : "Save recipe";
 
+  const contentBottomPadding =
+    keyboardHeight > 0
+      ? keyboardHeight + footerHeight + 24
+      : Math.max(footerHeight, 0) + 24;
+
   return (
     <FormProvider {...methods}>
       <SafeAreaView
@@ -282,7 +288,7 @@ export function AddRecipeWizardScreen() {
                 className="flex-1"
                 keyboardShouldPersistTaps="handled"
                 contentContainerStyle={{
-                  paddingBottom: keyboardHeight > 0 ? keyboardHeight + 120 : 0,
+                  paddingBottom: contentBottomPadding,
                 }}
               >
                 {SECTION_PREVIEW_TITLES.map((title, i) => (
@@ -321,7 +327,11 @@ export function AddRecipeWizardScreen() {
                 description={WIZARD_STEP_DESCRIPTIONS[step]}
                 counterLabel={undefined}
               />
-              <IngredientsSection mode="edit" />
+              <IngredientsSection
+                mode="edit"
+                bottomContentPadding={contentBottomPadding}
+                keyboardHeight={keyboardHeight}
+              />
             </View>
           ) : step === 3 ? (
             <View className="flex-1 px-4">
@@ -333,14 +343,18 @@ export function AddRecipeWizardScreen() {
                 description={WIZARD_STEP_DESCRIPTIONS[step]}
                 counterLabel={counterLabel}
               />
-              <CookingStepsSection mode="edit" />
+              <CookingStepsSection
+                mode="edit"
+                bottomContentPadding={contentBottomPadding}
+                keyboardHeight={keyboardHeight}
+              />
             </View>
           ) : (
             <ScrollView
               className="flex-1 px-4"
               keyboardShouldPersistTaps="handled"
               contentContainerStyle={{
-                paddingBottom: keyboardHeight > 0 ? keyboardHeight + 120 : 0,
+                paddingBottom: contentBottomPadding,
               }}
             >
               <WizardStepHeader
@@ -355,7 +369,12 @@ export function AddRecipeWizardScreen() {
             </ScrollView>
           )}
 
-          <View style={{ marginBottom: keyboardHeight }}>
+          <View
+            onLayout={(e) => {
+              const h = e.nativeEvent.layout.height;
+              if (h > 0) setFooterHeight(h);
+            }}
+          >
             <WizardFooterActions
               showStepBack={isPreview ? true : step > 0}
               primaryLabel={primaryLabel}

@@ -8,15 +8,34 @@ import {
 import { useIngredientGroupsField } from "@/features/add-recipe/hooks/useIngredientGroupsField";
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
 import { useFormContext, useWatch } from "react-hook-form";
-import { Pressable, ScrollView, View } from "react-native";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Keyboard,
+  Platform,
+  Pressable,
+  ScrollView,
+  View,
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+  UIManager,
+  findNodeHandle,
+} from "react-native";
 
 export interface IngredientsSectionProps {
   mode: "edit" | "preview";
+  bottomContentPadding?: number;
+  keyboardHeight?: number;
 }
 
-export function IngredientsSection({ mode }: IngredientsSectionProps) {
+export function IngredientsSection({
+  mode,
+  bottomContentPadding,
+  keyboardHeight,
+}: IngredientsSectionProps) {
   const { control } = useFormContext<AddRecipeFormValues>();
   const groups = useWatch({ control, name: "ingredientGroups" });
+  const scrollRef = useRef<ScrollView | null>(null);
+  const [focusedNode, setFocusedNode] = useState<number | null>(null);
   const {
     groupFields,
     groupCount,
@@ -78,6 +97,54 @@ export function IngredientsSection({ mode }: IngredientsSectionProps) {
     );
   }
 
+  const ensureFocusedVisible = useCallback(
+    (kbHeight?: number) => {
+      if (Platform.OS !== "android") return;
+      if (!focusedNode || !scrollRef.current) return;
+
+      const responder = scrollRef.current.getScrollResponder?.();
+      const scrollNode = responder ? findNodeHandle(responder) : null;
+      if (!scrollNode) return;
+
+      // Measure focused input relative to the scroll view, then scroll to it.
+      UIManager.measureLayout(
+        focusedNode,
+        scrollNode,
+        () => {},
+        (_x, y, _w, h) => {
+          const margin = 12;
+          const extra = Math.max(0, (kbHeight ?? keyboardHeight ?? 0) - margin);
+          const targetY = Math.max(0, y - margin + extra * 0);
+          scrollRef.current?.scrollTo({ y: targetY, animated: true });
+        }
+      );
+    },
+    [focusedNode, keyboardHeight]
+  );
+
+  useEffect(() => {
+    if (Platform.OS !== "android") return;
+
+    const sub = Keyboard.addListener("keyboardDidShow", (e) => {
+      const kb = e.endCoordinates?.height ?? keyboardHeight ?? 0;
+      if (kb <= 0) return;
+
+      // Defer until focus + layout settles.
+      setTimeout(() => {
+        ensureFocusedVisible(kb);
+      }, 50);
+    });
+
+    return () => sub.remove();
+  }, [ensureFocusedVisible, keyboardHeight]);
+
+  const onInputFocus = useCallback((node: number | null) => {
+    if (!node) return;
+    setFocusedNode(node);
+    // If keyboard is already open, scroll immediately.
+    setTimeout(() => ensureFocusedVisible(), 0);
+  }, [ensureFocusedVisible]);
+
   return (
     <View className="flex-1">
       <IngredientGroupsCounter
@@ -93,10 +160,15 @@ export function IngredientsSection({ mode }: IngredientsSectionProps) {
       ) : null}
 
       <ScrollView
+        ref={scrollRef}
         className="flex-1"
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ gap: 12, paddingBottom: 16 }}
+        onScroll={(_e: NativeSyntheticEvent<NativeScrollEvent>) => {}}
+        contentContainerStyle={{
+          gap: 12,
+          paddingBottom: bottomContentPadding ?? 16,
+        }}
       >
         {groupFields.map((g, groupIndex) => (
           <IngredientGroupCard
@@ -106,6 +178,7 @@ export function IngredientsSection({ mode }: IngredientsSectionProps) {
             canAddIngredient={canAddIngredient}
             onRemoveGroup={() => onRemoveGroup(groupIndex)}
             showRemoveGroup={groupIndex > 0}
+            onAnyInputFocus={onInputFocus}
           />
         ))}
 

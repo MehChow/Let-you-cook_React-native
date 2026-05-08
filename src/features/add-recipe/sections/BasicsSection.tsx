@@ -166,9 +166,9 @@ export function BasicsSection({ mode }: BasicsSectionProps) {
                   value={value}
                   onChangeText={onChange}
                   onBlur={onBlur}
-                  placeholder="3-4"
+                  placeholder="4"
                   placeholderTextColor="#75948c"
-                  keyboardType="numbers-and-punctuation"
+                  keyboardType="number-pad"
                   className="rounded-xl border border-sage-200 bg-white px-3 text-base"
                 />
               </LabeledField>
