@@ -4,7 +4,7 @@ import { Text } from "@/components/ui/text";
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
 import { useMemo, useState } from "react";
 import { Controller, useFieldArray, type Control } from "react-hook-form";
-import { Pressable, TextInput, View, findNodeHandle } from "react-native";
+import { Pressable, TextInput, View } from "react-native";
 import { IngredientRow } from "./IngredientRow";
 
 export const IngredientGroupCard = ({
@@ -31,7 +31,7 @@ export const IngredientGroupCard = ({
   const fallbackName = "Group name";
   const groupNameFieldPath = useMemo(
     () => `ingredientGroups.${groupIndex}.groupName` as const,
-    [groupIndex]
+    [groupIndex],
   );
 
   return (
@@ -61,24 +61,22 @@ export const IngredientGroupCard = ({
                     returnKeyType="done"
                     placeholder={fallbackName}
                     placeholderTextColor="#a3a3a3"
-                    onFocus={(e) => onAnyInputFocus?.(findNodeHandle(e.target))}
+                    onFocus={(e) =>
+                      onAnyInputFocus?.(
+                        // @ts-ignore - Accessing internal _nativeTag property for React 19 compatibility
+                        (e.nativeEvent as any)?.target as number | undefined,
+                      )
+                    }
                     onSubmitEditing={commitGroupName}
                     onBlur={commitGroupName}
                     maxLength={50}
                     className={`flex-1 border-b py-1 text-base font-semibold ${
-                      fieldState.invalid
-                        ? "border-danger-300 text-danger-500"
-                        : "border-sage-200"
+                      fieldState.invalid ? "border-danger-300 text-danger-500" : "border-sage-200"
                     }`}
                   />
                 ) : (
-                  <Pressable
-                    onPress={() => setEditingName(true)}
-                    className="flex-1 py-1"
-                  >
-                    <Text className="text-base font-semibold">
-                      {displayName}
-                    </Text>
+                  <Pressable onPress={() => setEditingName(true)} className="flex-1 py-1">
+                    <Text className="text-base font-semibold">{displayName}</Text>
                   </Pressable>
                 );
               }}
@@ -132,17 +130,12 @@ export const IngredientGroupCard = ({
         <Pressable
           onPress={() => {
             if (!canAddIngredient) return;
-            append(
-              { name: "", quantityAmount: "", quantityUnit: "g" },
-              { shouldFocus: true }
-            );
+            append({ name: "", quantityAmount: "", quantityUnit: "g" }, { shouldFocus: true });
           }}
           disabled={!canAddIngredient}
           className="mt-2 self-start px-1 active:opacity-80 disabled:opacity-40"
         >
-          <Text className="text-[10px] font-semibold text-sage-700">
-            + Add ingredient
-          </Text>
+          <Text className="text-[10px] font-semibold text-sage-700">+ Add ingredient</Text>
         </Pressable>
       </CardContent>
     </Card>

@@ -8,8 +8,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
-import { Controller, type Control } from "react-hook-form";
-import { Pressable, TextInput, View, findNodeHandle } from "react-native";
+import { Controller, useFormContext, type Control } from "react-hook-form";
+import { Pressable, TextInput, View } from "react-native";
 
 const UNIT_OPTIONS = ["ml", "g", "cup"] as const;
 const unitOption = (u: (typeof UNIT_OPTIONS)[number]) => ({
@@ -32,6 +32,10 @@ export const IngredientRow = ({
   removeDisabled: boolean;
   onAnyInputFocus?: (node: number | null) => void;
 }) => {
+  const { trigger } = useFormContext<AddRecipeFormValues>();
+  const quantityFieldPath = `ingredientGroups.${groupIndex}.items.${itemIndex}.quantityAmount`;
+  const nameFieldPath = `ingredientGroups.${groupIndex}.items.${itemIndex}.name`;
+
   return (
     <View className="flex-row items-center gap-2">
       {/* Ingredient Name (1/2 width) */}
@@ -42,12 +46,15 @@ export const IngredientRow = ({
           render={({ field: f, fieldState }) => (
             <TextInput
               value={f.value}
-              onChangeText={(t) => f.onChange(t.slice(0, 50))}
+              onChangeText={(t) => {
+                f.onChange(t.slice(0, 50));
+                trigger(nameFieldPath as any);
+              }}
               onBlur={f.onBlur}
               onFocus={(e) =>
                 onAnyInputFocus?.(
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  ((e.nativeEvent as any)?.target as number | undefined) ?? null
+                  ((e.nativeEvent as any)?.target as number | undefined) ?? null,
                 )
               }
               underlineColorAndroid="transparent"
@@ -55,9 +62,7 @@ export const IngredientRow = ({
               placeholderTextColor="#a3a3a3"
               maxLength={50}
               className={`min-h-8 rounded-lg border bg-white px-3 py-1 text-sm ${
-                fieldState.invalid
-                  ? "border-danger-300 bg-red-50"
-                  : "border-sage-200"
+                fieldState.invalid ? "border-danger-300 bg-red-50" : "border-sage-200"
               }`}
             />
           )}
@@ -72,20 +77,20 @@ export const IngredientRow = ({
           render={({ field: f, fieldState }) => (
             <View
               className={`flex-row items-center rounded-lg border bg-white ${
-                fieldState.invalid
-                  ? "border-danger-300 bg-red-50"
-                  : "border-sage-200"
+                fieldState.invalid ? "border-danger-300 bg-red-50" : "border-sage-200"
               }`}
             >
               <TextInput
                 value={f.value}
-                onChangeText={(t) => f.onChange(t.replace(/\s+/g, ""))}
+                onChangeText={(t) => {
+                  f.onChange(t.replace(/\s+/g, ""));
+                  trigger(quantityFieldPath as any);
+                }}
                 onBlur={f.onBlur}
                 onFocus={(e) =>
                   onAnyInputFocus?.(
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    ((e.nativeEvent as any)?.target as number | undefined) ??
-                      null
+                    ((e.nativeEvent as any)?.target as number | undefined) ?? null,
                   )
                 }
                 underlineColorAndroid="transparent"
@@ -104,9 +109,7 @@ export const IngredientRow = ({
                       value={unitOption(unitField.value)}
                       onValueChange={(opt) => {
                         if (!opt) return;
-                        unitField.onChange(
-                          opt.value as (typeof UNIT_OPTIONS)[number]
-                        );
+                        unitField.onChange(opt.value as (typeof UNIT_OPTIONS)[number]);
                       }}
                     >
                       <SelectTrigger

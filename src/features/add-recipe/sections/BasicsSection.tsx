@@ -1,17 +1,9 @@
 import { Description, Recipe, Serving, Time } from "@/components/Icon";
 import { Text } from "@/components/ui/text";
-import {
-  MAX_DESCRIPTION_LENGTH,
-  MAX_RECIPE_NAME_LENGTH,
-} from "@/features/add-recipe/constants";
+import { MAX_DESCRIPTION_LENGTH, MAX_RECIPE_NAME_LENGTH } from "@/features/add-recipe/constants";
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
 import { LabeledField } from "@/features/add-recipe/wizard/LabeledField";
-import {
-  Controller,
-  useFormContext,
-  useFormState,
-  useWatch,
-} from "react-hook-form";
+import { Controller, useFormContext, useFormState, useWatch } from "react-hook-form";
 import { TextInput, View } from "react-native";
 
 export interface BasicsSectionProps {
@@ -19,7 +11,7 @@ export interface BasicsSectionProps {
 }
 
 export function BasicsSection({ mode }: BasicsSectionProps) {
-  const { control } = useFormContext<AddRecipeFormValues>();
+  const { control, clearErrors } = useFormContext<AddRecipeFormValues>();
   const { errors } = useFormState({ control });
   const previewRecipeName = useWatch({ control, name: "recipeName" });
   const previewDescription = useWatch({ control, name: "description" });
@@ -38,9 +30,7 @@ export function BasicsSection({ mode }: BasicsSectionProps) {
           <Description size={18} color="#426159" />
           <Text className="text-sm font-semibold">Description (optional)</Text>
         </View>
-        <Text className="text-base">
-          {previewDescription?.trim() ? previewDescription : "—"}
-        </Text>
+        <Text className="text-base">{previewDescription?.trim() ? previewDescription : "—"}</Text>
         <Text className="text-right text-xs text-sage-500">
           {previewDescription?.length ?? 0} / {MAX_DESCRIPTION_LENGTH}
         </Text>
@@ -74,14 +64,13 @@ export function BasicsSection({ mode }: BasicsSectionProps) {
         control={control}
         name="recipeName"
         render={({ field: { onChange, onBlur, value } }) => (
-          <LabeledField
-            label="Recipe name"
-            icon={Recipe}
-            errorMessage={errors.recipeName?.message}
-          >
+          <LabeledField label="Recipe name" icon={Recipe} errorMessage={errors.recipeName?.message}>
             <TextInput
               value={value}
-              onChangeText={onChange}
+              onChangeText={(text) => {
+                clearErrors("recipeName");
+                onChange(text);
+              }}
               onBlur={onBlur}
               placeholder="Peppy juicy wings"
               placeholderTextColor="#75948c"
@@ -104,7 +93,10 @@ export function BasicsSection({ mode }: BasicsSectionProps) {
             <View className="relative">
               <TextInput
                 value={value ?? ""}
-                onChangeText={onChange}
+                onChangeText={(text) => {
+                  clearErrors("description");
+                  onChange(text);
+                }}
                 onBlur={onBlur}
                 placeholder="yummy chicken wings"
                 placeholderTextColor="#75948c"
@@ -137,16 +129,17 @@ export function BasicsSection({ mode }: BasicsSectionProps) {
                 <View className="flex-row items-center rounded-xl border border-sage-200 bg-white px-3">
                   <TextInput
                     value={value}
-                    onChangeText={onChange}
+                    onChangeText={(text) => {
+                      clearErrors("cookTimeMinutes");
+                      onChange(text);
+                    }}
                     onBlur={onBlur}
                     placeholder="30"
                     placeholderTextColor="#75948c"
                     keyboardType="number-pad"
                     className="min-w-0 flex-1 text-base"
                   />
-                  <Text className="pl-1 text-sm font-semibold  text-sage-500">
-                    min
-                  </Text>
+                  <Text className="pl-1 text-sm font-semibold  text-sage-500">min</Text>
                 </View>
               </LabeledField>
             )}
@@ -157,14 +150,13 @@ export function BasicsSection({ mode }: BasicsSectionProps) {
             control={control}
             name="servings"
             render={({ field: { onChange, onBlur, value } }) => (
-              <LabeledField
-                label="Serving"
-                icon={Serving}
-                errorMessage={errors.servings?.message}
-              >
+              <LabeledField label="Serving" icon={Serving} errorMessage={errors.servings?.message}>
                 <TextInput
                   value={value}
-                  onChangeText={onChange}
+                  onChangeText={(text) => {
+                    clearErrors("servings");
+                    onChange(text);
+                  }}
                   onBlur={onBlur}
                   placeholder="4"
                   placeholderTextColor="#75948c"

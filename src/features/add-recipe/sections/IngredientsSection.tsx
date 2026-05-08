@@ -1,24 +1,20 @@
 import { Text } from "@/components/ui/text";
 import { IngredientGroupCard } from "@/features/add-recipe/components/ingredient-groups/IngredientGroupCard";
 import { IngredientGroupsCounter } from "@/features/add-recipe/components/ingredient-groups/IngredientGroupsCounter";
-import {
-  MAX_INGREDIENT_GROUPS,
-  MAX_INGREDIENTS,
-} from "@/features/add-recipe/constants";
+import { MAX_INGREDIENT_GROUPS, MAX_INGREDIENTS } from "@/features/add-recipe/constants";
 import { useIngredientGroupsField } from "@/features/add-recipe/hooks/useIngredientGroupsField";
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
-import { useFormContext, useWatch } from "react-hook-form";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useFormContext, useWatch } from "react-hook-form";
 import {
   Keyboard,
   Platform,
   Pressable,
   ScrollView,
+  UIManager,
   View,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
-  UIManager,
-  findNodeHandle,
 } from "react-native";
 
 export interface IngredientsSectionProps {
@@ -51,8 +47,7 @@ export function IngredientsSection({
     const completedGroups = (groups ?? [])
       .map((g) => {
         const completedItems = (g.items ?? []).filter(
-          (row) =>
-            Boolean(row.name?.trim()) && Boolean(row.quantityAmount?.trim())
+          (row) => Boolean(row.name?.trim()) && Boolean(row.quantityAmount?.trim()),
         );
         return { ...g, items: completedItems };
       })
@@ -70,12 +65,8 @@ export function IngredientsSection({
             </Text>
 
             <View className="flex-row border-b border-sage-200 pb-2">
-              <Text className="flex-1 text-xs font-bold uppercase text-sage-500">
-                Ingredient
-              </Text>
-              <Text className="w-24 text-xs font-bold uppercase text-sage-500">
-                Quantity
-              </Text>
+              <Text className="flex-1 text-xs font-bold uppercase text-sage-500">Ingredient</Text>
+              <Text className="w-24 text-xs font-bold uppercase text-sage-500">Quantity</Text>
             </View>
 
             {(g.items ?? []).map((row, i) => (
@@ -85,9 +76,7 @@ export function IngredientsSection({
               >
                 <Text className="flex-1 pr-2 text-base">{row.name || "—"}</Text>
                 <Text className="w-24 text-base">
-                  {row.quantityAmount?.trim()
-                    ? `${row.quantityAmount} ${row.quantityUnit}`
-                    : "—"}
+                  {row.quantityAmount?.trim() ? `${row.quantityAmount} ${row.quantityUnit}` : "—"}
                 </Text>
               </View>
             ))}
@@ -102,8 +91,9 @@ export function IngredientsSection({
       if (Platform.OS !== "android") return;
       if (!focusedNode || !scrollRef.current) return;
 
-      const responder = scrollRef.current.getScrollResponder?.();
-      const scrollNode = responder ? findNodeHandle(responder) : null;
+      // Use the ScrollView ref directly for React 19 compatibility
+      // @ts-ignore - Accessing internal _nativeTag property
+      const scrollNode = scrollRef.current?._nativeTag;
       if (!scrollNode) return;
 
       // Measure focused input relative to the scroll view, then scroll to it.
@@ -116,10 +106,10 @@ export function IngredientsSection({
           const extra = Math.max(0, (kbHeight ?? keyboardHeight ?? 0) - margin);
           const targetY = Math.max(0, y - margin + extra * 0);
           scrollRef.current?.scrollTo({ y: targetY, animated: true });
-        }
+        },
       );
     },
-    [focusedNode, keyboardHeight]
+    [focusedNode, keyboardHeight],
   );
 
   useEffect(() => {
@@ -138,24 +128,22 @@ export function IngredientsSection({
     return () => sub.remove();
   }, [ensureFocusedVisible, keyboardHeight]);
 
-  const onInputFocus = useCallback((node: number | null) => {
-    if (!node) return;
-    setFocusedNode(node);
-    // If keyboard is already open, scroll immediately.
-    setTimeout(() => ensureFocusedVisible(), 0);
-  }, [ensureFocusedVisible]);
+  const onInputFocus = useCallback(
+    (node: number | null) => {
+      if (!node) return;
+      setFocusedNode(node);
+      // If keyboard is already open, scroll immediately.
+      setTimeout(() => ensureFocusedVisible(), 0);
+    },
+    [ensureFocusedVisible],
+  );
 
   return (
     <View className="flex-1">
-      <IngredientGroupsCounter
-        totalIngredients={totalIngredients}
-        groupCount={groupCount}
-      />
+      <IngredientGroupsCounter totalIngredients={totalIngredients} groupCount={groupCount} />
       {ingredientGroupsError ? (
         <View className="mb-2 mt-1 w-full rounded-xl border border-danger-300 bg-red-100 px-3 py-2">
-          <Text className="text-[11px] font-medium text-danger-500">
-            {ingredientGroupsError}
-          </Text>
+          <Text className="text-[11px] font-medium text-danger-500">{ingredientGroupsError}</Text>
         </View>
       ) : null}
 

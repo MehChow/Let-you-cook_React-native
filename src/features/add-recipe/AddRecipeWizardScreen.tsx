@@ -8,20 +8,14 @@ import {
   WIZARD_STEP_PRETITLE_KEYS,
   WIZARD_STEP_TITLES,
 } from "@/features/add-recipe/constants";
-import {
-  addRecipeFormSchema,
-  type AddRecipeFormValues,
-} from "@/features/add-recipe/schema";
+import { addRecipeFormSchema, type AddRecipeFormValues } from "@/features/add-recipe/schema";
 import { BasicsSection } from "@/features/add-recipe/sections/BasicsSection";
 import { CaloriesSection } from "@/features/add-recipe/sections/CaloriesSection";
 import { CookingStepsSection } from "@/features/add-recipe/sections/CookingStepsSection";
 import { ImagesSection } from "@/features/add-recipe/sections/ImagesSection";
 import { IngredientsSection } from "@/features/add-recipe/sections/IngredientsSection";
 import { ReminderSection } from "@/features/add-recipe/sections/ReminderSection";
-import {
-  applyZodIssuesToForm,
-  validateWizardStep,
-} from "@/features/add-recipe/validateStep";
+import { applyZodIssuesToForm, validateWizardStep } from "@/features/add-recipe/validateStep";
 import { PreviewHintBanner } from "@/features/add-recipe/wizard/PreviewHintBanner";
 import { SectionPreviewCard } from "@/features/add-recipe/wizard/SectionPreviewCard";
 import { WizardFooterActions } from "@/features/add-recipe/wizard/WizardFooterActions";
@@ -165,14 +159,28 @@ export function AddRecipeWizardScreen() {
     if (step === 2) {
       const valuesBefore = getValues();
       const groups = valuesBefore.ingredientGroups ?? [];
-      const keep = groups.filter((g) =>
+      const cleanedGroups = groups.map((g) => {
+        const items = g.items ?? [];
+        // Filter out empty rows (where both name and quantityAmount are empty)
+        const filteredItems = items.filter(
+          (row) => Boolean(row.name?.trim()) || Boolean(row.quantityAmount?.trim()),
+        );
+        return {
+          ...g,
+          items:
+            filteredItems.length > 0
+              ? filteredItems
+              : [{ name: "", quantityAmount: "", quantityUnit: "g" as const }],
+        };
+      });
+      // Keep groups that have at least one complete ingredient
+      const keep = cleanedGroups.filter((g) =>
         (g.items ?? []).some(
-          (row) =>
-            Boolean(row.name?.trim()) && Boolean(row.quantityAmount?.trim())
-        )
+          (row) => Boolean(row.name?.trim()) && Boolean(row.quantityAmount?.trim()),
+        ),
       );
       // Keep at least one group so the user always has somewhere to type.
-      setValue("ingredientGroups", keep.length > 0 ? keep : groups, {
+      setValue("ingredientGroups", keep.length > 0 ? keep : cleanedGroups, {
         shouldDirty: true,
       });
     }
@@ -201,7 +209,7 @@ export function AddRecipeWizardScreen() {
       Alert.alert(
         "Recipe saved (demo)",
         `Saved “${parsed.data.recipeName}” locally in this build — API wiring comes later.`,
-        [{ text: "OK", onPress: () => router.back() }]
+        [{ text: "OK", onPress: () => router.back() }],
       );
       return;
     }
@@ -210,7 +218,7 @@ export function AddRecipeWizardScreen() {
       `Saved “${
         values.recipeName || "Untitled recipe"
       }” locally in this build — API wiring comes later.`,
-      [{ text: "OK", onPress: () => router.back() }]
+      [{ text: "OK", onPress: () => router.back() }],
     );
   }, [clearErrors, getValues, setError]);
 
@@ -243,31 +251,26 @@ export function AddRecipeWizardScreen() {
     step === 2
       ? `${(ingredientGroups ?? []).reduce(
           (sum, g) => sum + (g.items?.length ?? 0),
-          0
+          0,
         )} / ${MAX_INGREDIENTS}`
       : step === 3
-      ? `${cookingSteps?.length ?? 0} / ${MAX_COOKING_STEPS}`
-      : undefined;
+        ? `${cookingSteps?.length ?? 0} / ${MAX_COOKING_STEPS}`
+        : undefined;
 
   const primaryLabel = isPreview
     ? step < TOTAL_WIZARD_STEPS - 1
       ? "Continue"
       : "Save recipe"
     : step < TOTAL_WIZARD_STEPS - 1
-    ? "Continue"
-    : "Save recipe";
+      ? "Continue"
+      : "Save recipe";
 
   const contentBottomPadding =
-    keyboardHeight > 0
-      ? keyboardHeight + footerHeight + 24
-      : Math.max(footerHeight, 0) + 24;
+    keyboardHeight > 0 ? keyboardHeight + footerHeight + 24 : Math.max(footerHeight, 0) + 24;
 
   return (
     <FormProvider {...methods}>
-      <SafeAreaView
-        style={{ flex: 1, backgroundColor: "#dce4e2" }}
-        edges={["top"]}
-      >
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#dce4e2" }} edges={["top"]}>
         <View style={{ flex: 1 }}>
           <WizardTopBar
             title={isPreview ? "Preview" : "Create Recipe"}
@@ -308,9 +311,7 @@ export function AddRecipeWizardScreen() {
           ) : step === 1 ? (
             <View className="flex-1 px-4">
               <WizardStepHeader
-                preTitle={`STEP ${step + 1} — ${
-                  WIZARD_STEP_PRETITLE_KEYS[step]
-                }`}
+                preTitle={`STEP ${step + 1} — ${WIZARD_STEP_PRETITLE_KEYS[step]}`}
                 title={WIZARD_STEP_TITLES[step]}
                 description={WIZARD_STEP_DESCRIPTIONS[step]}
                 counterLabel={counterLabel}
@@ -320,9 +321,7 @@ export function AddRecipeWizardScreen() {
           ) : step === 2 ? (
             <View className="flex-1 px-4">
               <WizardStepHeader
-                preTitle={`STEP ${step + 1} — ${
-                  WIZARD_STEP_PRETITLE_KEYS[step]
-                }`}
+                preTitle={`STEP ${step + 1} — ${WIZARD_STEP_PRETITLE_KEYS[step]}`}
                 title={WIZARD_STEP_TITLES[step]}
                 description={WIZARD_STEP_DESCRIPTIONS[step]}
                 counterLabel={undefined}
@@ -336,9 +335,7 @@ export function AddRecipeWizardScreen() {
           ) : step === 3 ? (
             <View className="flex-1 px-4">
               <WizardStepHeader
-                preTitle={`STEP ${step + 1} — ${
-                  WIZARD_STEP_PRETITLE_KEYS[step]
-                }`}
+                preTitle={`STEP ${step + 1} — ${WIZARD_STEP_PRETITLE_KEYS[step]}`}
                 title={WIZARD_STEP_TITLES[step]}
                 description={WIZARD_STEP_DESCRIPTIONS[step]}
                 counterLabel={counterLabel}
@@ -358,9 +355,7 @@ export function AddRecipeWizardScreen() {
               }}
             >
               <WizardStepHeader
-                preTitle={`STEP ${step + 1} — ${
-                  WIZARD_STEP_PRETITLE_KEYS[step]
-                }`}
+                preTitle={`STEP ${step + 1} — ${WIZARD_STEP_PRETITLE_KEYS[step]}`}
                 title={WIZARD_STEP_TITLES[step]}
                 description={WIZARD_STEP_DESCRIPTIONS[step]}
                 counterLabel={counterLabel}
