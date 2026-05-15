@@ -12,6 +12,7 @@ import {
   addRecipeFormSchema,
   type AddRecipeFormValues,
 } from "@/features/add-recipe/schema";
+import { sanitizeIngredientGroups } from "@/features/add-recipe/utils/ingredientGroups";
 import { BasicsSection } from "@/features/add-recipe/sections/BasicsSection";
 import { CaloriesSection } from "@/features/add-recipe/sections/CaloriesSection";
 import { CookingStepsSection } from "@/features/add-recipe/sections/CookingStepsSection";
@@ -20,6 +21,7 @@ import { IngredientsSection } from "@/features/add-recipe/sections/IngredientsSe
 import { ReminderSection } from "@/features/add-recipe/sections/ReminderSection";
 import {
   applyZodIssuesToForm,
+  getUniqueZodIssueMessages,
   validateWizardStep,
 } from "@/features/add-recipe/validateStep";
 import { PreviewHintBanner } from "@/features/add-recipe/wizard/PreviewHintBanner";
@@ -33,6 +35,7 @@ import { useCallback, useEffect, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { Alert, BackHandler, Keyboard, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { toast } from "sonner-native";
 
 const defaultValues: AddRecipeFormValues = {
   recipeName: "",
@@ -139,50 +142,45 @@ export function AddRecipeWizardScreen() {
     };
   }, []);
 
+  const showIngredientValidationToast = useCallback((messages: string[]) => {
+    if (messages.length === 0) return;
+
+    toast.error("Please fix your ingredients", {
+      description: messages.join("\n"),
+    });
+  }, []);
+
   const goNext = useCallback(() => {
     clearErrors();
-    if (step === 2) {
-      const valuesBefore = getValues();
-      const groups = valuesBefore.ingredientGroups ?? [];
-      const cleanedGroups = groups.map((g) => {
-        const items = g.items ?? [];
-        // Filter out empty rows (where both name and quantityAmount are empty)
-        const filteredItems = items.filter(
-          (row) =>
-            Boolean(row.name?.trim()) || Boolean(row.quantityAmount?.trim())
-        );
-        return {
-          ...g,
-          items:
-            filteredItems.length > 0
-              ? filteredItems
-              : [{ name: "", quantityAmount: "", quantityUnit: "g" as const }],
-        };
-      });
-      // Keep groups that have at least one complete ingredient
-      const keep = cleanedGroups.filter((g) =>
-        (g.items ?? []).some(
-          (row) =>
-            Boolean(row.name?.trim()) && Boolean(row.quantityAmount?.trim())
-        )
-      );
-      // Keep at least one group so the user always has somewhere to type.
-      setValue("ingredientGroups", keep.length > 0 ? keep : cleanedGroups, {
-        shouldDirty: true,
-      });
-    }
-
     const values = getValues();
     const result = validateWizardStep(step, values);
     if (!result.ok) {
       applyZodIssuesToForm(result.error, setError);
+      if (step === 2) {
+        showIngredientValidationToast(
+          getUniqueZodIssueMessages(result.error),
+        );
+      }
 
       return;
     }
+
+    if (step === 2) {
+      setValue(
+        "ingredientGroups",
+        sanitizeIngredientGroups(values.ingredientGroups),
+        {
+          shouldDirty: true,
+          shouldTouch: false,
+          shouldValidate: false,
+        },
+      );
+    }
+
     if (step < TOTAL_WIZARD_STEPS - 1) {
       setStep((s) => s + 1);
     }
-  }, [clearErrors, getValues, setError, setValue, step]);
+  }, [clearErrors, getValues, setError, setValue, showIngredientValidationToast, step]);
 
   const finishRecipe = useCallback(() => {
     clearErrors();
@@ -191,11 +189,25 @@ export function AddRecipeWizardScreen() {
       const parsed = addRecipeFormSchema.safeParse(values);
       if (!parsed.success) {
         applyZodIssuesToForm(parsed.error, setError);
+        const ingredientMessages = Array.from(
+          new Set(
+            parsed.error.issues
+              .filter((issue) => issue.path[0] === "ingredientGroups")
+              .map((issue) => issue.message),
+          ),
+        );
+        if (ingredientMessages.length > 0) {
+          showIngredientValidationToast(ingredientMessages);
+        }
         return;
       }
+      const cleanedValues = {
+        ...parsed.data,
+        ingredientGroups: sanitizeIngredientGroups(parsed.data.ingredientGroups),
+      };
       Alert.alert(
         "Recipe saved (demo)",
-        `Saved “${parsed.data.recipeName}” locally in this build — API wiring comes later.`,
+        `Saved “${cleanedValues.recipeName}” locally in this build — API wiring comes later.`,
         [{ text: "OK", onPress: () => router.back() }]
       );
       return;
@@ -207,7 +219,7 @@ export function AddRecipeWizardScreen() {
       }” locally in this build — API wiring comes later.`,
       [{ text: "OK", onPress: () => router.back() }]
     );
-  }, [clearErrors, getValues, setError]);
+  }, [clearErrors, getValues, setError, showIngredientValidationToast]);
 
   const onPrimaryFooter = useCallback(() => {
     if (isPreview) {

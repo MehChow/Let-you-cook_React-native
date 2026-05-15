@@ -9,7 +9,12 @@ import {
 } from "@/components/ui/select";
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
 import { useRef } from "react";
-import { Controller, useFormContext, type Control } from "react-hook-form";
+import {
+  Controller,
+  useFormContext,
+  type Control,
+  type FieldPath,
+} from "react-hook-form";
 import { Pressable, TextInput, View } from "react-native";
 
 const UNIT_OPTIONS = ["ml", "g", "cup"] as const;
@@ -34,8 +39,8 @@ export const IngredientRow = ({
   onAnyInputFocus?: (input: TextInput | null) => void;
 }) => {
   const { trigger } = useFormContext<AddRecipeFormValues>();
-  const quantityFieldPath = `ingredientGroups.${groupIndex}.items.${itemIndex}.quantityAmount`;
-  const nameFieldPath = `ingredientGroups.${groupIndex}.items.${itemIndex}.name`;
+  const quantityFieldPath = `ingredientGroups.${groupIndex}.items.${itemIndex}.quantityAmount` as FieldPath<AddRecipeFormValues>;
+  const nameFieldPath = `ingredientGroups.${groupIndex}.items.${itemIndex}.name` as FieldPath<AddRecipeFormValues>;
   const nameInputRef = useRef<TextInput | null>(null);
   const quantityInputRef = useRef<TextInput | null>(null);
 
@@ -52,7 +57,7 @@ export const IngredientRow = ({
               value={f.value}
               onChangeText={(t) => {
                 f.onChange(t.slice(0, 50));
-                trigger(nameFieldPath as any);
+                void trigger([nameFieldPath, quantityFieldPath]);
               }}
               onBlur={f.onBlur}
               onFocus={() => onAnyInputFocus?.(nameInputRef.current)}
@@ -81,11 +86,11 @@ export const IngredientRow = ({
             >
               <TextInput
                 ref={quantityInputRef}
-                value={f.value}
-                onChangeText={(t) => {
-                  f.onChange(t.replace(/\s+/g, ""));
-                  trigger(quantityFieldPath as any);
-                }}
+              value={f.value}
+              onChangeText={(t) => {
+                f.onChange(t.replace(/\s+/g, ""));
+                void trigger([nameFieldPath, quantityFieldPath]);
+              }}
                 onBlur={f.onBlur}
                 onFocus={() => onAnyInputFocus?.(quantityInputRef.current)}
                 underlineColorAndroid="transparent"

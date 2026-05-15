@@ -3,6 +3,7 @@ import {
   MAX_INGREDIENTS,
 } from "@/features/add-recipe/constants";
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
+import { createEmptyIngredientGroup } from "@/features/add-recipe/utils/ingredientGroups";
 import { useCallback, useEffect, useMemo } from "react";
 import {
   useFieldArray,
@@ -10,46 +11,6 @@ import {
   useFormState,
   useWatch,
 } from "react-hook-form";
-import { toast } from "sonner-native";
-
-export const DEFAULT_INGREDIENT_GROUP = {
-  groupName: "Group name",
-  items: [{ name: "", quantityAmount: "", quantityUnit: "g" }],
-} satisfies AddRecipeFormValues["ingredientGroups"][number];
-
-const getQuantityAmountErrorMessage = (
-  errorNode: unknown
-): string | undefined => {
-  if (!errorNode || typeof errorNode !== "object") return undefined;
-
-  const node = errorNode as Record<string, unknown>;
-  const quantityAmount = node.quantityAmount;
-
-  if (quantityAmount && typeof quantityAmount === "object") {
-    const message = (quantityAmount as { message?: unknown }).message;
-    if (typeof message === "string") return message;
-  }
-
-  for (const value of Object.values(node)) {
-    const nestedMessage = getQuantityAmountErrorMessage(value);
-    if (nestedMessage) return nestedMessage;
-  }
-
-  return undefined;
-};
-
-const hasNestedIngredientFieldErrors = (errorNode: unknown): boolean => {
-  if (!errorNode || typeof errorNode !== "object") return false;
-
-  const node = errorNode as Record<string, unknown>;
-  return Object.entries(node).some(([key, value]) => {
-    if (key === "message" || key === "type" || key === "ref") {
-      return false;
-    }
-
-    return Boolean(value && typeof value === "object");
-  });
-};
 
 export const useIngredientGroupsField = () => {
   const { control, clearErrors } = useFormContext<AddRecipeFormValues>();
@@ -101,8 +62,7 @@ export const useIngredientGroupsField = () => {
 
   const onAddGroup = useCallback(() => {
     if (!canAddGroup) return;
-    appendGroup(DEFAULT_INGREDIENT_GROUP, { shouldFocus: false });
-    toast("Hello, World!");
+    appendGroup(createEmptyIngredientGroup(), { shouldFocus: false });
   }, [appendGroup, canAddGroup]);
 
   const onRemoveGroup = useCallback(
@@ -113,14 +73,6 @@ export const useIngredientGroupsField = () => {
     [groupCount, removeGroup]
   );
 
-  const ingredientGroupsError = useMemo(
-    () =>
-      getQuantityAmountErrorMessage(errors.ingredientGroups) ??
-      (errors.ingredientGroups?.message as string | undefined) ??
-      undefined,
-    [errors.ingredientGroups]
-  );
-
   return {
     groupFields,
     groupCount,
@@ -129,6 +81,18 @@ export const useIngredientGroupsField = () => {
     canAddIngredient,
     onAddGroup,
     onRemoveGroup,
-    ingredientGroupsError,
   };
+};
+
+const hasNestedIngredientFieldErrors = (errorNode: unknown): boolean => {
+  if (!errorNode || typeof errorNode !== "object") return false;
+
+  const node = errorNode as Record<string, unknown>;
+  return Object.entries(node).some(([key, value]) => {
+    if (key === "message" || key === "type" || key === "ref") {
+      return false;
+    }
+
+    return Boolean(value && typeof value === "object");
+  });
 };

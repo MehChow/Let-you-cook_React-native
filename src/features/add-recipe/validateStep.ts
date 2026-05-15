@@ -26,3 +26,15 @@ export function applyZodIssuesToForm(
     }
   }
 }
+
+export function getUniqueZodIssueMessages(error: z.ZodError): string[] {
+  const messages: string[] = [];
+
+  for (const issue of error.issues) {
+    if (!messages.includes(issue.message)) {
+      messages.push(issue.message);
+    }
+  }
+
+  return messages;
+}

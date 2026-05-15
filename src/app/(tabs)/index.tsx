@@ -17,13 +17,9 @@ import {
 import { useFavourites } from "@/hooks/useFavourites";
 import { useRouter } from "expo-router";
 import * as React from "react";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function HomeScreen() {
-  const insets = useSafeAreaInsets();
   const router = useRouter();
   const selectedCategoryId = useCategoryStore((s) => s.selectedCategoryId);
   const setSelectedCategoryId = useCategoryStore(

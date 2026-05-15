@@ -48,44 +48,7 @@ export function IngredientsSection({
     canAddIngredient,
     onAddGroup,
     onRemoveGroup,
-    ingredientGroupsError,
   } = useIngredientGroupsField();
-
-  if (mode === "preview") {
-    const completedGroups = prepareIngredientGroupsForPreview(groups);
-
-    return (
-      <View className="gap-3">
-        {completedGroups.map((g, gi) => (
-          <View
-            key={`group-preview-${gi}-${g.groupName?.slice(0, 12) ?? ""}`}
-            className="rounded-2xl border border-sage-100 bg-sage-50/50 p-3"
-          >
-            <Text className="mb-2 text-sm font-bold text-sage-700">
-              {g.groupName?.trim() ? g.groupName : "—"}
-            </Text>
-
-            <View className="flex-row border-b border-sage-200 pb-2">
-              <Text className="flex-1 text-xs font-bold uppercase text-sage-500">Ingredient</Text>
-              <Text className="w-24 text-xs font-bold uppercase text-sage-500">Quantity</Text>
-            </View>
-
-            {(g.items ?? []).map((row, i) => (
-              <View
-                key={`group-${gi}-row-${i}-${row.name}-${row.quantityAmount}-${row.quantityUnit}`}
-                className="flex-row border-b border-sage-100 py-2"
-              >
-                <Text className="flex-1 pr-2 text-base">{row.name || "—"}</Text>
-                <Text className="w-24 text-base">
-                  {row.quantityAmount?.trim() ? `${row.quantityAmount} ${row.quantityUnit}` : "—"}
-                </Text>
-              </View>
-            ))}
-          </View>
-        ))}
-      </View>
-    );
-  }
 
   const ensureFocusedVisible = useCallback(
     (kbHeight?: number) => {
@@ -137,14 +100,50 @@ export function IngredientsSection({
     [ensureFocusedVisible],
   );
 
+  if (mode === "preview") {
+    const completedGroups = prepareIngredientGroupsForPreview(groups);
+
+    return (
+      <View className="gap-3">
+        {completedGroups.map((g, gi) => (
+          <View
+            key={`group-preview-${gi}-${g.groupName?.slice(0, 12) ?? ""}`}
+            className="rounded-2xl border border-sage-100 bg-sage-50/50 p-3"
+          >
+            <Text className="mb-2 text-sm font-bold text-sage-700">
+              {g.groupName?.trim() ? g.groupName : "—"}
+            </Text>
+
+            <View className="flex-row border-b border-sage-200 pb-2">
+              <Text className="flex-1 text-xs font-bold uppercase text-sage-500">Ingredient</Text>
+              <Text className="w-24 text-xs font-bold uppercase text-sage-500">Quantity</Text>
+            </View>
+
+            {(g.items ?? []).map((row, i) => (
+              <View
+                key={`group-${gi}-row-${i}-${row.name}-${row.quantityAmount}-${row.quantityUnit}`}
+                className="flex-row border-b border-sage-100 py-2"
+              >
+                <Text className="flex-1 pr-2 text-base">{row.name || "—"}</Text>
+                <Text className="w-24 text-base">
+                  {row.quantityAmount?.trim()
+                    ? `${row.quantityAmount} ${row.quantityUnit}`
+                    : "—"}
+                </Text>
+              </View>
+            ))}
+          </View>
+        ))}
+      </View>
+    );
+  }
+
   return (
     <View className="flex-1">
-      <IngredientGroupsCounter totalIngredients={totalIngredients} groupCount={groupCount} />
-      {ingredientGroupsError ? (
-        <View className="mb-2 mt-1 w-full rounded-xl border border-danger-300 bg-red-100 px-3 py-2">
-          <Text className="text-[11px] font-medium text-danger-500">{ingredientGroupsError}</Text>
-        </View>
-      ) : null}
+      <IngredientGroupsCounter
+        totalIngredients={totalIngredients}
+        groupCount={groupCount}
+      />
 
       <ScrollView
         ref={scrollRef}
@@ -175,7 +174,7 @@ export function IngredientsSection({
         <Pressable
           onPress={onAddGroup}
           disabled={!canAddGroup}
-          className="self-stretch rounded-2xl border border-dashed border-sage-400 px-4 py-4 items-center justify-center active:bg-sage-50 disabled:opacity-40"
+          className="self-stretch items-center justify-center rounded-2xl border border-dashed border-sage-400 px-4 py-4 active:bg-sage-50 disabled:opacity-40"
         >
           <Text className="text-sm font-semibold text-sage-700">
             + Add group{" "}

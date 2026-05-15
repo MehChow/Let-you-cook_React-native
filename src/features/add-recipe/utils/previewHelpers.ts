@@ -1,4 +1,5 @@
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
+import { sanitizeIngredientGroups } from "@/features/add-recipe/utils/ingredientGroups";
 
 /**
  * Filter cooking steps for preview, excluding empty ones.
@@ -16,13 +17,5 @@ export const prepareCookingStepsForPreview = (
 export const prepareIngredientGroupsForPreview = (
   groups: AddRecipeFormValues["ingredientGroups"]
 ): AddRecipeFormValues["ingredientGroups"] => {
-  return (groups ?? [])
-    .map((g) => {
-      const completedItems = (g.items ?? []).filter(
-        (row) =>
-          Boolean(row.name?.trim()) && Boolean(row.quantityAmount?.trim())
-      );
-      return { ...g, items: completedItems };
-    })
-    .filter((g) => (g.items ?? []).length > 0);
+  return sanitizeIngredientGroups(groups);
 };

@@ -79,9 +79,9 @@ export default function RootLayout() {
             }}
           />
         </Stack>
+        <Toaster />
         <PortalHost />
       </ThemeProvider>
-      <Toaster />
     </GestureHandlerRootView>
   );
 }

@@ -41,14 +41,14 @@ export function CookingStepsSection({
     [fields.length, remove]
   );
 
-  if (mode === "preview") {
-    return <CookingStepsPreview steps={previewSteps} />;
-  }
-
   const keyExtractor = useCallback(
     (item: any, index: number) => `${item.id}-${index}`,
     []
   );
+
+  if (mode === "preview") {
+    return <CookingStepsPreview steps={previewSteps} />;
+  }
 
   return (
     <NestableScrollContainer

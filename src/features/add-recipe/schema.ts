@@ -56,9 +56,8 @@ export const ingredientGroupSchema = z.object({
   groupName: z
     .string()
     .trim()
-    .min(1, "Group name required")
     .max(50, "Group name must be 50 characters or fewer"),
-  items: z.array(ingredientRowSchema).min(1, "Add at least one ingredient"),
+  items: z.array(ingredientRowSchema),
 });
 
 export const cookingStepSchema = z.object({
@@ -111,7 +110,7 @@ export const ingredientsStepSchema = z
     ingredientGroups: z
       .array(ingredientGroupSchema)
       .min(1, "Add at least one group")
-      .max(MAX_INGREDIENT_GROUPS),
+      .max(MAX_INGREDIENT_GROUPS, `You can add up to ${MAX_INGREDIENT_GROUPS} groups`),
   })
   .superRefine((val, ctx) => {
     const groups = val.ingredientGroups ?? [];
@@ -166,7 +165,7 @@ export const ingredientsStepSchema = z
       ctx.addIssue({
         code: "custom",
         path: ["ingredientGroups"],
-        message: "Fill in at least one ingredient (name and amount).",
+        message: "Fill in at least one ingredient.",
       });
     }
   });
