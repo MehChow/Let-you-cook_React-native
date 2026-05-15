@@ -1,7 +1,5 @@
 import { isZodValidationEnabled } from "@/config/validation";
 import {
-  MAX_COOKING_STEPS,
-  MAX_INGREDIENTS,
   SECTION_PREVIEW_TITLES,
   TOTAL_WIZARD_STEPS,
   WIZARD_STEP_DESCRIPTIONS,
@@ -32,7 +30,7 @@ import { WizardStepIndicator } from "@/features/add-recipe/wizard/WizardStepIndi
 import { WizardTopBar } from "@/features/add-recipe/wizard/WizardTopBar";
 import { router } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { FormProvider, useForm, useWatch } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { Alert, BackHandler, Keyboard, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { toast } from "sonner-native";
@@ -84,15 +82,6 @@ export function AddRecipeWizardScreen() {
   });
 
   const { getValues, setError, clearErrors, formState, setValue } = methods;
-
-  const ingredientGroups = useWatch({
-    control: methods.control,
-    name: "ingredientGroups",
-  });
-  const cookingSteps = useWatch({
-    control: methods.control,
-    name: "cookingSteps",
-  });
 
   const attemptExit = useCallback(() => {
     if (isPreview) {
@@ -246,16 +235,6 @@ export function AddRecipeWizardScreen() {
     if (step > 0) setStep((s) => s - 1);
   }, [isPreview, step]);
 
-  const counterLabel =
-    step === 2
-      ? `${(ingredientGroups ?? []).reduce(
-          (sum, g) => sum + (g.items?.length ?? 0),
-          0
-        )} / ${MAX_INGREDIENTS}`
-      : step === 3
-      ? `${cookingSteps?.length ?? 0} / ${MAX_COOKING_STEPS}`
-      : undefined;
-
   const primaryLabel = isPreview
     ? step < TOTAL_WIZARD_STEPS - 1
       ? "Continue"
@@ -323,7 +302,6 @@ export function AddRecipeWizardScreen() {
                 }`}
                 title={WIZARD_STEP_TITLES[step]}
                 description={WIZARD_STEP_DESCRIPTIONS[step]}
-                counterLabel={counterLabel}
               />
               {(() => {
                 const Component = WIZARD_SECTION_COMPONENTS[step];
@@ -331,7 +309,6 @@ export function AddRecipeWizardScreen() {
                   <Component
                     mode="edit"
                     bottomContentPadding={contentBottomPadding}
-                    keyboardHeight={keyboardHeight}
                   />
                 );
               })()}
@@ -350,7 +327,6 @@ export function AddRecipeWizardScreen() {
                 }`}
                 title={WIZARD_STEP_TITLES[step]}
                 description={WIZARD_STEP_DESCRIPTIONS[step]}
-                counterLabel={counterLabel}
               />
               {(() => {
                 const Component = WIZARD_SECTION_COMPONENTS[step];

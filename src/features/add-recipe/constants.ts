@@ -38,7 +38,7 @@ export const WIZARD_STEP_TITLES = [
   "Show us your dish",
   "What goes in the dish?",
   "Walk us through it",
-  "Reminder",
+  "Any extra nodes?",
   "Nutritional information",
 ] as const;
 
@@ -46,8 +46,8 @@ export const WIZARD_STEP_DESCRIPTIONS: (string | undefined)[] = [
   undefined,
   "The first image is your thumbnail. Drag to reorder.",
   "Organize your ingredients into groups for better readability.",
-  undefined,
-  undefined,
+  "Drag to reorder steps. Add images for visual guidance.",
+  "Tips, substitutions, or anything else worth noting.",
   undefined,
 ];
 
