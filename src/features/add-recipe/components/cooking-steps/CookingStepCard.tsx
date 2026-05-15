@@ -9,12 +9,13 @@ import { useImagePicker } from "@/features/add-recipe/hooks/useImagePicker";
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import { useCallback } from "react";
+import { memo, useCallback } from "react";
 import { Controller, useFormContext, type Control } from "react-hook-form";
 import { Pressable, View } from "react-native";
 
 export interface CookingStepCardProps {
   index: number;
+  displayIndex?: number;
   isActive: boolean;
   onDrag: () => void;
   onRemove: () => void;
@@ -24,6 +25,7 @@ export interface CookingStepCardProps {
 
 export function CookingStepCard({
   index,
+  displayIndex,
   isActive,
   onDrag,
   onRemove,
@@ -65,7 +67,9 @@ export function CookingStepCard({
               Step
             </Text>
             <Badge className="flex h-6 w-6 bg-sage-700 px-0" variant="default">
-              <Text className="text-sm font-bold text-white">{index + 1}</Text>
+              <Text className="text-sm font-bold text-white">
+                {(displayIndex ?? index) + 1}
+              </Text>
             </Badge>
           </View>
         </Pressable>
@@ -88,6 +92,7 @@ export function CookingStepCard({
         maxLength={MAX_STEP_INSTRUCTION_LENGTH}
         inputClassName="min-h-20 pb-7"
         onInputFocus={onAnyInputFocus}
+        highlightCounterAtLimit
       />
 
       <ControllerImageField
@@ -99,6 +104,8 @@ export function CookingStepCard({
     </Card>
   );
 }
+
+export const MemoizedCookingStepCard = memo(CookingStepCard);
 
 function ControllerImageField({
   control,

@@ -7,7 +7,7 @@ export const MAX_RECIPE_NAME_LENGTH = 120;
 
 export const MAX_INGREDIENTS = 30;
 export const MAX_INGREDIENT_GROUPS = 5;
-export const MAX_COOKING_STEPS = 15;
+export const MAX_COOKING_STEPS = 20;
 export const MAX_RECIPE_IMAGES = 9;
 
 export const MIN_SERVING = 1;

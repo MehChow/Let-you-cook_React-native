@@ -18,7 +18,7 @@ export function useCookingStepsField() {
   });
 
   const canAddStep = fields.length < MAX_COOKING_STEPS;
-  const canRemoveStep = fields.length > 1;
+  const canRemoveStep = useCallback((index: number) => index > 0, []);
 
   const handleAddStep = useCallback(() => {
     if (!canAddStep) return;
@@ -27,7 +27,7 @@ export function useCookingStepsField() {
 
   const handleRemoveStep = useCallback(
     (index: number) => {
-      if (!canRemoveStep) return;
+      if (!canRemoveStep(index)) return;
       remove(index);
     },
     [canRemoveStep, remove],
@@ -41,8 +41,8 @@ export function useCookingStepsField() {
   );
 
   const keyExtractor = useCallback(
-    (item: FieldArrayWithId<AddRecipeFormValues, "cookingSteps", "id">, index: number) => {
-      return `${item.id}-${index}`;
+    (item: FieldArrayWithId<AddRecipeFormValues, "cookingSteps", "id">) => {
+      return item.id;
     },
     [],
   );

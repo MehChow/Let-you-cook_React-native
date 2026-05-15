@@ -139,6 +139,14 @@ export function AddRecipeWizardScreen() {
     });
   }, []);
 
+  const showCookingStepsValidationToast = useCallback((messages: string[]) => {
+    if (messages.length === 0) return;
+
+    toast.error("Please fix your cooking steps", {
+      description: messages.join("\n"),
+    });
+  }, []);
+
   const goNext = useCallback(() => {
     clearErrors();
     const values = getValues();
@@ -147,6 +155,11 @@ export function AddRecipeWizardScreen() {
       applyZodIssuesToForm(result.error, setError);
       if (step === 2) {
         showIngredientValidationToast(
+          getUniqueZodIssueMessages(result.error),
+        );
+      }
+      if (step === 3) {
+        showCookingStepsValidationToast(
           getUniqueZodIssueMessages(result.error),
         );
       }
@@ -169,7 +182,15 @@ export function AddRecipeWizardScreen() {
     if (step < TOTAL_WIZARD_STEPS - 1) {
       setStep((s) => s + 1);
     }
-  }, [clearErrors, getValues, setError, setValue, showIngredientValidationToast, step]);
+  }, [
+    clearErrors,
+    getValues,
+    setError,
+    setValue,
+    showCookingStepsValidationToast,
+    showIngredientValidationToast,
+    step,
+  ]);
 
   const finishRecipe = useCallback(() => {
     clearErrors();
@@ -187,6 +208,16 @@ export function AddRecipeWizardScreen() {
         );
         if (ingredientMessages.length > 0) {
           showIngredientValidationToast(ingredientMessages);
+        }
+        const cookingStepMessages = Array.from(
+          new Set(
+            parsed.error.issues
+              .filter((issue) => issue.path[0] === "cookingSteps")
+              .map((issue) => issue.message),
+          ),
+        );
+        if (cookingStepMessages.length > 0) {
+          showCookingStepsValidationToast(cookingStepMessages);
         }
         return;
       }
@@ -208,7 +239,13 @@ export function AddRecipeWizardScreen() {
       }” locally in this build — API wiring comes later.`,
       [{ text: "OK", onPress: () => router.back() }]
     );
-  }, [clearErrors, getValues, setError, showIngredientValidationToast]);
+  }, [
+    clearErrors,
+    getValues,
+    setError,
+    showCookingStepsValidationToast,
+    showIngredientValidationToast,
+  ]);
 
   const onPrimaryFooter = useCallback(() => {
     if (isPreview) {
