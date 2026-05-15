@@ -3,10 +3,12 @@ import { AddRecipeSectionCounter } from "@/features/add-recipe/components/AddRec
 import { CookingStepCard } from "@/features/add-recipe/components/cooking-steps/CookingStepCard";
 import { CookingStepsPreview } from "@/features/add-recipe/components/cooking-steps/CookingStepsPreview";
 import { MAX_COOKING_STEPS } from "@/features/add-recipe/constants";
+import { useKeyboardAwareFieldScroll } from "@/features/add-recipe/hooks/useKeyboardAwareFieldScroll";
 import { useCookingStepsField } from "@/features/add-recipe/hooks/useCookingStepsField";
 import { useCallback } from "react";
-import type { RenderItemParams } from "react-native-draggable-flatlist";
+import type { ScrollView as GestureHandlerScrollView } from "react-native-gesture-handler";
 import { View } from "react-native";
+import type { RenderItemParams } from "react-native-draggable-flatlist";
 import {
   NestableDraggableFlatList,
   NestableScrollContainer,
@@ -31,11 +33,15 @@ export function CookingStepsSection({
     handleMoveStep,
     keyExtractor,
   } = useCookingStepsField();
+  const { scrollRef, onInputFocus } =
+    useKeyboardAwareFieldScroll<GestureHandlerScrollView>();
 
   const renderItem = useCallback(
-    ({ getIndex, drag, isActive }: RenderItemParams<
-      (typeof fields)[number]
-    >) => {
+    ({
+      getIndex,
+      drag,
+      isActive,
+    }: RenderItemParams<(typeof fields)[number]>) => {
       const index = getIndex() ?? 0;
       return (
         <CookingStepCard
@@ -44,10 +50,11 @@ export function CookingStepsSection({
           onDrag={drag}
           onRemove={() => handleRemoveStep(index)}
           canRemove={canRemoveStep}
+          onAnyInputFocus={onInputFocus}
         />
       );
     },
-    [canRemoveStep, handleRemoveStep],
+    [canRemoveStep, handleRemoveStep, onInputFocus]
   );
 
   if (mode === "preview") {
@@ -66,9 +73,11 @@ export function CookingStepsSection({
         ]}
       />
       <NestableScrollContainer
+        ref={scrollRef}
         className="flex-1"
         style={{ flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
         contentContainerStyle={{
           paddingBottom: bottomContentPadding ?? 24,
         }}

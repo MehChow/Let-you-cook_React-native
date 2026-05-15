@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import type { ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import {
   Controller,
   useFormContext,
@@ -21,6 +21,7 @@ export interface AddRecipeCounterTextAreaProps {
   placeholderTextColor?: string;
   counterPrefix?: ReactNode;
   formatText?: (text: string) => string;
+  onInputFocus?: (input: TextInput | null) => void;
 }
 
 export function AddRecipeCounterTextArea({
@@ -34,8 +35,10 @@ export function AddRecipeCounterTextArea({
   placeholderTextColor = "#75948c",
   counterPrefix,
   formatText,
+  onInputFocus,
 }: AddRecipeCounterTextAreaProps) {
   const { clearErrors } = useFormContext<AddRecipeFormValues>();
+  const inputRef = useRef<TextInput | null>(null);
 
   return (
     <Controller
@@ -50,9 +53,11 @@ export function AddRecipeCounterTextArea({
         return (
           <View className={cn("relative", wrapperClassName)}>
             <TextInput
+              ref={inputRef}
               value={value ?? ""}
               onChangeText={handleChangeText}
               onBlur={onBlur}
+              onFocus={() => onInputFocus?.(inputRef.current)}
               placeholder={placeholder}
               placeholderTextColor={placeholderTextColor}
               multiline

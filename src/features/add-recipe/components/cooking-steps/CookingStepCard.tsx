@@ -19,6 +19,7 @@ export interface CookingStepCardProps {
   onDrag: () => void;
   onRemove: () => void;
   canRemove: boolean;
+  onAnyInputFocus?: (input: import("react-native").TextInput | null) => void;
 }
 
 export function CookingStepCard({
@@ -27,6 +28,7 @@ export function CookingStepCard({
   onDrag,
   onRemove,
   canRemove,
+  onAnyInputFocus,
 }: CookingStepCardProps) {
   const { control, setValue } = useFormContext<AddRecipeFormValues>();
   const { pickImage } = useImagePicker();
@@ -85,6 +87,7 @@ export function CookingStepCard({
         placeholder="Mix the flour with butter..."
         maxLength={MAX_STEP_INSTRUCTION_LENGTH}
         inputClassName="min-h-20 pb-7"
+        onInputFocus={onAnyInputFocus}
       />
 
       <ControllerImageField
