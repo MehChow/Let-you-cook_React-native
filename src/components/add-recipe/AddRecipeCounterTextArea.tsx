@@ -22,6 +22,7 @@ export interface AddRecipeCounterTextAreaProps {
   counterPrefix?: ReactNode;
   formatText?: (text: string) => string;
   onInputFocus?: (input: TextInput | null) => void;
+  highlightCounterAtLimit?: boolean;
 }
 
 export function AddRecipeCounterTextArea({
@@ -36,6 +37,7 @@ export function AddRecipeCounterTextArea({
   counterPrefix,
   formatText,
   onInputFocus,
+  highlightCounterAtLimit = false,
 }: AddRecipeCounterTextAreaProps) {
   const { clearErrors } = useFormContext<AddRecipeFormValues>();
   const inputRef = useRef<TextInput | null>(null);
@@ -44,7 +46,10 @@ export function AddRecipeCounterTextArea({
     <Controller
       control={control}
       name={name}
-      render={({ field: { onChange, onBlur, value } }) => {
+      render={({ field: { onChange, onBlur, value }, fieldState }) => {
+        const characterCount = (value ?? "").length;
+        const isAtLimit = highlightCounterAtLimit && characterCount >= maxLength;
+
         const handleChangeText = (text: string) => {
           clearErrors(name);
           onChange(formatText ? formatText(text) : text);
@@ -64,14 +69,21 @@ export function AddRecipeCounterTextArea({
               textAlignVertical="top"
               maxLength={maxLength}
               className={cn(
-                "min-h-28 rounded-xl border border-sage-200 bg-white px-3 pb-7 text-base",
+                "min-h-28 rounded-xl border bg-white px-3 pb-7 text-base",
+                fieldState.invalid ? "border-danger-300 bg-red-50" : "border-sage-200",
                 inputClassName,
               )}
             />
             <View pointerEvents="none" className="absolute bottom-2 right-3">
-              <Text className={cn("text-xs text-sage-500", counterClassName)}>
+              <Text
+                className={cn(
+                  "text-xs",
+                  isAtLimit ? "text-danger-500" : "text-sage-500",
+                  counterClassName,
+                )}
+              >
                 {counterPrefix}
-                {(value ?? "").length} / {maxLength}
+                {characterCount} / {maxLength}
               </Text>
             </View>
           </View>

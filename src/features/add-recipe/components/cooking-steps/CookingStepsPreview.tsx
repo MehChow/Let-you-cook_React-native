@@ -32,7 +32,7 @@ export function CookingStepsPreview({ steps }: CookingStepsPreviewProps) {
               <Image
                 source={{ uri: step.imageUri }}
                 className="mt-2 w-full rounded-xl"
-                style={{ aspectRatio: 4 / 3 }}
+                style={{ aspectRatio: 16 / 9 }}
                 contentFit="cover"
               />
             ) : null}

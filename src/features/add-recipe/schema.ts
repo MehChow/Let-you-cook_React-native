@@ -174,7 +174,7 @@ export const cookingStepsStepSchema = z.object({
   cookingSteps: z
     .array(cookingStepSchema)
     .min(1, "Add at least one step")
-    .max(MAX_COOKING_STEPS),
+    .max(MAX_COOKING_STEPS, `You can add up to ${MAX_COOKING_STEPS} steps`),
 });
 
 export const reminderStepSchema = z.object({
