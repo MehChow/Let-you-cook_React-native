@@ -8,14 +8,20 @@ import {
   WIZARD_STEP_PRETITLE_KEYS,
   WIZARD_STEP_TITLES,
 } from "@/features/add-recipe/constants";
-import { addRecipeFormSchema, type AddRecipeFormValues } from "@/features/add-recipe/schema";
+import {
+  addRecipeFormSchema,
+  type AddRecipeFormValues,
+} from "@/features/add-recipe/schema";
 import { BasicsSection } from "@/features/add-recipe/sections/BasicsSection";
 import { CaloriesSection } from "@/features/add-recipe/sections/CaloriesSection";
 import { CookingStepsSection } from "@/features/add-recipe/sections/CookingStepsSection";
 import { ImagesSection } from "@/features/add-recipe/sections/ImagesSection";
 import { IngredientsSection } from "@/features/add-recipe/sections/IngredientsSection";
 import { ReminderSection } from "@/features/add-recipe/sections/ReminderSection";
-import { applyZodIssuesToForm, validateWizardStep } from "@/features/add-recipe/validateStep";
+import {
+  applyZodIssuesToForm,
+  validateWizardStep,
+} from "@/features/add-recipe/validateStep";
 import { PreviewHintBanner } from "@/features/add-recipe/wizard/PreviewHintBanner";
 import { SectionPreviewCard } from "@/features/add-recipe/wizard/SectionPreviewCard";
 import { WizardFooterActions } from "@/features/add-recipe/wizard/WizardFooterActions";
@@ -23,7 +29,7 @@ import { WizardStepHeader } from "@/features/add-recipe/wizard/WizardStepHeader"
 import { WizardStepIndicator } from "@/features/add-recipe/wizard/WizardStepIndicator";
 import { WizardTopBar } from "@/features/add-recipe/wizard/WizardTopBar";
 import { router } from "expo-router";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { Alert, BackHandler, Keyboard, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -45,43 +51,22 @@ const defaultValues: AddRecipeFormValues = {
   nutritionMode: "ai",
 };
 
-function renderWizardStep(step: number): ReactNode {
-  switch (step) {
-    case 0:
-      return <BasicsSection mode="edit" />;
-    case 1:
-      return <ImagesSection mode="edit" />;
-    case 2:
-      return <IngredientsSection mode="edit" />;
-    case 3:
-      return <CookingStepsSection mode="edit" />;
-    case 4:
-      return <ReminderSection mode="edit" />;
-    case 5:
-      return <CaloriesSection mode="edit" />;
-    default:
-      return null;
-  }
-}
+/**
+ * Map step index to section component and rendering config
+ */
+const WIZARD_SECTION_COMPONENTS = [
+  BasicsSection,
+  ImagesSection,
+  IngredientsSection,
+  CookingStepsSection,
+  ReminderSection,
+  CaloriesSection,
+] as const;
 
-function renderPreviewSection(stepIndex: number): ReactNode {
-  switch (stepIndex) {
-    case 0:
-      return <BasicsSection mode="preview" />;
-    case 1:
-      return <ImagesSection mode="preview" />;
-    case 2:
-      return <IngredientsSection mode="preview" />;
-    case 3:
-      return <CookingStepsSection mode="preview" />;
-    case 4:
-      return <ReminderSection mode="preview" />;
-    case 5:
-      return <CaloriesSection mode="preview" />;
-    default:
-      return null;
-  }
-}
+/**
+ * Sections that need special scroll container (not wrapped in automatic ScrollView)
+ */
+const SECTIONS_WITH_CUSTOM_SCROLL = new Set([2, 3]); // Ingredients, CookingSteps
 
 export function AddRecipeWizardScreen() {
   const [step, setStep] = useState(0);
@@ -163,7 +148,8 @@ export function AddRecipeWizardScreen() {
         const items = g.items ?? [];
         // Filter out empty rows (where both name and quantityAmount are empty)
         const filteredItems = items.filter(
-          (row) => Boolean(row.name?.trim()) || Boolean(row.quantityAmount?.trim()),
+          (row) =>
+            Boolean(row.name?.trim()) || Boolean(row.quantityAmount?.trim())
         );
         return {
           ...g,
@@ -176,8 +162,9 @@ export function AddRecipeWizardScreen() {
       // Keep groups that have at least one complete ingredient
       const keep = cleanedGroups.filter((g) =>
         (g.items ?? []).some(
-          (row) => Boolean(row.name?.trim()) && Boolean(row.quantityAmount?.trim()),
-        ),
+          (row) =>
+            Boolean(row.name?.trim()) && Boolean(row.quantityAmount?.trim())
+        )
       );
       // Keep at least one group so the user always has somewhere to type.
       setValue("ingredientGroups", keep.length > 0 ? keep : cleanedGroups, {
@@ -209,7 +196,7 @@ export function AddRecipeWizardScreen() {
       Alert.alert(
         "Recipe saved (demo)",
         `Saved “${parsed.data.recipeName}” locally in this build — API wiring comes later.`,
-        [{ text: "OK", onPress: () => router.back() }],
+        [{ text: "OK", onPress: () => router.back() }]
       );
       return;
     }
@@ -218,7 +205,7 @@ export function AddRecipeWizardScreen() {
       `Saved “${
         values.recipeName || "Untitled recipe"
       }” locally in this build — API wiring comes later.`,
-      [{ text: "OK", onPress: () => router.back() }],
+      [{ text: "OK", onPress: () => router.back() }]
     );
   }, [clearErrors, getValues, setError]);
 
@@ -251,26 +238,31 @@ export function AddRecipeWizardScreen() {
     step === 2
       ? `${(ingredientGroups ?? []).reduce(
           (sum, g) => sum + (g.items?.length ?? 0),
-          0,
+          0
         )} / ${MAX_INGREDIENTS}`
       : step === 3
-        ? `${cookingSteps?.length ?? 0} / ${MAX_COOKING_STEPS}`
-        : undefined;
+      ? `${cookingSteps?.length ?? 0} / ${MAX_COOKING_STEPS}`
+      : undefined;
 
   const primaryLabel = isPreview
     ? step < TOTAL_WIZARD_STEPS - 1
       ? "Continue"
       : "Save recipe"
     : step < TOTAL_WIZARD_STEPS - 1
-      ? "Continue"
-      : "Save recipe";
+    ? "Continue"
+    : "Save recipe";
 
   const contentBottomPadding =
-    keyboardHeight > 0 ? keyboardHeight + footerHeight + 24 : Math.max(footerHeight, 0) + 24;
+    keyboardHeight > 0
+      ? keyboardHeight + footerHeight + 24
+      : Math.max(footerHeight, 0) + 24;
 
   return (
     <FormProvider {...methods}>
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#dce4e2" }} edges={["top"]}>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: "#dce4e2" }}
+        edges={["top"]}
+      >
         <View style={{ flex: 1 }}>
           <WizardTopBar
             title={isPreview ? "Preview" : "Create Recipe"}
@@ -294,57 +286,43 @@ export function AddRecipeWizardScreen() {
                   paddingBottom: contentBottomPadding,
                 }}
               >
-                {SECTION_PREVIEW_TITLES.map((title, i) => (
-                  <SectionPreviewCard
-                    key={title}
-                    title={title}
-                    onPress={() => {
-                      setStep(i);
-                      setIsPreview(false);
-                    }}
-                  >
-                    {renderPreviewSection(i)}
-                  </SectionPreviewCard>
-                ))}
+                {SECTION_PREVIEW_TITLES.map((title, i) => {
+                  const Component = WIZARD_SECTION_COMPONENTS[i];
+                  return (
+                    <SectionPreviewCard
+                      key={title}
+                      title={title}
+                      onPress={() => {
+                        setStep(i);
+                        setIsPreview(false);
+                      }}
+                    >
+                      <Component mode="preview" />
+                    </SectionPreviewCard>
+                  );
+                })}
               </ScrollView>
             </>
-          ) : step === 1 ? (
-            <View className="flex-1 px-4">
+          ) : SECTIONS_WITH_CUSTOM_SCROLL.has(step) ? (
+            <View className="flex-1 mx-4">
               <WizardStepHeader
-                preTitle={`STEP ${step + 1} — ${WIZARD_STEP_PRETITLE_KEYS[step]}`}
+                preTitle={`STEP ${step + 1} — ${
+                  WIZARD_STEP_PRETITLE_KEYS[step]
+                }`}
                 title={WIZARD_STEP_TITLES[step]}
                 description={WIZARD_STEP_DESCRIPTIONS[step]}
                 counterLabel={counterLabel}
               />
-              <ImagesSection mode="edit" />
-            </View>
-          ) : step === 2 ? (
-            <View className="flex-1 px-4">
-              <WizardStepHeader
-                preTitle={`STEP ${step + 1} — ${WIZARD_STEP_PRETITLE_KEYS[step]}`}
-                title={WIZARD_STEP_TITLES[step]}
-                description={WIZARD_STEP_DESCRIPTIONS[step]}
-                counterLabel={undefined}
-              />
-              <IngredientsSection
-                mode="edit"
-                bottomContentPadding={contentBottomPadding}
-                keyboardHeight={keyboardHeight}
-              />
-            </View>
-          ) : step === 3 ? (
-            <View className="flex-1 px-4">
-              <WizardStepHeader
-                preTitle={`STEP ${step + 1} — ${WIZARD_STEP_PRETITLE_KEYS[step]}`}
-                title={WIZARD_STEP_TITLES[step]}
-                description={WIZARD_STEP_DESCRIPTIONS[step]}
-                counterLabel={counterLabel}
-              />
-              <CookingStepsSection
-                mode="edit"
-                bottomContentPadding={contentBottomPadding}
-                keyboardHeight={keyboardHeight}
-              />
+              {(() => {
+                const Component = WIZARD_SECTION_COMPONENTS[step];
+                return (
+                  <Component
+                    mode="edit"
+                    bottomContentPadding={contentBottomPadding}
+                    keyboardHeight={keyboardHeight}
+                  />
+                );
+              })()}
             </View>
           ) : (
             <ScrollView
@@ -355,12 +333,17 @@ export function AddRecipeWizardScreen() {
               }}
             >
               <WizardStepHeader
-                preTitle={`STEP ${step + 1} — ${WIZARD_STEP_PRETITLE_KEYS[step]}`}
+                preTitle={`STEP ${step + 1} — ${
+                  WIZARD_STEP_PRETITLE_KEYS[step]
+                }`}
                 title={WIZARD_STEP_TITLES[step]}
                 description={WIZARD_STEP_DESCRIPTIONS[step]}
                 counterLabel={counterLabel}
               />
-              {renderWizardStep(step)}
+              {(() => {
+                const Component = WIZARD_SECTION_COMPONENTS[step];
+                return <Component mode="edit" />;
+              })()}
             </ScrollView>
           )}
 

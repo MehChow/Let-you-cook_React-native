@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
+import { useRef } from "react";
 import { Controller, useFormContext, type Control } from "react-hook-form";
 import { Pressable, TextInput, View } from "react-native";
 
@@ -30,11 +31,13 @@ export const IngredientRow = ({
   itemIndex: number;
   onRemove: () => void;
   removeDisabled: boolean;
-  onAnyInputFocus?: (node: number | null) => void;
+  onAnyInputFocus?: (input: TextInput | null) => void;
 }) => {
   const { trigger } = useFormContext<AddRecipeFormValues>();
   const quantityFieldPath = `ingredientGroups.${groupIndex}.items.${itemIndex}.quantityAmount`;
   const nameFieldPath = `ingredientGroups.${groupIndex}.items.${itemIndex}.name`;
+  const nameInputRef = useRef<TextInput | null>(null);
+  const quantityInputRef = useRef<TextInput | null>(null);
 
   return (
     <View className="flex-row items-center gap-2">
@@ -45,18 +48,14 @@ export const IngredientRow = ({
           name={`ingredientGroups.${groupIndex}.items.${itemIndex}.name`}
           render={({ field: f, fieldState }) => (
             <TextInput
+              ref={nameInputRef}
               value={f.value}
               onChangeText={(t) => {
                 f.onChange(t.slice(0, 50));
                 trigger(nameFieldPath as any);
               }}
               onBlur={f.onBlur}
-              onFocus={(e) =>
-                onAnyInputFocus?.(
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  ((e.nativeEvent as any)?.target as number | undefined) ?? null,
-                )
-              }
+              onFocus={() => onAnyInputFocus?.(nameInputRef.current)}
               underlineColorAndroid="transparent"
               placeholder="Sugar"
               placeholderTextColor="#a3a3a3"
@@ -81,18 +80,14 @@ export const IngredientRow = ({
               }`}
             >
               <TextInput
+                ref={quantityInputRef}
                 value={f.value}
                 onChangeText={(t) => {
                   f.onChange(t.replace(/\s+/g, ""));
                   trigger(quantityFieldPath as any);
                 }}
                 onBlur={f.onBlur}
-                onFocus={(e) =>
-                  onAnyInputFocus?.(
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    ((e.nativeEvent as any)?.target as number | undefined) ?? null,
-                  )
-                }
+                onFocus={() => onAnyInputFocus?.(quantityInputRef.current)}
                 underlineColorAndroid="transparent"
                 placeholder="30"
                 placeholderTextColor="#a3a3a3"

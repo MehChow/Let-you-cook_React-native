@@ -40,7 +40,8 @@
         {
           "photosPermission": "Allow LetYouCook to access your photos to add recipe images."
         }
-      ]
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true,

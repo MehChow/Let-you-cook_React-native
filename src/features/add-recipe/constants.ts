@@ -37,7 +37,7 @@ export const WIZARD_STEP_TITLES = [
   "What are you cooking today?",
   "Show us your dish",
   "What goes in the dish?",
-  "Cooking steps",
+  "Walk us through it",
   "Reminder",
   "Nutritional information",
 ] as const;

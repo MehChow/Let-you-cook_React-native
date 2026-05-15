@@ -1,20 +1,20 @@
 import { MAX_RECIPE_IMAGES } from "@/features/add-recipe/constants";
+import { useImagePicker } from "@/features/add-recipe/hooks/useImagePicker";
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
-import * as ImagePicker from "expo-image-picker";
 import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
 } from "react";
 import {
-  useFieldArray,
-  useFormContext,
-  useFormState,
-  useWatch,
+    useFieldArray,
+    useFormContext,
+    useFormState,
+    useWatch,
 } from "react-hook-form";
-import { Alert, ScrollView, useWindowDimensions } from "react-native";
+import { ScrollView, useWindowDimensions } from "react-native";
 
 /** Matches `px-4` wizard horizontal inset for the images step. */
 export const RECIPE_IMAGES_EDIT_CONTENT_GUTTER = 32;
@@ -31,23 +31,6 @@ function newRecipeImageClientKey(): string {
   return `img-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
 }
 
-async function pickImageFromLibrary(): Promise<string | null> {
-  const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  if (!perm.granted) {
-    Alert.alert(
-      "Permission needed",
-      "Allow photo library access to add recipe images."
-    );
-    return null;
-  }
-  const result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ["images"],
-    quality: 0.85,
-  });
-  if (result.canceled || !result.assets[0]) return null;
-  return result.assets[0].uri;
-}
-
 export function useRecipeImagesField() {
   const { width: screenWidth } = useWindowDimensions();
   const contentWidth = screenWidth - RECIPE_IMAGES_EDIT_CONTENT_GUTTER;
@@ -56,6 +39,7 @@ export function useRecipeImagesField() {
   const { control, clearErrors } = useFormContext<AddRecipeFormValues>();
   const { errors } = useFormState({ control });
   const previewImages = useWatch({ control, name: "recipeImageUris" });
+  const { pickImage } = useImagePicker();
 
   const carouselRef = useRef<ScrollView>(null);
   const [carouselIndex, setCarouselIndex] = useState(0);
@@ -101,14 +85,14 @@ export function useRecipeImagesField() {
 
   const onAppendImage = useCallback(async () => {
     if (fields.length >= MAX_RECIPE_IMAGES) return;
-    const uri = await pickImageFromLibrary();
+    const uri = await pickImage("recipe");
     if (uri) {
       append(
         { uri, clientKey: newRecipeImageClientKey() },
         { shouldFocus: false }
       );
     }
-  }, [append, fields.length]);
+  }, [append, pickImage, fields.length]);
 
   useEffect(() => {
     if (fields.length > 0 && errors.recipeImageUris) {

@@ -2,7 +2,7 @@ import { Ingredients as IngredientsIcon } from "@/components/Icon";
 import { Card, CardContent } from "@/components/ui/card";
 import { Text } from "@/components/ui/text";
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Controller, useFieldArray, type Control } from "react-hook-form";
 import { Pressable, TextInput, View } from "react-native";
 import { IngredientRow } from "./IngredientRow";
@@ -20,7 +20,7 @@ export const IngredientGroupCard = ({
   canAddIngredient: boolean;
   onRemoveGroup: () => void;
   showRemoveGroup: boolean;
-  onAnyInputFocus?: (node: number | null) => void;
+  onAnyInputFocus?: (input: TextInput | null) => void;
 }) => {
   const { fields, append, remove } = useFieldArray({
     control,
@@ -28,6 +28,7 @@ export const IngredientGroupCard = ({
   });
 
   const [editingName, setEditingName] = useState(false);
+  const groupNameInputRef = useRef<TextInput | null>(null);
   const fallbackName = "Group name";
   const groupNameFieldPath = useMemo(
     () => `ingredientGroups.${groupIndex}.groupName` as const,
@@ -55,18 +56,14 @@ export const IngredientGroupCard = ({
                 };
                 return editingName ? (
                   <TextInput
+                    ref={groupNameInputRef}
                     value={f.value ?? ""}
                     onChangeText={(t) => f.onChange(t.slice(0, 50))}
                     autoFocus
                     returnKeyType="done"
                     placeholder={fallbackName}
                     placeholderTextColor="#a3a3a3"
-                    onFocus={(e) =>
-                      onAnyInputFocus?.(
-                        // @ts-ignore - Accessing internal _nativeTag property for React 19 compatibility
-                        (e.nativeEvent as any)?.target as number | undefined,
-                      )
-                    }
+                    onFocus={() => onAnyInputFocus?.(groupNameInputRef.current)}
                     onSubmitEditing={commitGroupName}
                     onBlur={commitGroupName}
                     maxLength={50}

@@ -39,20 +39,13 @@ export const ingredientRowSchema = z.object({
     .superRefine((val, ctx) => {
       // Validate amount only when user entered something.
       if (!val) return;
-      // Accept: integers, decimals, fractions, mixed fractions (no spaces)
-      // 7, 1.5, 1/2, 1-1/2
-      if (/\s/.test(val)) {
-        ctx.addIssue({
-          code: "custom",
-          message: "No spaces (e.g., 7, 1.5, 1/2, 1-1/2)",
-        });
-        return;
-      }
-      const re = /^(\d+(?:\.\d+)?|\d+\/\d+|\d+-\d+\/\d+)$/;
+      // Accept only whole numbers and simple fractions.
+      // Examples: 500, 1/2
+      const re = /^(\d+|\d+\/\d+)$/;
       if (!re.test(val)) {
         ctx.addIssue({
           code: "custom",
-          message: "Use 7, 1.5, 1/2, or 1-1/2",
+          message: "Only accept integer and fraction (e.g. 20, 1/2)",
         });
       }
     }),
