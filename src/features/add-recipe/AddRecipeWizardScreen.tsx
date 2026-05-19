@@ -50,6 +50,9 @@ const defaultValues: AddRecipeFormValues = {
   cookingSteps: [{ instruction: "", imageUri: "" }],
   chefNotes: "",
   nutritionMode: "ai",
+  nutritionProteinGrams: "",
+  nutritionCarbsGrams: "",
+  nutritionFatGrams: "",
 };
 
 /**

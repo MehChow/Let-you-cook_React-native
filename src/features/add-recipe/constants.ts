@@ -39,7 +39,7 @@ export const WIZARD_STEP_TITLES = [
   "What goes in the dish?",
   "Walk us through it",
   "Any extra nodes?",
-  "Nutritional information",
+  "Estimate nutritional information (optional)",
 ] as const;
 
 export const WIZARD_STEP_DESCRIPTIONS: (string | undefined)[] = [
@@ -48,7 +48,7 @@ export const WIZARD_STEP_DESCRIPTIONS: (string | undefined)[] = [
   "Organize your ingredients into groups for better readability.",
   "Drag to reorder steps. Add images for visual guidance.",
   "Tips, substitutions, or anything else worth noting.",
-  undefined,
+  "Use AI to estimate calories per serving or fill them in manually.",
 ];
 
 /** Preview / section titles (match design copy). */

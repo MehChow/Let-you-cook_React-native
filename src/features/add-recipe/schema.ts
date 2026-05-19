@@ -183,6 +183,42 @@ export const reminderStepSchema = z.object({
 
 export const caloriesStepSchema = z.object({
   nutritionMode: z.enum(["ai", "manual"]),
+  nutritionProteinGrams: z
+    .string()
+    .trim()
+    .superRefine((val, ctx) => {
+      if (!val) return;
+      if (!/^\d+$/.test(val)) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Use a whole number",
+        });
+      }
+    }),
+  nutritionCarbsGrams: z
+    .string()
+    .trim()
+    .superRefine((val, ctx) => {
+      if (!val) return;
+      if (!/^\d+$/.test(val)) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Use a whole number",
+        });
+      }
+    }),
+  nutritionFatGrams: z
+    .string()
+    .trim()
+    .superRefine((val, ctx) => {
+      if (!val) return;
+      if (!/^\d+$/.test(val)) {
+        ctx.addIssue({
+          code: "custom",
+          message: "Use a whole number",
+        });
+      }
+    }),
 });
 
 export const addRecipeFormSchema = basicsStepSchema
