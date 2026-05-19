@@ -84,8 +84,8 @@ export function CaloriesSection({ mode }: CaloriesSectionProps) {
             value="ai"
             className={
               nutritionMode === "ai"
-                ? "flex-1 rounded-lg bg-sage-600 px-4"
-                : "flex-1 rounded-lg bg-transparent px-4"
+                ? "flex-1 rounded-lg bg-sage-600 px-4 py-1.5"
+                : "flex-1 rounded-lg bg-transparent px-4 py-1.5"
             }
           >
             <AI
@@ -95,8 +95,8 @@ export function CaloriesSection({ mode }: CaloriesSectionProps) {
             <Text
               className={
                 nutritionMode === "ai"
-                  ? "text-[10px] font-semibold text-white"
-                  : "text-[10px] font-semibold text-black"
+                  ? "text-xs font-semibold text-white"
+                  : "text-xs font-semibold text-sage-600"
               }
             >
               AI Calculator
@@ -107,8 +107,8 @@ export function CaloriesSection({ mode }: CaloriesSectionProps) {
             value="manual"
             className={
               nutritionMode === "manual"
-                ? "flex-1 rounded-lg bg-sage-600 px-4"
-                : "flex-1 rounded-lg bg-transparent px-4"
+                ? "flex-1 rounded-lg bg-sage-600 px-4 py-1.5"
+                : "flex-1 rounded-lg bg-transparent px-4 py-1.5"
             }
           >
             <Edit
@@ -118,8 +118,8 @@ export function CaloriesSection({ mode }: CaloriesSectionProps) {
             <Text
               className={
                 nutritionMode === "manual"
-                  ? "text-[10px] font-semibold text-white"
-                  : "text-[10px] font-semibold text-black"
+                  ? "text-xs font-semibold text-white"
+                  : "text-xs font-semibold text-sage-600"
               }
             >
               Manual input
@@ -155,6 +155,7 @@ export function CaloriesSection({ mode }: CaloriesSectionProps) {
               primaryActionLabel={
                 aiState === "loading" ? "Analyzing recipe..." : "Analyze"
               }
+              primaryActionLoading={aiState === "loading"}
               onPrimaryAction={handleAnalyze}
               primaryActionDisabled={aiState === "loading"}
             />

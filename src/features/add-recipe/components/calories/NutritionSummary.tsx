@@ -11,7 +11,7 @@ import type {
   NutritionSummaryRow,
 } from "@/features/add-recipe/hooks/useCaloriesSection";
 import { cn } from "@/lib/utils";
-import { View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 
 export interface NutritionSummaryProps {
   title: string;
@@ -27,6 +27,7 @@ export interface NutritionSummaryProps {
   primaryActionLabel?: string;
   onPrimaryAction?: () => void;
   primaryActionDisabled?: boolean;
+  primaryActionLoading?: boolean;
   secondaryActionLabel?: string;
   onSecondaryAction?: () => void;
   successBannerLabel?: string;
@@ -44,6 +45,7 @@ export function NutritionSummary({
   primaryActionLabel,
   onPrimaryAction,
   primaryActionDisabled,
+  primaryActionLoading = false,
   secondaryActionLabel,
   onSecondaryAction,
   successBannerLabel,
@@ -62,32 +64,28 @@ export function NutritionSummary({
         <View className={cn("gap-4", compact && "gap-3")}>
           <View className="items-center gap-2">
             <View className="p-3 bg-sage-100 rounded-full">
-              <Icon
-                as={AI}
-                className="bg-sage-600 text-sage-600 size-4"
-                fill="#426159"
-              />
+              <Icon as={AI} className="bg-sage-600 text-sage-600 size-4" />
             </View>
-            <Text className="text-sm font-semibold text-black">{title}</Text>
+            <Text className="font-semibold text-black">{title}</Text>
             {description ? (
-              <Text className="text-center text-[10px] text-neutral-400 font-semibold">
+              <Text className="text-center text-[10px] text-neutral-400">
                 {description}
               </Text>
             ) : null}
           </View>
 
           {successBannerLabel ? (
-            <View className="rounded-xl bg-[#21a34a] px-4 py-3">
-              <View className="flex-row items-center justify-center gap-2">
-                <Check size={16} color="#ffffff" />
-                <Text className="text-sm font-semibold text-white">
-                  {successBannerLabel}
-                </Text>
+            <View className="flex-row items-center justify-center gap-2 rounded-xl border border-[#b9dfc5] bg-[#eef8f1] px-3 py-2.5">
+              <View className="rounded-full bg-[#21a34a] p-1.5">
+                <Check size={12} color="#ffffff" />
               </View>
+              <Text className="text-sm font-semibold text-sage-600">
+                Analysis complete
+              </Text>
             </View>
           ) : null}
 
-          {secondaryActionLabel && onSecondaryAction ? (
+          {secondaryActionLabel && onSecondaryAction && !successBannerLabel ? (
             <Button
               onPress={onSecondaryAction}
               className="h-12 rounded-xl bg-[#c33333]"
@@ -117,15 +115,27 @@ export function NutritionSummary({
             </View>
           ) : null}
 
+          {secondaryActionLabel && onSecondaryAction && successBannerLabel ? (
+            <Button
+              onPress={onSecondaryAction}
+              className="h-12 rounded-xl bg-[#c33333]"
+            >
+              <Delete size={16} color="#ffffff" />
+              <Text className="text-sm font-semibold text-white">
+                {secondaryActionLabel}
+              </Text>
+            </Button>
+          ) : null}
+
           {primaryActionLabel && onPrimaryAction ? (
             <Button
               onPress={onPrimaryAction}
               disabled={primaryActionDisabled}
-              className={cn(
-                "rounded-xl bg-sage-700 h-8",
-                primaryActionDisabled && "bg-sage-400",
-              )}
+              className="rounded-xl bg-sage-700 h-8"
             >
+              {primaryActionLoading ? (
+                <ActivityIndicator size={16} color="#ffffff" />
+              ) : null}
               <Text className="text-xs font-semibold text-white">
                 {primaryActionLabel}
               </Text>

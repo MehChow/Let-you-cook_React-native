@@ -88,7 +88,7 @@ export function ReminderSection({ mode }: ReminderSectionProps) {
         )}
       />
 
-      <Card className="gap-0 rounded-2xl bg-sage-200 py-4">
+      <Card className="gap-0 rounded-2xl bg-sage-200 py-4 border-0">
         <CardContent className="px-6">
           <View className="gap-3">
             <Text className="text-base font-semibold text-black">

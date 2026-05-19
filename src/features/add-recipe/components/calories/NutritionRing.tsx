@@ -22,7 +22,7 @@ export interface NutritionRingProps {
 }
 
 export function NutritionRing({ rows, totalCalories }: NutritionRingProps) {
-  const scaleValue = useSharedValue(totalCalories > 0 ? 1 : 0.92);
+  const scaleValue = useSharedValue(0.92);
 
   useEffect(() => {
     scaleValue.value = withTiming(totalCalories > 0 ? 1 : 0.92, {

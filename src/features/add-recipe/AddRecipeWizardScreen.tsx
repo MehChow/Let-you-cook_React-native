@@ -10,13 +10,13 @@ import {
   addRecipeFormSchema,
   type AddRecipeFormValues,
 } from "@/features/add-recipe/schema";
-import { sanitizeIngredientGroups } from "@/features/add-recipe/utils/ingredientGroups";
 import { BasicsSection } from "@/features/add-recipe/sections/BasicsSection";
 import { CaloriesSection } from "@/features/add-recipe/sections/CaloriesSection";
 import { CookingStepsSection } from "@/features/add-recipe/sections/CookingStepsSection";
 import { ImagesSection } from "@/features/add-recipe/sections/ImagesSection";
 import { IngredientsSection } from "@/features/add-recipe/sections/IngredientsSection";
 import { ReminderSection } from "@/features/add-recipe/sections/ReminderSection";
+import { sanitizeIngredientGroups } from "@/features/add-recipe/utils/ingredientGroups";
 import {
   applyZodIssuesToForm,
   getUniqueZodIssueMessages,
@@ -157,9 +157,7 @@ export function AddRecipeWizardScreen() {
     if (!result.ok) {
       applyZodIssuesToForm(result.error, setError);
       if (step === 2) {
-        showIngredientValidationToast(
-          getUniqueZodIssueMessages(result.error),
-        );
+        showIngredientValidationToast(getUniqueZodIssueMessages(result.error));
       }
       if (step === 3) {
         showCookingStepsValidationToast(
@@ -226,12 +224,14 @@ export function AddRecipeWizardScreen() {
       }
       const cleanedValues = {
         ...parsed.data,
-        ingredientGroups: sanitizeIngredientGroups(parsed.data.ingredientGroups),
+        ingredientGroups: sanitizeIngredientGroups(
+          parsed.data.ingredientGroups,
+        ),
       };
       Alert.alert(
         "Recipe saved (demo)",
         `Saved “${cleanedValues.recipeName}” locally in this build — API wiring comes later.`,
-        [{ text: "OK", onPress: () => router.back() }]
+        [{ text: "OK", onPress: () => router.back() }],
       );
       return;
     }
@@ -240,7 +240,7 @@ export function AddRecipeWizardScreen() {
       `Saved “${
         values.recipeName || "Untitled recipe"
       }” locally in this build — API wiring comes later.`,
-      [{ text: "OK", onPress: () => router.back() }]
+      [{ text: "OK", onPress: () => router.back() }],
     );
   }, [
     clearErrors,
@@ -280,8 +280,8 @@ export function AddRecipeWizardScreen() {
       ? "Continue"
       : "Save recipe"
     : step < TOTAL_WIZARD_STEPS - 1
-    ? "Continue"
-    : "Save recipe";
+      ? "Continue"
+      : "Save recipe";
 
   const contentBottomPadding =
     keyboardHeight > 0

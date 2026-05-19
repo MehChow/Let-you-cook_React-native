@@ -40,7 +40,7 @@ const FavouriteViewModeToggle: React.FC<FavouriteViewModeToggleProps> = ({
     modeIndex.value = withTiming(mode === "grid" ? 0 : 1, {
       duration: 220,
     });
-  }, [mode]);
+  }, [mode, modeIndex]);
 
   const indicatorStyle = useAnimatedStyle(() => ({
     width: PILL_WIDTH,
@@ -87,7 +87,7 @@ const FavouriteViewModeToggle: React.FC<FavouriteViewModeToggleProps> = ({
               as={Grid}
               className={cn(
                 "size-4",
-                mode === "grid" ? "text-sage-700" : "text-white"
+                mode === "grid" ? "text-sage-700" : "text-white",
               )}
             />
           </Pressable>
@@ -102,7 +102,7 @@ const FavouriteViewModeToggle: React.FC<FavouriteViewModeToggleProps> = ({
               as={List}
               className={cn(
                 "size-4",
-                mode === "list" ? "text-sage-700" : "text-white"
+                mode === "list" ? "text-sage-700" : "text-white",
               )}
             />
           </Pressable>

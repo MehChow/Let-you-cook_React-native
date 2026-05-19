@@ -20,7 +20,7 @@ export default function FavouritesScreen() {
 
   const favouritedRecipes = React.useMemo(
     () => popularRecipes.filter((r) => Boolean(favourites[r.id])),
-    [favourites]
+    [favourites],
   );
 
   const header = React.useMemo(
@@ -30,7 +30,7 @@ export default function FavouritesScreen() {
         <FavouriteViewModeToggle mode={viewMode} onModeChange={setViewMode} />
       </View>
     ),
-    [insets.top, viewMode]
+    [viewMode],
   );
 
   const empty = React.useMemo(
@@ -44,7 +44,7 @@ export default function FavouritesScreen() {
         </Text>
       </View>
     ),
-    []
+    [],
   );
 
   const renderGridItem = React.useCallback(
@@ -67,7 +67,7 @@ export default function FavouritesScreen() {
         />
       </View>
     ),
-    [isFavourite, setFavourite]
+    [isFavourite, setFavourite],
   );
 
   const renderListItem = React.useCallback(
@@ -84,7 +84,7 @@ export default function FavouritesScreen() {
         />
       </View>
     ),
-    [isFavourite, setFavourite]
+    [isFavourite, setFavourite],
   );
 
   return (

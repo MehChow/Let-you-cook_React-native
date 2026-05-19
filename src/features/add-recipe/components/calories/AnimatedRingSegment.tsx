@@ -26,8 +26,8 @@ export function AnimatedRingSegment({
   ratio,
   startRatio,
 }: AnimatedRingSegmentProps) {
-  const ratioValue = useSharedValue(ratio);
-  const startValue = useSharedValue(startRatio);
+  const ratioValue = useSharedValue(0);
+  const startValue = useSharedValue(0);
 
   useEffect(() => {
     ratioValue.value = withTiming(ratio, {
