@@ -23,7 +23,7 @@ export const servingsSchema = z
       .refine((v) => {
         const n = Number.parseInt(v, 10);
         return n >= MIN_SERVING && n <= MAX_SERVING;
-      }, `Amount must be between ${MIN_SERVING} and ${MAX_SERVING}`)
+      }, `Amount must be between ${MIN_SERVING} and ${MAX_SERVING}`),
   );
 
 export const ingredientRowSchema = z.object({
@@ -87,7 +87,7 @@ export const basicsStepSchema = z.object({
         .refine((v) => {
           const n = Number.parseInt(v, 10);
           return n > 0 && n <= 1440;
-        }, "Enter a realistic cook time")
+        }, "Enter a realistic cook time"),
     ),
   servings: servingsSchema,
 });
@@ -110,13 +110,16 @@ export const ingredientsStepSchema = z
     ingredientGroups: z
       .array(ingredientGroupSchema)
       .min(1, "Add at least one group")
-      .max(MAX_INGREDIENT_GROUPS, `You can add up to ${MAX_INGREDIENT_GROUPS} groups`),
+      .max(
+        MAX_INGREDIENT_GROUPS,
+        `You can add up to ${MAX_INGREDIENT_GROUPS} groups`,
+      ),
   })
   .superRefine((val, ctx) => {
     const groups = val.ingredientGroups ?? [];
     const totalIngredients = groups.reduce(
       (sum, g) => sum + (g.items?.length ?? 0),
-      0
+      0,
     );
     if (totalIngredients > MAX_INGREDIENTS) {
       ctx.addIssue({
@@ -221,12 +224,15 @@ export const caloriesStepSchema = z.object({
     }),
 });
 
-export const addRecipeFormSchema = basicsStepSchema
-  .merge(imagesStepSchema)
-  .merge(ingredientsStepSchema)
-  .merge(cookingStepsStepSchema)
-  .merge(reminderStepSchema)
-  .merge(caloriesStepSchema);
+// `.merge()` throws when any object schema contains refinements. Use
+// `safeExtend()` with the underlying shapes to combine step schemas
+// without losing refinements.
+export const addRecipeFormSchema = (basicsStepSchema as any)
+  .safeExtend((imagesStepSchema as any)._def.shape)
+  .safeExtend((ingredientsStepSchema as any)._def.shape)
+  .safeExtend((cookingStepsStepSchema as any)._def.shape)
+  .safeExtend((reminderStepSchema as any)._def.shape)
+  .safeExtend((caloriesStepSchema as any)._def.shape);
 
 export type AddRecipeFormValues = z.infer<typeof addRecipeFormSchema>;
 

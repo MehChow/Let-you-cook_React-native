@@ -12,7 +12,6 @@
     "lint": "expo lint"
   },
   "dependencies": {
-    "@expo-google-fonts/inter": "^0.4.2",
     "@expo-google-fonts/outfit": "^0.4.3",
     "@legendapp/list": "^2.0.19",
     "@react-native-community/slider": "5.1.2",
