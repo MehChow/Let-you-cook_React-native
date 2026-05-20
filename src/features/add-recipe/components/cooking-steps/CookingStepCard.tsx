@@ -1,4 +1,4 @@
-import { Delete, Drag, Image as ImageIcon } from "@/components/Icon";
+import { Delete, Drag, Image as ImageIcon, Remove } from "@/components/Icon";
 import { AddRecipeCounterTextArea } from "@/components/add-recipe/AddRecipeCounterTextArea";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader } from "@/components/ui/card";
@@ -134,10 +134,10 @@ function ControllerImageField({
                 />
               </Pressable>
               <Pressable
-                className="absolute right-2 top-2 h-6 w-6 items-center justify-center rounded-full bg-black/60 px-0 py-1"
+                className="absolute right-2 top-2 h-6 w-6 items-center justify-center rounded-full bg-black/60"
                 onPress={onRemoveImage}
               >
-                <Text className="text-xs font-bold text-white">x</Text>
+                <Icon as={Remove} size={16} color="#fff" />
               </Pressable>
             </View>
           ) : (
