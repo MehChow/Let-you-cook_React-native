@@ -186,6 +186,11 @@ export const reminderStepSchema = z.object({
 
 export const caloriesStepSchema = z.object({
   nutritionMode: z.enum(["ai", "manual"]),
+  nutritionAiProteinGrams: z.number().int().nonnegative().nullable(),
+  nutritionAiCarbsGrams: z.number().int().nonnegative().nullable(),
+  nutritionAiFatGrams: z.number().int().nonnegative().nullable(),
+  nutritionAiTotalCalories: z.number().int().nonnegative().nullable(),
+  nutritionAiSourceFingerprint: z.string(),
   nutritionProteinGrams: z
     .string()
     .trim()

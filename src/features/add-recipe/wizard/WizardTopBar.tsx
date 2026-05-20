@@ -5,17 +5,18 @@ import { colors } from "@/util/twColor";
 import { Pressable, View } from "react-native";
 
 export interface WizardTopBarProps {
-  /** Center title: "Create Recipe" in wizard mode, "Preview" in preview mode */
   title: string;
-  previewActive: boolean;
   onExit: () => void;
-  onTogglePreview: () => void;
+  showPreviewButton?: boolean;
+  previewActive?: boolean;
+  onTogglePreview?: () => void;
 }
 
 export function WizardTopBar({
   title,
-  previewActive,
   onExit,
+  showPreviewButton = false,
+  previewActive = false,
   onTogglePreview,
 }: WizardTopBarProps) {
   return (
@@ -32,23 +33,27 @@ export function WizardTopBar({
           <Icon as={ChevronLeft} size={16} color={colors.sage[500]} />
         </Pressable>
         <Text className="flex-1 text-center text-lg font-bold">{title}</Text>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={
-            previewActive ? "Leave preview" : "Preview recipe"
-          }
-          hitSlop={12}
-          onPress={onTogglePreview}
-          className="h-9 w-9 items-center justify-center rounded-full bg-white active:opacity-80"
-          style={{ elevation: 2 }}
-        >
-          <Icon
-            as={PreviewIcon}
-            size={16}
-            color={colors.sage[500]}
-            fill={previewActive ? colors.sage[600] : "transparent"}
-          />
-        </Pressable>
+        {showPreviewButton && onTogglePreview ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={
+              previewActive ? "Leave preview" : "Preview recipe"
+            }
+            hitSlop={12}
+            onPress={onTogglePreview}
+            className="h-9 w-9 items-center justify-center rounded-full bg-white active:opacity-80"
+            style={{ elevation: 2 }}
+          >
+            <Icon
+              as={PreviewIcon}
+              size={16}
+              color={colors.sage[500]}
+              fill={previewActive ? colors.sage[600] : "transparent"}
+            />
+          </Pressable>
+        ) : (
+          <View className="h-9 w-9" />
+        )}
       </View>
     </View>
   );

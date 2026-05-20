@@ -1,4 +1,13 @@
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
+import {
+  buildNutritionDependencyFingerprint,
+  getAiNutritionDraftState,
+  getManualNutritionState,
+  resolvePreviewNutrition,
+  type NutritionAiStatus,
+  type NutritionMacroKey,
+  type NutritionSummaryRowData,
+} from "@/features/add-recipe/utils/nutrition";
 import { useEffect, useRef, useState } from "react";
 import { useFormContext, useFormState, useWatch } from "react-hook-form";
 
@@ -14,25 +23,8 @@ const NUTRITION_COLORS = {
   fat: "#f4b562",
 } as const;
 
-const CALORIES_PER_GRAM = {
-  protein: 4,
-  carbs: 4,
-  fat: 9,
-} as const;
-
-export type NutritionMacroKey = keyof typeof CALORIES_PER_GRAM;
 export type NutritionModeValue = AddRecipeFormValues["nutritionMode"];
-export type NutritionAiState = "idle" | "loading" | "success";
-
-export interface NutritionSummaryRow {
-  key: NutritionMacroKey;
-  label: string;
-  color: string;
-  grams: number;
-  gramsText: string;
-  calories: number;
-  ratio: number;
-}
+export type NutritionSummaryRow = NutritionSummaryRowData;
 
 export interface NutritionInputRow {
   key: NutritionMacroKey;
@@ -45,79 +37,33 @@ export interface NutritionInputRow {
     | "nutritionFatGrams";
 }
 
-function parseMacroValue(value?: string) {
-  const trimmed = value?.trim() ?? "";
-  if (!trimmed) {
-    return { grams: 0, isValid: false, hasValue: false };
-  }
-  if (!/^\d+$/.test(trimmed)) {
-    return { grams: 0, isValid: false, hasValue: true };
-  }
-  return { grams: Number.parseInt(trimmed, 10), isValid: true, hasValue: true };
-}
-
-function buildSummary(source: Record<NutritionMacroKey, number | string>) {
-  const protein =
-    typeof source.protein === "number"
-      ? source.protein
-      : parseMacroValue(source.protein).grams;
-  const carbs =
-    typeof source.carbs === "number"
-      ? source.carbs
-      : parseMacroValue(source.carbs).grams;
-  const fat =
-    typeof source.fat === "number"
-      ? source.fat
-      : parseMacroValue(source.fat).grams;
-
-  const macroCalories = {
-    protein: protein * CALORIES_PER_GRAM.protein,
-    carbs: carbs * CALORIES_PER_GRAM.carbs,
-    fat: fat * CALORIES_PER_GRAM.fat,
-  };
-  const totalCalories =
-    macroCalories.protein + macroCalories.carbs + macroCalories.fat;
-
-  const rows: NutritionSummaryRow[] = [
-    {
-      key: "protein",
-      label: "Protein",
-      color: NUTRITION_COLORS.protein,
-      grams: protein,
-      gramsText: protein > 0 ? `${protein}g` : "0g",
-      calories: macroCalories.protein,
-      ratio: totalCalories > 0 ? macroCalories.protein / totalCalories : 0,
-    },
-    {
-      key: "carbs",
-      label: "Carbs",
-      color: NUTRITION_COLORS.carbs,
-      grams: carbs,
-      gramsText: carbs > 0 ? `${carbs}g` : "0g",
-      calories: macroCalories.carbs,
-      ratio: totalCalories > 0 ? macroCalories.carbs / totalCalories : 0,
-    },
-    {
-      key: "fat",
-      label: "Fat",
-      color: NUTRITION_COLORS.fat,
-      grams: fat,
-      calories: macroCalories.fat,
-      gramsText: fat > 0 ? `${fat}g` : "0g",
-      ratio: totalCalories > 0 ? macroCalories.fat / totalCalories : 0,
-    },
-  ];
-
-  return {
-    totalCalories,
-    rows,
-  };
-}
-
 export function useCaloriesSection() {
   const { control, setValue } = useFormContext<AddRecipeFormValues>();
   const { errors } = useFormState({ control });
   const nutritionMode = useWatch({ control, name: "nutritionMode" });
+  const servings = useWatch({ control, name: "servings" });
+  const ingredientGroups = useWatch({ control, name: "ingredientGroups" });
+  const cookingSteps = useWatch({ control, name: "cookingSteps" });
+  const nutritionAiProteinGrams = useWatch({
+    control,
+    name: "nutritionAiProteinGrams",
+  });
+  const nutritionAiCarbsGrams = useWatch({
+    control,
+    name: "nutritionAiCarbsGrams",
+  });
+  const nutritionAiFatGrams = useWatch({
+    control,
+    name: "nutritionAiFatGrams",
+  });
+  const nutritionAiTotalCalories = useWatch({
+    control,
+    name: "nutritionAiTotalCalories",
+  });
+  const nutritionAiSourceFingerprint = useWatch({
+    control,
+    name: "nutritionAiSourceFingerprint",
+  });
   const nutritionProteinGrams = useWatch({
     control,
     name: "nutritionProteinGrams",
@@ -131,7 +77,7 @@ export function useCaloriesSection() {
     name: "nutritionFatGrams",
   });
   const aiTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [aiState, setAiState] = useState<NutritionAiState>("idle");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -141,22 +87,36 @@ export function useCaloriesSection() {
     };
   }, []);
 
-  const manualProtein = parseMacroValue(nutritionProteinGrams);
-  const manualCarbs = parseMacroValue(nutritionCarbsGrams);
-  const manualFat = parseMacroValue(nutritionFatGrams);
-  const manualSummary = buildSummary({
-    protein: nutritionProteinGrams ?? "",
-    carbs: nutritionCarbsGrams ?? "",
-    fat: nutritionFatGrams ?? "",
+  const dependencyValues = {
+    servings: servings ?? "",
+    ingredientGroups: ingredientGroups ?? [],
+    cookingSteps: cookingSteps ?? [],
+  };
+  const manualState = getManualNutritionState({
+    nutritionProteinGrams: nutritionProteinGrams ?? "",
+    nutritionCarbsGrams: nutritionCarbsGrams ?? "",
+    nutritionFatGrams: nutritionFatGrams ?? "",
   });
-  const aiSummary = buildSummary(DEMO_AI_MACROS);
-
-  const manualHasAnyValue =
-    manualProtein.hasValue || manualCarbs.hasValue || manualFat.hasValue;
-  const manualHasAnyValidValue =
-    manualProtein.isValid || manualCarbs.isValid || manualFat.isValid;
-  const manualIsComplete =
-    manualProtein.isValid && manualCarbs.isValid && manualFat.isValid;
+  const aiDraftState = getAiNutritionDraftState({
+    nutritionAiProteinGrams,
+    nutritionAiCarbsGrams,
+    nutritionAiFatGrams,
+    nutritionAiTotalCalories,
+    nutritionAiSourceFingerprint: nutritionAiSourceFingerprint ?? "",
+    ...dependencyValues,
+  });
+  const previewSummary = resolvePreviewNutrition({
+    nutritionMode,
+    nutritionProteinGrams: nutritionProteinGrams ?? "",
+    nutritionCarbsGrams: nutritionCarbsGrams ?? "",
+    nutritionFatGrams: nutritionFatGrams ?? "",
+    nutritionAiProteinGrams,
+    nutritionAiCarbsGrams,
+    nutritionAiFatGrams,
+    nutritionAiTotalCalories,
+    nutritionAiSourceFingerprint: nutritionAiSourceFingerprint ?? "",
+    ...dependencyValues,
+  });
 
   const inputRows: NutritionInputRow[] = [
     {
@@ -203,13 +163,45 @@ export function useCaloriesSection() {
   };
 
   const handleAnalyze = () => {
-    if (aiState === "loading") return;
+    if (isAnalyzing) return;
     if (aiTimeoutRef.current) {
       clearTimeout(aiTimeoutRef.current);
     }
-    setAiState("loading");
+    setIsAnalyzing(true);
     aiTimeoutRef.current = setTimeout(() => {
-      setAiState("success");
+      const currentFingerprint = buildNutritionDependencyFingerprint(
+        dependencyValues,
+      );
+      const totalCalories =
+        DEMO_AI_MACROS.protein * 4 +
+        DEMO_AI_MACROS.carbs * 4 +
+        DEMO_AI_MACROS.fat * 9;
+      setValue("nutritionAiProteinGrams", DEMO_AI_MACROS.protein, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: false,
+      });
+      setValue("nutritionAiCarbsGrams", DEMO_AI_MACROS.carbs, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: false,
+      });
+      setValue("nutritionAiFatGrams", DEMO_AI_MACROS.fat, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: false,
+      });
+      setValue("nutritionAiTotalCalories", totalCalories, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: false,
+      });
+      setValue("nutritionAiSourceFingerprint", currentFingerprint, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: false,
+      });
+      setIsAnalyzing(false);
       aiTimeoutRef.current = null;
     }, 1200);
   };
@@ -219,23 +211,58 @@ export function useCaloriesSection() {
       clearTimeout(aiTimeoutRef.current);
       aiTimeoutRef.current = null;
     }
-    setAiState("idle");
+    setIsAnalyzing(false);
+    setValue("nutritionAiProteinGrams", null, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: false,
+    });
+    setValue("nutritionAiCarbsGrams", null, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: false,
+    });
+    setValue("nutritionAiFatGrams", null, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: false,
+    });
+    setValue("nutritionAiTotalCalories", null, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: false,
+    });
+    setValue("nutritionAiSourceFingerprint", "", {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: false,
+    });
   };
 
-  const previewSummary =
-    nutritionMode === "manual" ? manualSummary : aiSummary;
+  const handleRemoveManualResult = () => {
+    setMacroValue("nutritionProteinGrams", "");
+    setMacroValue("nutritionCarbsGrams", "");
+    setMacroValue("nutritionFatGrams", "");
+  };
+
+  const aiStatus: NutritionAiStatus = aiDraftState.status;
+  const aiActionLabel =
+    aiDraftState.status === "stale" ? "Re-analyze" : "Analyze";
 
   return {
-    aiState,
-    aiSummary,
+    aiActionLabel,
+    aiStatus,
+    aiSummary: aiDraftState.summary,
     errors,
     handleAnalyze,
     handleRemoveAiResult,
+    handleRemoveManualResult,
     inputRows,
-    manualHasAnyValidValue,
-    manualHasAnyValue,
-    manualIsComplete,
-    manualSummary,
+    isAnalyzing,
+    manualHasAnyValidValue: manualState.hasAnyValidValue,
+    manualHasAnyValue: manualState.hasAnyValue,
+    manualIsComplete: manualState.isComplete,
+    manualSummary: manualState.summary,
     nutritionMode,
     previewSummary,
     setMacroValue,

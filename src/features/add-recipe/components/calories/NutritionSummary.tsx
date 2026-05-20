@@ -29,9 +29,12 @@ export interface NutritionSummaryProps {
   onPrimaryAction?: () => void;
   primaryActionDisabled?: boolean;
   primaryActionLoading?: boolean;
+  primaryActionDestructive?: boolean;
+  primaryActionIcon?: React.ReactNode;
   secondaryActionLabel?: string;
   onSecondaryAction?: () => void;
-  successBannerLabel?: string;
+  statusBannerLabel?: string;
+  statusBannerTone?: "success" | "warning";
   compact?: boolean;
 }
 
@@ -47,12 +50,29 @@ export function NutritionSummary({
   onPrimaryAction,
   primaryActionDisabled,
   primaryActionLoading = false,
+  primaryActionDestructive = false,
+  primaryActionIcon,
   secondaryActionLabel,
   onSecondaryAction,
-  successBannerLabel,
+  statusBannerLabel,
+  statusBannerTone = "success",
   compact = false,
 }: NutritionSummaryProps) {
   const isEditable = !!inputRows && !!onChangeInputValue;
+  const statusColors =
+    statusBannerTone === "warning"
+      ? {
+          border: "border-[#e7c278]",
+          background: "bg-[#fff7e8]",
+          pill: "bg-[#d48a14]",
+          text: "text-[#8a5a09]",
+        }
+      : {
+          border: "border-[#b9dfc5]",
+          background: "bg-[#eef8f1]",
+          pill: "bg-[#21a34a]",
+          text: "text-sage-600",
+        };
 
   return (
     <Card
@@ -75,18 +95,28 @@ export function NutritionSummary({
             ) : null}
           </View>
 
-          {successBannerLabel ? (
-            <View className="flex-row items-center justify-center gap-2 rounded-xl border border-[#b9dfc5] bg-[#eef8f1] px-3 py-2.5">
-              <View className="rounded-full bg-[#21a34a] p-1.5">
-                <Check size={12} color="#ffffff" />
+          {statusBannerLabel ? (
+            <View
+              className={cn(
+                "flex-row items-center justify-center gap-2 rounded-xl px-3 py-2.5",
+                statusColors.border,
+                statusColors.background,
+              )}
+            >
+              <View className={cn("rounded-full p-1.5", statusColors.pill)}>
+                {statusBannerTone === "warning" ? (
+                  <AI size={12} color="#ffffff" />
+                ) : (
+                  <Check size={12} color="#ffffff" />
+                )}
               </View>
-              <Text className="text-sm font-semibold text-sage-600">
-                Analysis complete
+              <Text className={cn("text-sm font-semibold", statusColors.text)}>
+                {statusBannerLabel}
               </Text>
             </View>
           ) : null}
 
-          {secondaryActionLabel && onSecondaryAction && !successBannerLabel ? (
+          {secondaryActionLabel && onSecondaryAction && !statusBannerLabel ? (
             <Button
               onPress={onSecondaryAction}
               className="h-8 rounded-xl bg-[#c33333]"
@@ -98,7 +128,7 @@ export function NutritionSummary({
             </Button>
           ) : null}
 
-          {(successBannerLabel || secondaryActionLabel) && !compact ? (
+          {(statusBannerLabel || secondaryActionLabel) && !compact ? (
             <Separator className="bg-neutral-200" />
           ) : null}
 
@@ -120,7 +150,27 @@ export function NutritionSummary({
             </View>
           ) : null}
 
-          {secondaryActionLabel && onSecondaryAction && successBannerLabel ? (
+          {primaryActionLabel && onPrimaryAction ? (
+            <Button
+              onPress={onPrimaryAction}
+              disabled={primaryActionDisabled}
+              className={cn(
+                "h-8 rounded-xl",
+                primaryActionDestructive ? "bg-[#c33333]" : "bg-sage-700",
+              )}
+            >
+              {primaryActionLoading ? (
+                <ActivityIndicator size={16} color="#ffffff" />
+              ) : primaryActionIcon ? (
+                primaryActionIcon
+              ) : null}
+              <Text className="text-xs font-semibold text-white">
+                {primaryActionLabel}
+              </Text>
+            </Button>
+          ) : null}
+
+          {secondaryActionLabel && onSecondaryAction && statusBannerLabel ? (
             <Button
               onPress={onSecondaryAction}
               className="h-8 rounded-xl bg-[#c33333]"
@@ -132,20 +182,6 @@ export function NutritionSummary({
             </Button>
           ) : null}
 
-          {primaryActionLabel && onPrimaryAction ? (
-            <Button
-              onPress={onPrimaryAction}
-              disabled={primaryActionDisabled}
-              className="rounded-xl bg-sage-700 h-8"
-            >
-              {primaryActionLoading ? (
-                <ActivityIndicator size={16} color="#ffffff" />
-              ) : null}
-              <Text className="text-xs font-semibold text-white">
-                {primaryActionLabel}
-              </Text>
-            </Button>
-          ) : null}
         </View>
       </CardContent>
     </Card>

@@ -1,15 +1,10 @@
-import { isZodValidationEnabled } from "@/config/validation";
 import {
-  SECTION_PREVIEW_TITLES,
   TOTAL_WIZARD_STEPS,
   WIZARD_STEP_DESCRIPTIONS,
   WIZARD_STEP_PRETITLE_KEYS,
   WIZARD_STEP_TITLES,
 } from "@/features/add-recipe/constants";
-import {
-  addRecipeFormSchema,
-  type AddRecipeFormValues,
-} from "@/features/add-recipe/schema";
+import { type AddRecipeFormValues } from "@/features/add-recipe/schema";
 import { BasicsSection } from "@/features/add-recipe/sections/BasicsSection";
 import { CaloriesSection } from "@/features/add-recipe/sections/CaloriesSection";
 import { CookingStepsSection } from "@/features/add-recipe/sections/CookingStepsSection";
@@ -22,8 +17,7 @@ import {
   getUniqueZodIssueMessages,
   validateWizardStep,
 } from "@/features/add-recipe/validateStep";
-import { PreviewHintBanner } from "@/features/add-recipe/wizard/PreviewHintBanner";
-import { SectionPreviewCard } from "@/features/add-recipe/wizard/SectionPreviewCard";
+import { useAddRecipePreviewStore } from "@/features/add-recipe/addRecipePreviewStore";
 import { WizardFooterActions } from "@/features/add-recipe/wizard/WizardFooterActions";
 import { WizardStepHeader } from "@/features/add-recipe/wizard/WizardStepHeader";
 import { WizardStepIndicator } from "@/features/add-recipe/wizard/WizardStepIndicator";
@@ -50,14 +44,16 @@ const defaultValues: AddRecipeFormValues = {
   cookingSteps: [{ instruction: "", imageUri: "" }],
   chefNotes: "",
   nutritionMode: "ai",
+  nutritionAiProteinGrams: null,
+  nutritionAiCarbsGrams: null,
+  nutritionAiFatGrams: null,
+  nutritionAiTotalCalories: null,
+  nutritionAiSourceFingerprint: "",
   nutritionProteinGrams: "",
   nutritionCarbsGrams: "",
   nutritionFatGrams: "",
 };
 
-/**
- * Map step index to section component and rendering config
- */
 const WIZARD_SECTION_COMPONENTS = [
   BasicsSection,
   ImagesSection,
@@ -67,16 +63,15 @@ const WIZARD_SECTION_COMPONENTS = [
   CaloriesSection,
 ] as const;
 
-/**
- * Sections that need special scroll container (not wrapped in automatic ScrollView)
- */
-const SECTIONS_WITH_CUSTOM_SCROLL = new Set([2, 3]); // Ingredients, CookingSteps
+const SECTIONS_WITH_CUSTOM_SCROLL = new Set([2, 3]);
 
 export function AddRecipeWizardScreen() {
   const [step, setStep] = useState(0);
-  const [isPreview, setIsPreview] = useState(false);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [footerHeight, setFooterHeight] = useState(0);
+  const targetStep = useAddRecipePreviewStore((s) => s.targetStep);
+  const setTargetStep = useAddRecipePreviewStore((s) => s.setTargetStep);
+  const setPreviewSnapshot = useAddRecipePreviewStore((s) => s.setSnapshot);
 
   const methods = useForm<AddRecipeFormValues>({
     defaultValues,
@@ -87,10 +82,6 @@ export function AddRecipeWizardScreen() {
   const { getValues, setError, clearErrors, formState, setValue } = methods;
 
   const attemptExit = useCallback(() => {
-    if (isPreview) {
-      setIsPreview(false);
-      return;
-    }
     if (formState.isDirty) {
       Alert.alert("Discard changes?", "Your recipe draft will be lost.", [
         { text: "Keep editing", style: "cancel" },
@@ -103,14 +94,16 @@ export function AddRecipeWizardScreen() {
     } else {
       router.back();
     }
-  }, [formState.isDirty, isPreview]);
+  }, [formState.isDirty]);
+
+  useEffect(() => {
+    if (targetStep === null) return;
+    setStep(targetStep);
+    setTargetStep(null);
+  }, [setTargetStep, targetStep]);
 
   useEffect(() => {
     const sub = BackHandler.addEventListener("hardwareBackPress", () => {
-      if (isPreview) {
-        setIsPreview(false);
-        return true;
-      }
       if (step > 0) {
         setStep((s) => s - 1);
         return true;
@@ -119,7 +112,7 @@ export function AddRecipeWizardScreen() {
       return true;
     });
     return () => sub.remove();
-  }, [step, isPreview, attemptExit]);
+  }, [attemptExit, step]);
 
   useEffect(() => {
     const showSub = Keyboard.addListener("keyboardDidShow", (e) => {
@@ -164,7 +157,6 @@ export function AddRecipeWizardScreen() {
           getUniqueZodIssueMessages(result.error),
         );
       }
-
       return;
     }
 
@@ -193,95 +185,20 @@ export function AddRecipeWizardScreen() {
     step,
   ]);
 
-  const finishRecipe = useCallback(() => {
-    clearErrors();
-    const values = getValues();
-    if (isZodValidationEnabled) {
-      const parsed = addRecipeFormSchema.safeParse(values);
-      if (!parsed.success) {
-        applyZodIssuesToForm(parsed.error, setError);
-        const ingredientMessages = Array.from(
-          new Set(
-            parsed.error.issues
-              .filter((issue) => issue.path[0] === "ingredientGroups")
-              .map((issue) => issue.message),
-          ),
-        );
-        if (ingredientMessages.length > 0) {
-          showIngredientValidationToast(ingredientMessages);
-        }
-        const cookingStepMessages = Array.from(
-          new Set(
-            parsed.error.issues
-              .filter((issue) => issue.path[0] === "cookingSteps")
-              .map((issue) => issue.message),
-          ),
-        );
-        if (cookingStepMessages.length > 0) {
-          showCookingStepsValidationToast(cookingStepMessages);
-        }
-        return;
-      }
-      const cleanedValues = {
-        ...parsed.data,
-        ingredientGroups: sanitizeIngredientGroups(
-          parsed.data.ingredientGroups,
-        ),
-      };
-      Alert.alert(
-        "Recipe saved (demo)",
-        `Saved “${cleanedValues.recipeName}” locally in this build — API wiring comes later.`,
-        [{ text: "OK", onPress: () => router.back() }],
-      );
-      return;
-    }
-    Alert.alert(
-      "Recipe saved (demo)",
-      `Saved “${
-        values.recipeName || "Untitled recipe"
-      }” locally in this build — API wiring comes later.`,
-      [{ text: "OK", onPress: () => router.back() }],
-    );
-  }, [
-    clearErrors,
-    getValues,
-    setError,
-    showCookingStepsValidationToast,
-    showIngredientValidationToast,
-  ]);
-
   const onPrimaryFooter = useCallback(() => {
-    if (isPreview) {
-      setIsPreview(false);
-      if (step < TOTAL_WIZARD_STEPS - 1) {
-        setStep((s) => s + 1);
-      } else {
-        finishRecipe();
-      }
-      return;
-    }
     if (step < TOTAL_WIZARD_STEPS - 1) {
       goNext();
     } else {
-      finishRecipe();
+      setPreviewSnapshot(getValues());
+      router.push("/add-recipe/preview");
     }
-  }, [finishRecipe, goNext, isPreview, step]);
+  }, [getValues, goNext, setPreviewSnapshot, step]);
 
   const onFooterBack = useCallback(() => {
-    if (isPreview) {
-      setIsPreview(false);
-      return;
-    }
     if (step > 0) setStep((s) => s - 1);
-  }, [isPreview, step]);
+  }, [step]);
 
-  const primaryLabel = isPreview
-    ? step < TOTAL_WIZARD_STEPS - 1
-      ? "Continue"
-      : "Save recipe"
-    : step < TOTAL_WIZARD_STEPS - 1
-      ? "Continue"
-      : "Save recipe";
+  const primaryLabel = step < TOTAL_WIZARD_STEPS - 1 ? "Continue" : "Preview";
 
   const contentBottomPadding =
     keyboardHeight > 0
@@ -296,50 +213,16 @@ export function AddRecipeWizardScreen() {
       >
         <View style={{ flex: 1 }}>
           <WizardTopBar
-            title={isPreview ? "Preview" : "Create Recipe"}
-            previewActive={isPreview}
+            title="Create Recipe"
             onExit={attemptExit}
-            onTogglePreview={() => {
-              if (isPreview) setIsPreview(false);
-              else setIsPreview(true);
-            }}
           />
 
-          {!isPreview ? <WizardStepIndicator currentStepIndex={step} /> : null}
+          <WizardStepIndicator currentStepIndex={step} />
 
-          {isPreview ? (
-            <>
-              <PreviewHintBanner />
-              <ScrollView
-                className="flex-1"
-                keyboardShouldPersistTaps="handled"
-                contentContainerStyle={{
-                  paddingBottom: contentBottomPadding,
-                }}
-              >
-                {SECTION_PREVIEW_TITLES.map((title, i) => {
-                  const Component = WIZARD_SECTION_COMPONENTS[i];
-                  return (
-                    <SectionPreviewCard
-                      key={title}
-                      title={title}
-                      onPress={() => {
-                        setStep(i);
-                        setIsPreview(false);
-                      }}
-                    >
-                      <Component mode="preview" />
-                    </SectionPreviewCard>
-                  );
-                })}
-              </ScrollView>
-            </>
-          ) : SECTIONS_WITH_CUSTOM_SCROLL.has(step) ? (
+          {SECTIONS_WITH_CUSTOM_SCROLL.has(step) ? (
             <View className="flex-1 mx-4">
               <WizardStepHeader
-                preTitle={`STEP ${step + 1} — ${
-                  WIZARD_STEP_PRETITLE_KEYS[step]
-                }`}
+                preTitle={`STEP ${step + 1} - ${WIZARD_STEP_PRETITLE_KEYS[step]}`}
                 title={WIZARD_STEP_TITLES[step]}
                 description={WIZARD_STEP_DESCRIPTIONS[step]}
               />
@@ -362,9 +245,7 @@ export function AddRecipeWizardScreen() {
               }}
             >
               <WizardStepHeader
-                preTitle={`STEP ${step + 1} — ${
-                  WIZARD_STEP_PRETITLE_KEYS[step]
-                }`}
+                preTitle={`STEP ${step + 1} - ${WIZARD_STEP_PRETITLE_KEYS[step]}`}
                 title={WIZARD_STEP_TITLES[step]}
                 description={WIZARD_STEP_DESCRIPTIONS[step]}
               />
@@ -382,7 +263,7 @@ export function AddRecipeWizardScreen() {
             }}
           >
             <WizardFooterActions
-              showStepBack={isPreview ? true : step > 0}
+              showStepBack={step > 0}
               primaryLabel={primaryLabel}
               onStepBack={onFooterBack}
               onPrimary={onPrimaryFooter}

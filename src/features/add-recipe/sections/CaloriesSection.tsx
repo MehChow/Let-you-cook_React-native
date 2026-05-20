@@ -1,4 +1,4 @@
-import { AI, Calories as CaloriesIcon, Edit } from "@/components/Icon";
+import { AI, Calories as CaloriesIcon, Delete, Edit } from "@/components/Icon";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Text } from "@/components/ui/text";
 import { NutritionSummary } from "@/features/add-recipe/components/calories/NutritionSummary";
@@ -34,30 +34,41 @@ function CaloriesSectionPreview() {
         </View>
       </View>
 
-      <NutritionSummary
-        compact
-        title={
-          nutritionMode === "manual" ? "Manual input" : "AI Calories calculator"
-        }
-        description={
-          nutritionMode === "manual"
-            ? "Preview of your current manual nutrition values."
-            : "AI estimation summary for this recipe."
-        }
-        rows={previewSummary.rows}
-        totalCalories={previewSummary.totalCalories}
-      />
+      {previewSummary ? (
+        <NutritionSummary
+          compact
+          title={
+            nutritionMode === "manual"
+              ? "Manual input"
+              : "AI Calories calculator"
+          }
+          description={
+            nutritionMode === "manual"
+              ? "Preview of your current manual nutrition values."
+              : "AI estimation summary for this recipe."
+          }
+          rows={previewSummary.rows}
+          totalCalories={previewSummary.totalCalories}
+        />
+      ) : (
+        <Text className="text-xs text-sage-500">
+          No nutrition information is currently selected to be saved.
+        </Text>
+      )}
     </View>
   );
 }
 
 export function CaloriesSection({ mode }: CaloriesSectionProps) {
   const {
-    aiState,
+    aiActionLabel,
+    aiStatus,
     aiSummary,
     handleAnalyze,
     handleRemoveAiResult,
+    handleRemoveManualResult,
     inputRows,
+    isAnalyzing,
     manualHasAnyValidValue,
     manualHasAnyValue,
     manualIsComplete,
@@ -129,13 +140,20 @@ export function CaloriesSection({ mode }: CaloriesSectionProps) {
 
         {/* Tab content */}
         <TabsContent value="ai" className="mt-0">
-          {aiState === "success" ? (
+          {aiStatus === "ready" || aiStatus === "stale" ? (
             <NutritionSummary
               title="AI Calories calculator"
               description="This estimate uses your ingredients, quantities, serving count and cooking steps."
               rows={aiSummary.rows}
               totalCalories={aiSummary.totalCalories}
-              successBannerLabel="Success"
+              statusBannerLabel={
+                aiStatus === "stale" ? "Analysis outdated" : "Analysis complete"
+              }
+              statusBannerTone={aiStatus === "stale" ? "warning" : "success"}
+              primaryActionLabel={aiStatus === "stale" ? "Re-analyze" : undefined}
+              primaryActionLoading={isAnalyzing}
+              onPrimaryAction={aiStatus === "stale" ? handleAnalyze : undefined}
+              primaryActionDisabled={isAnalyzing}
               secondaryActionLabel="Remove"
               onSecondaryAction={handleRemoveAiResult}
             />
@@ -153,11 +171,11 @@ export function CaloriesSection({ mode }: CaloriesSectionProps) {
               }))}
               totalCalories={0}
               primaryActionLabel={
-                aiState === "loading" ? "Analyzing recipe..." : "Analyze"
+                isAnalyzing ? "Analyzing recipe..." : aiActionLabel
               }
-              primaryActionLoading={aiState === "loading"}
+              primaryActionLoading={isAnalyzing}
               onPrimaryAction={handleAnalyze}
-              primaryActionDisabled={aiState === "loading"}
+              primaryActionDisabled={isAnalyzing}
             />
           )}
         </TabsContent>
@@ -170,16 +188,12 @@ export function CaloriesSection({ mode }: CaloriesSectionProps) {
             totalCalories={manualSummary.totalCalories}
             inputRows={inputRows}
             onChangeInputValue={setMacroValue}
-            primaryActionLabel={manualHasAnyValue ? "Clear" : undefined}
-            onPrimaryAction={
-              manualHasAnyValue
-                ? () => {
-                    setMacroValue("nutritionProteinGrams", "");
-                    setMacroValue("nutritionCarbsGrams", "");
-                    setMacroValue("nutritionFatGrams", "");
-                  }
-                : undefined
+            primaryActionLabel={manualHasAnyValue ? "Remove" : undefined}
+            primaryActionDestructive
+            primaryActionIcon={
+              manualHasAnyValue ? <Delete size={14} color="#ffffff" /> : undefined
             }
+            onPrimaryAction={manualHasAnyValue ? handleRemoveManualResult : undefined}
           />
 
           <View className="px-1">
