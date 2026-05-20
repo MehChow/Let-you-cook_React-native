@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Text } from "@/components/ui/text";
 import { NutritionSummary } from "@/features/add-recipe/components/calories/NutritionSummary";
 import { useCaloriesSection } from "@/features/add-recipe/hooks/useCaloriesSection";
-import { Keyboard, View } from "react-native";
+import { View } from "react-native";
 
 export interface CaloriesSectionProps {
   mode: "edit" | "preview";
@@ -170,10 +170,8 @@ export function CaloriesSection({ mode }: CaloriesSectionProps) {
             totalCalories={manualSummary.totalCalories}
             inputRows={inputRows}
             onChangeInputValue={setMacroValue}
-            primaryActionLabel="Apply"
-            onPrimaryAction={Keyboard.dismiss}
-            secondaryActionLabel={manualHasAnyValue ? "Remove" : undefined}
-            onSecondaryAction={
+            primaryActionLabel={manualHasAnyValue ? "Clear" : undefined}
+            onPrimaryAction={
               manualHasAnyValue
                 ? () => {
                     setMacroValue("nutritionProteinGrams", "");

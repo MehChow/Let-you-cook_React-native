@@ -2,6 +2,7 @@ import { AI, Check, Delete } from "@/components/Icon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
+import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
 import { EditableMacroRows } from "@/features/add-recipe/components/calories/EditableMacroRows";
 import { NutritionRing } from "@/features/add-recipe/components/calories/NutritionRing";
@@ -88,17 +89,21 @@ export function NutritionSummary({
           {secondaryActionLabel && onSecondaryAction && !successBannerLabel ? (
             <Button
               onPress={onSecondaryAction}
-              className="h-12 rounded-xl bg-[#c33333]"
+              className="h-8 rounded-xl bg-[#c33333]"
             >
-              <Delete size={16} color="#ffffff" />
-              <Text className="text-sm font-semibold text-white">
+              <Delete size={14} color="#ffffff" />
+              <Text className="text-xs font-semibold text-white">
                 {secondaryActionLabel}
               </Text>
             </Button>
           ) : null}
 
           {(successBannerLabel || secondaryActionLabel) && !compact ? (
-            <View className="h-px bg-neutral-200" />
+            <Separator className="bg-neutral-200" />
+          ) : null}
+
+          {isEditable && !hideVisualization ? (
+            <Separator className="bg-neutral-200" />
           ) : null}
 
           {!hideVisualization ? (
@@ -118,10 +123,10 @@ export function NutritionSummary({
           {secondaryActionLabel && onSecondaryAction && successBannerLabel ? (
             <Button
               onPress={onSecondaryAction}
-              className="h-12 rounded-xl bg-[#c33333]"
+              className="h-8 rounded-xl bg-[#c33333]"
             >
-              <Delete size={16} color="#ffffff" />
-              <Text className="text-sm font-semibold text-white">
+              <Delete size={14} color="#ffffff" />
+              <Text className="text-xs font-semibold text-white">
                 {secondaryActionLabel}
               </Text>
             </Button>
