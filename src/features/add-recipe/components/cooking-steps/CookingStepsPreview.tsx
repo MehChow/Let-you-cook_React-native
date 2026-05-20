@@ -1,17 +1,21 @@
 import { Text } from "@/components/ui/text";
 import { MAX_STEP_INSTRUCTION_LENGTH } from "@/features/add-recipe/constants";
-import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
 import { Image } from "expo-image";
 import { View } from "react-native";
 
+export interface CookingStepPreviewItem {
+  imageUri?: string;
+  instruction?: string;
+}
+
 export interface CookingStepsPreviewProps {
-  steps: AddRecipeFormValues["cookingSteps"];
+  steps: CookingStepPreviewItem[];
 }
 
 export function CookingStepsPreview({ steps }: CookingStepsPreviewProps) {
   return (
     <View className="gap-4">
-      {(steps ?? []).map((step, i) => {
+      {(steps ?? []).map((step: CookingStepPreviewItem, i: number) => {
         const instructionText = step.instruction?.trim()
           ? step.instruction
           : "No instruction yet";

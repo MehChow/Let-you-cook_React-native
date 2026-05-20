@@ -1,6 +1,11 @@
 import { Delete } from "@/components/Icon";
 import { Icon } from "@/components/ui/icon";
 import {
+  DEFAULT_INGREDIENT_UNIT,
+  INGREDIENT_UNIT_OPTIONS,
+  type IngredientUnitOption,
+} from "@/features/add-recipe/constants";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -17,10 +22,9 @@ import {
 } from "react-hook-form";
 import { Pressable, TextInput, View } from "react-native";
 
-const UNIT_OPTIONS = ["ml", "g", "cup"] as const;
-const unitOption = (u: (typeof UNIT_OPTIONS)[number]) => ({
+const unitOption = (u: IngredientUnitOption) => ({
   value: u,
-  label: u,
+  label: u === "n/a" ? "N/A" : u,
 });
 
 export const IngredientRow = ({
@@ -109,7 +113,7 @@ export const IngredientRow = ({
                       value={unitOption(unitField.value)}
                       onValueChange={(opt) => {
                         if (!opt) return;
-                        unitField.onChange(opt.value as (typeof UNIT_OPTIONS)[number]);
+                        unitField.onChange(opt.value as IngredientUnitOption);
                       }}
                     >
                       <SelectTrigger
@@ -117,13 +121,13 @@ export const IngredientRow = ({
                         className="h-6 flex-1 border-0 bg-transparent px-2 py-0 shadow-none"
                       >
                         <SelectValue
-                          placeholder="g"
+                          placeholder={DEFAULT_INGREDIENT_UNIT}
                           className="text-sm font-semibold text-sage-700"
                         />
                       </SelectTrigger>
                       <SelectContent side="top" align="end">
-                        {UNIT_OPTIONS.map((u) => (
-                          <SelectItem key={u} value={u} label={u} />
+                        {INGREDIENT_UNIT_OPTIONS.map((u) => (
+                          <SelectItem key={u} value={u} label={unitOption(u).label} />
                         ))}
                       </SelectContent>
                     </Select>

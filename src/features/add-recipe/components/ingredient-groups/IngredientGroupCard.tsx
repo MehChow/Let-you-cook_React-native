@@ -1,3 +1,4 @@
+import { DEFAULT_INGREDIENT_UNIT } from "@/features/add-recipe/constants";
 import { Ingredients as IngredientsIcon } from "@/components/Icon";
 import { Card, CardContent } from "@/components/ui/card";
 import { Text } from "@/components/ui/text";
@@ -127,7 +128,14 @@ export const IngredientGroupCard = ({
         <Pressable
           onPress={() => {
             if (!canAddIngredient) return;
-            append({ name: "", quantityAmount: "", quantityUnit: "g" }, { shouldFocus: true });
+            append(
+              {
+                name: "",
+                quantityAmount: "",
+                quantityUnit: DEFAULT_INGREDIENT_UNIT,
+              },
+              { shouldFocus: true },
+            );
           }}
           disabled={!canAddIngredient}
           className="mt-2 self-start px-1 active:opacity-80 disabled:opacity-40"

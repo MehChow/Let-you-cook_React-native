@@ -1,5 +1,7 @@
 import { z } from "zod";
 import {
+  DEFAULT_INGREDIENT_UNIT,
+  INGREDIENT_UNIT_OPTIONS,
   MAX_CHEF_NOTES_LENGTH,
   MAX_COOKING_STEPS,
   MAX_DESCRIPTION_LENGTH,
@@ -49,7 +51,7 @@ export const ingredientRowSchema = z.object({
         });
       }
     }),
-  quantityUnit: z.enum(["ml", "g", "cup"]),
+  quantityUnit: z.enum(INGREDIENT_UNIT_OPTIONS).default(DEFAULT_INGREDIENT_UNIT),
 });
 
 export const ingredientGroupSchema = z.object({

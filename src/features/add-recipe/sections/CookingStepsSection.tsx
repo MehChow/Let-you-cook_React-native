@@ -5,7 +5,8 @@ import { CookingStepsPreview } from "@/features/add-recipe/components/cooking-st
 import { MAX_COOKING_STEPS } from "@/features/add-recipe/constants";
 import { useKeyboardAwareFieldScroll } from "@/features/add-recipe/hooks/useKeyboardAwareFieldScroll";
 import { useCookingStepsField } from "@/features/add-recipe/hooks/useCookingStepsField";
-import { useCallback, useMemo, useState } from "react";
+import { useCookingStepsDragDisplay } from "@/features/add-recipe/hooks/useCookingStepsDragDisplay";
+import { useCallback } from "react";
 import type { ScrollView as GestureHandlerScrollView } from "react-native-gesture-handler";
 import { View } from "react-native";
 import type { RenderItemParams } from "react-native-draggable-flatlist";
@@ -35,41 +36,12 @@ export function CookingStepsSection({
   } = useCookingStepsField();
   const { scrollRef, onInputFocus } =
     useKeyboardAwareFieldScroll<GestureHandlerScrollView>();
-  const [dragFromIndex, setDragFromIndex] = useState<number | null>(null);
-  const [placeholderIndex, setPlaceholderIndex] = useState<number | null>(null);
-
-  const displayIndexById = useMemo(() => {
-    const displayMap = new Map<string, number>();
-
-    fields.forEach((field, index) => {
-      let displayIndex = index;
-
-      if (
-        dragFromIndex !== null &&
-        placeholderIndex !== null &&
-        dragFromIndex !== placeholderIndex
-      ) {
-        if (index === dragFromIndex) {
-          displayIndex = placeholderIndex;
-        } else if (dragFromIndex < placeholderIndex) {
-          if (index > dragFromIndex && index <= placeholderIndex) {
-            displayIndex = index - 1;
-          }
-        } else if (index >= placeholderIndex && index < dragFromIndex) {
-          displayIndex = index + 1;
-        }
-      }
-
-      displayMap.set(field.id, displayIndex);
-    });
-
-    return displayMap;
-  }, [dragFromIndex, fields, placeholderIndex]);
-
-  const resetDragState = useCallback(() => {
-    setDragFromIndex(null);
-    setPlaceholderIndex(null);
-  }, []);
+  const {
+    beginDrag,
+    displayIndexById,
+    resetDragState,
+    setPlaceholderIndex,
+  } = useCookingStepsDragDisplay(fields);
 
   const renderItem = useCallback(
     ({
@@ -140,8 +112,7 @@ export function CookingStepsSection({
             resetDragState();
           }}
           onDragBegin={(index) => {
-            setDragFromIndex(index);
-            setPlaceholderIndex(index);
+            beginDrag(index);
           }}
           renderItem={renderItem}
           ListFooterComponent={

@@ -4,6 +4,7 @@ import {
 } from "@/features/add-recipe/constants";
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
 import { createEmptyIngredientGroup } from "@/features/add-recipe/utils/ingredientGroups";
+import { prepareIngredientGroupsForPreview } from "@/features/add-recipe/utils/previewHelpers";
 import { useCallback, useEffect, useMemo } from "react";
 import {
   useFieldArray,
@@ -19,9 +20,9 @@ export const useIngredientGroupsField = () => {
   const watchedGroups = useWatch({ control, name: "ingredientGroups" });
 
   useEffect(() => {
-    const hasCompleteIngredient = (watchedGroups ?? []).some((g) =>
+    const hasCompleteIngredient = (watchedGroups ?? []).some((g: AddRecipeFormValues["ingredientGroups"][number]) =>
       (g.items ?? []).some(
-        (row) =>
+        (row: AddRecipeFormValues["ingredientGroups"][number]["items"][number]) =>
           Boolean(row.name?.trim()) &&
           Boolean(row.quantityAmount?.trim()) &&
           Boolean(row.quantityUnit?.trim())
@@ -52,13 +53,15 @@ export const useIngredientGroupsField = () => {
 
   const totalIngredients = useMemo(() => {
     return (watchedGroups ?? []).reduce(
-      (sum, g) => sum + (g.items?.length ?? 0),
+      (sum: number, g: AddRecipeFormValues["ingredientGroups"][number]) =>
+        sum + (g.items?.length ?? 0),
       0
     );
   }, [watchedGroups]);
 
   const canAddGroup = groupCount < MAX_INGREDIENT_GROUPS;
   const canAddIngredient = totalIngredients < MAX_INGREDIENTS;
+  const previewGroups = prepareIngredientGroupsForPreview(watchedGroups);
 
   const onAddGroup = useCallback(() => {
     if (!canAddGroup) return;
@@ -74,8 +77,10 @@ export const useIngredientGroupsField = () => {
   );
 
   return {
+    control,
     groupFields,
     groupCount,
+    previewGroups,
     totalIngredients,
     canAddGroup,
     canAddIngredient,

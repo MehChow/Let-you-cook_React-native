@@ -14,7 +14,7 @@ export function SectionPreviewCard({
 }: SectionPreviewCardProps) {
   const inner = (
     <>
-      <Text className="mb-3 text-lg font-bold text-accent-600">{title}</Text>
+      <Text className="mb-3 text-xl font-bold text-accent-600">{title}</Text>
       {children}
     </>
   );

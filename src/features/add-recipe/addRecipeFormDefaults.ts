@@ -1,3 +1,4 @@
+import { DEFAULT_INGREDIENT_UNIT } from "@/features/add-recipe/constants";
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
 
 export const addRecipeFormDefaults: AddRecipeFormValues = {
@@ -9,7 +10,7 @@ export const addRecipeFormDefaults: AddRecipeFormValues = {
   ingredientGroups: [
     {
       groupName: "Group name",
-      items: [{ name: "", quantityAmount: "", quantityUnit: "g" }],
+      items: [{ name: "", quantityAmount: "", quantityUnit: DEFAULT_INGREDIENT_UNIT }],
     },
   ],
   cookingSteps: [{ instruction: "", imageUri: "" }],

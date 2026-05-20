@@ -150,7 +150,9 @@ export function CaloriesSection({ mode }: CaloriesSectionProps) {
                 aiStatus === "stale" ? "Analysis outdated" : "Analysis complete"
               }
               statusBannerTone={aiStatus === "stale" ? "warning" : "success"}
-              primaryActionLabel={aiStatus === "stale" ? "Re-analyze" : undefined}
+              primaryActionLabel={
+                aiStatus === "stale" ? "Re-analyze" : undefined
+              }
               primaryActionLoading={isAnalyzing}
               onPrimaryAction={aiStatus === "stale" ? handleAnalyze : undefined}
               primaryActionDisabled={isAnalyzing}
@@ -191,9 +193,13 @@ export function CaloriesSection({ mode }: CaloriesSectionProps) {
             primaryActionLabel={manualHasAnyValue ? "Remove" : undefined}
             primaryActionDestructive
             primaryActionIcon={
-              manualHasAnyValue ? <Delete size={14} color="#ffffff" /> : undefined
+              manualHasAnyValue ? (
+                <Delete size={14} color="#ffffff" />
+              ) : undefined
             }
-            onPrimaryAction={manualHasAnyValue ? handleRemoveManualResult : undefined}
+            onPrimaryAction={
+              manualHasAnyValue ? handleRemoveManualResult : undefined
+            }
           />
 
           <View className="px-1">

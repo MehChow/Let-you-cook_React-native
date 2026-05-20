@@ -1,3 +1,4 @@
+import { DEFAULT_INGREDIENT_UNIT } from "@/features/add-recipe/constants";
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
 
 type IngredientGroup = AddRecipeFormValues["ingredientGroups"][number];
@@ -8,7 +9,7 @@ const hasText = (value?: string) => Boolean(value?.trim());
 export const createEmptyIngredientRow = (): IngredientRow => ({
   name: "",
   quantityAmount: "",
-  quantityUnit: "g",
+  quantityUnit: DEFAULT_INGREDIENT_UNIT,
 });
 
 export const createEmptyIngredientGroup = (): IngredientGroup => ({
@@ -26,9 +27,9 @@ export const sanitizeIngredientGroups = (
   groups: AddRecipeFormValues["ingredientGroups"] | undefined,
 ): AddRecipeFormValues["ingredientGroups"] => {
   return (groups ?? [])
-    .map((group) => {
+    .map((group: IngredientGroup) => {
       const items = (group.items ?? []).filter(
-        (row) => !isBlankIngredientRow(row),
+        (row: IngredientRow) => !isBlankIngredientRow(row),
       );
 
       return {
@@ -36,5 +37,5 @@ export const sanitizeIngredientGroups = (
         items,
       };
     })
-    .filter((group) => (group.items ?? []).length > 0);
+    .filter((group: IngredientGroup) => (group.items ?? []).length > 0);
 };

@@ -16,7 +16,7 @@ export interface BasicsSectionProps {
 }
 
 export function BasicsSection({ mode }: BasicsSectionProps) {
-  const { control, errors, previewValues } = useBasicsSectionField();
+  const { control, errorMessages, previewValues } = useBasicsSectionField();
 
   if (mode === "preview") {
     return <BasicsSectionPreview {...previewValues} />;
@@ -27,7 +27,7 @@ export function BasicsSection({ mode }: BasicsSectionProps) {
       <LabeledField
         label="Recipe name"
         icon={Recipe}
-        errorMessage={errors.recipeName?.message}
+        errorMessage={errorMessages.recipeName}
       >
         <AddRecipeTextField
           control={control}
@@ -40,7 +40,7 @@ export function BasicsSection({ mode }: BasicsSectionProps) {
       <LabeledField
         label="Description (optional)"
         icon={Description}
-        errorMessage={errors.description?.message}
+        errorMessage={errorMessages.description}
       >
         <AddRecipeCounterTextArea
           control={control}
@@ -56,7 +56,7 @@ export function BasicsSection({ mode }: BasicsSectionProps) {
           <LabeledField
             label="Cook time"
             icon={Time}
-            errorMessage={errors.cookTimeMinutes?.message}
+            errorMessage={errorMessages.cookTimeMinutes}
           >
             <AddRecipeTextField
               control={control}
@@ -76,7 +76,7 @@ export function BasicsSection({ mode }: BasicsSectionProps) {
           <LabeledField
             label="Serving"
             icon={Serving}
-            errorMessage={errors.servings?.message}
+            errorMessage={errorMessages.servings}
           >
             <AddRecipeTextField
               control={control}

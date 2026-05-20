@@ -10,6 +10,10 @@ export const MAX_INGREDIENT_GROUPS = 5;
 export const MAX_COOKING_STEPS = 20;
 export const MAX_RECIPE_IMAGES = 9;
 
+export const INGREDIENT_UNIT_OPTIONS = ["n/a", "ml", "g", "cup"] as const;
+export type IngredientUnitOption = (typeof INGREDIENT_UNIT_OPTIONS)[number];
+export const DEFAULT_INGREDIENT_UNIT: IngredientUnitOption = "g";
+
 export const MIN_SERVING = 1;
 export const MAX_SERVING = 99;
 
@@ -60,3 +64,15 @@ export const SECTION_PREVIEW_TITLES = [
   "Reminder",
   "Nutritional information",
 ] as const;
+
+export const formatIngredientQuantity = (
+  amount?: string,
+  unit?: IngredientUnitOption,
+) => {
+  const trimmedAmount = amount?.trim() ?? "";
+
+  if (!trimmedAmount) return "";
+  if (unit === "n/a") return trimmedAmount;
+
+  return `${trimmedAmount} ${unit ?? DEFAULT_INGREDIENT_UNIT}`;
+};

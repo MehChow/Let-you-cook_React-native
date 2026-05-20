@@ -23,6 +23,11 @@ export const RECIPE_IMAGES_PREVIEW_CONTENT_GUTTER = 48;
 
 export const RECIPE_IMAGES_GRID_GAP = 12;
 
+export interface RecipeImageFieldValue {
+  clientKey: string;
+  uri: string;
+}
+
 function newRecipeImageClientKey(): string {
   const c = globalThis.crypto;
   if (c && "randomUUID" in c && typeof c.randomUUID === "function") {
@@ -45,10 +50,17 @@ export function useRecipeImagesField() {
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [gridDragging, setGridDragging] = useState(false);
 
-  const { fields, append, remove, replace } = useFieldArray({
+  const {
+    fields: recipeImageFields,
+    append,
+    remove,
+    replace,
+  } = useFieldArray({
     control,
     name: "recipeImageUris",
   });
+  const fields = recipeImageFields as (typeof recipeImageFields[number] &
+    RecipeImageFieldValue)[];
 
   const photoModels = useMemo(
     () => fields.map((f) => ({ uri: f.uri, clientKey: f.clientKey })),

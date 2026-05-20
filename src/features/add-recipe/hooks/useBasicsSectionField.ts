@@ -23,10 +23,20 @@ export function useBasicsSectionField() {
     cookTimeMinutes: cookTimeMinutes ?? "",
     servings: servings ?? "",
   };
+  const errorMessages = {
+    recipeName: getErrorMessage(errors.recipeName?.message),
+    description: getErrorMessage(errors.description?.message),
+    cookTimeMinutes: getErrorMessage(errors.cookTimeMinutes?.message),
+    servings: getErrorMessage(errors.servings?.message),
+  };
 
   return {
     control,
-    errors,
+    errorMessages,
     previewValues,
   };
 }
+
+const getErrorMessage = (message: unknown): string | undefined => {
+  return typeof message === "string" ? message : undefined;
+};
