@@ -1,8 +1,11 @@
-import * as React from "react";
-import type { SearchFilters } from "@/features/search/filterStore";
-import { FILTER_DEFAULTS, getAppliedCount } from "@/features/search/filterStore";
-import { parseServingRange } from "@/features/search/utils/parseServingRange";
 import type { HomeRecipe } from "@/features/home/mockData";
+import type { SearchFilters } from "@/features/search/filterStore";
+import {
+  FILTER_DEFAULTS,
+  getAppliedCount,
+} from "@/features/search/filterStore";
+import { parseServingRange } from "@/features/search/utils/parseServingRange";
+import * as React from "react";
 
 type Params = {
   recipes: readonly HomeRecipe[];
@@ -90,7 +93,7 @@ export function useSearchDerived({
   }, [filters, recipes, searchText, selectedCategoryLabel]);
 
   const activeFilterChips = React.useMemo(() => {
-    const chips: Array<{ key: string; label: string; onRemove: () => void }> = [];
+    const chips: { key: string; label: string; onRemove: () => void }[] = [];
 
     if (filters.sortBy !== FILTER_DEFAULTS.sortBy) {
       const sortLabel =
@@ -158,4 +161,3 @@ export function useSearchDerived({
     activeFilterChips,
   };
 }
-

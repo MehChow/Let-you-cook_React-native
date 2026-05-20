@@ -1,7 +1,7 @@
 import { Description, Recipe, Serving, Time } from "@/components/Icon";
 import { Text } from "@/components/ui/text";
-import type { BasicsSectionPreviewValues } from "@/features/add-recipe/hooks/useBasicsSectionField";
 import { MAX_DESCRIPTION_LENGTH } from "@/features/add-recipe/constants";
+import type { BasicsSectionPreviewValues } from "@/features/add-recipe/hooks/useBasicsSectionField";
 import { View } from "react-native";
 
 export interface BasicsSectionPreviewProps extends BasicsSectionPreviewValues {}

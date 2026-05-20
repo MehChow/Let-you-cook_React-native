@@ -12,13 +12,11 @@ type FavoriteButtonProps = {
   size?: FavoriteButtonSize;
 };
 
-const sizeClasses: Record<
-  FavoriteButtonSize,
-  { wrap: string; icon: string }
-> = {
-  default: { wrap: "h-9 w-9", icon: "size-5" },
-  compact: { wrap: "h-6 w-6", icon: "size-3" },
-};
+const sizeClasses: Record<FavoriteButtonSize, { wrap: string; icon: string }> =
+  {
+    default: { wrap: "h-9 w-9", icon: "size-5" },
+    compact: { wrap: "h-6 w-6", icon: "size-3" },
+  };
 
 export default function FavoriteButton({
   isActive = false,
@@ -42,7 +40,7 @@ export default function FavoriteButton({
         className={cn(
           "items-center justify-center rounded-full",
           wrap,
-          bgClass
+          bgClass,
         )}
       >
         <Icon

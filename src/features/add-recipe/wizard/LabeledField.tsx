@@ -24,7 +24,7 @@ export function LabeledField({
     <View className="mb-4 gap-1">
       <View className="flex-row items-center gap-2">
         <IconMark size={18} color="#426159" />
-        <Text className="text-sm font-bold">{label}</Text>
+        <Text className="text-sm font-semibold text-sage-700">{label}</Text>
       </View>
       {children}
       {errorMessage ? (

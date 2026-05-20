@@ -63,13 +63,9 @@ export function CookingStepCard({
         >
           <Icon as={Drag} size={20} color="#75948c" />
           <View className="flex-row items-center gap-1">
-            <Text className="text-lg font-bold uppercase tracking-wider">
-              Step
-            </Text>
+            <Text className="text-lg font-bold uppercase">Step</Text>
             <Badge className="flex h-6 w-6 bg-sage-700 px-0" variant="default">
-              <Text className="text-sm font-bold text-white">
-                {(displayIndex ?? index) + 1}
-              </Text>
+              <Text className="text-white">{(displayIndex ?? index) + 1}</Text>
             </Badge>
           </View>
         </Pressable>

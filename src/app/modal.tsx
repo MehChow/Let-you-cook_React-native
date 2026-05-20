@@ -59,7 +59,7 @@ export default function Modal() {
       style={{ paddingBottom: Math.max(insets.bottom, 12) }}
     >
       <View className="px-5 pt-4">
-        <Text className="text-center text-base font-bold text-foreground">
+        <Text className="text-center text-base font-sans-bold text-foreground">
           Category
         </Text>
       </View>
@@ -128,7 +128,7 @@ export default function Modal() {
                 maxOpacity={0.62}
                 heightFraction={0.5}
               />
-              <Text className="absolute bottom-3 left-3 z-20 text-[14px] font-semibold text-white">
+              <Text className="absolute bottom-3 left-3 z-20 text-[14px] font-sans-semibold text-white">
                 {item.label}
               </Text>
             </PressableCard>
@@ -146,3 +146,4 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
 });
+

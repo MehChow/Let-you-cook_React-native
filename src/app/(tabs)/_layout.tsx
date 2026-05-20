@@ -16,7 +16,7 @@ export default function TabLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.sage[600],
         tabBarInactiveTintColor: colors.sage[400],
-        tabBarLabelStyle: { fontSize: 11, fontWeight: "600" },
+        tabBarLabelStyle: { fontSize: 11, fontFamily: "Outfit-SemiBold" },
         tabBarActiveBackgroundColor: "transparent",
         tabBarInactiveBackgroundColor: "transparent",
         tabBarStyle: {

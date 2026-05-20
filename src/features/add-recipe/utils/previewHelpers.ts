@@ -7,7 +7,9 @@ import { sanitizeIngredientGroups } from "@/features/add-recipe/utils/ingredient
 export const prepareCookingStepsForPreview = (
   steps: AddRecipeFormValues["cookingSteps"]
 ): AddRecipeFormValues["cookingSteps"] => {
-  return (steps ?? []).filter((step) => Boolean(step.instruction?.trim()));
+  return (steps ?? []).filter((step: AddRecipeFormValues["cookingSteps"][number]) =>
+    Boolean(step.instruction?.trim()),
+  );
 };
 
 /**
