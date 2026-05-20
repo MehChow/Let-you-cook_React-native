@@ -18,22 +18,15 @@ import { cn } from "@/lib/utils";
 import { useRouter } from "expo-router";
 import * as React from "react";
 import { FlatList, Pressable, ScrollView, TextInput, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-const RECENT_SEARCHES = [
-  "healthy",
-  "tiramisu",
-  "snacks",
-  "vegan",
-  "cake",
-];
+const RECENT_SEARCHES = ["healthy", "tiramisu", "snacks", "vegan", "cake"];
 
 export default function SearchScreen() {
-  const insets = useSafeAreaInsets();
   const router = useRouter();
   const selectedCategoryId = useCategoryStore((s) => s.selectedCategoryId);
   const setSelectedCategoryId = useCategoryStore(
-    (s) => s.setSelectedCategoryId
+    (s) => s.setSelectedCategoryId,
   );
 
   const [searchText, setSearchText] = React.useState("");
@@ -61,7 +54,7 @@ export default function SearchScreen() {
       calories: caloriesRange,
       servings: servingsRange,
     }),
-    [caloriesRange, cookingTime, servingsRange, sortBy]
+    [caloriesRange, cookingTime, servingsRange, sortBy],
   );
 
   const { appliedCount, filteredRecipes, activeFilterChips } = useSearchDerived(
@@ -74,7 +67,7 @@ export default function SearchScreen() {
       setCookingTime,
       setCalories,
       setServings,
-    }
+    },
   );
 
   const categoryItems = React.useMemo(
@@ -85,7 +78,7 @@ export default function SearchScreen() {
         placeholderColorClass: c.placeholderColorClass,
         imageSource: c.imageThumb,
       })),
-    []
+    [],
   );
 
   const renderRecipe = React.useCallback(
@@ -108,11 +101,14 @@ export default function SearchScreen() {
         />
       </View>
     ),
-    [isFavourite, setFavourite]
+    [isFavourite, setFavourite],
   );
 
   return (
-    <View className="flex-1 bg-sage-100">
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#dce4e2" }}
+      edges={["top", "left", "right"]}
+    >
       <FlatList
         showsVerticalScrollIndicator={false}
         data={filteredRecipes}
@@ -145,7 +141,7 @@ export default function SearchScreen() {
                 onPress={() => router.push("/filters")}
                 className={cn(
                   "h-10 w-10 items-center justify-center rounded-2xl active:opacity-80",
-                  appliedCount > 0 ? "bg-sage-500" : "bg-sage-200"
+                  appliedCount > 0 ? "bg-sage-500" : "bg-sage-200",
                 )}
                 style={{ elevation: 3 }}
               >
@@ -153,11 +149,11 @@ export default function SearchScreen() {
                   as={Filter}
                   className={cn(
                     "size-4.5",
-                    appliedCount > 0 ? "text-white" : "text-sage-500"
+                    appliedCount > 0 ? "text-white" : "text-sage-500",
                   )}
                 />
                 {appliedCount > 0 ? (
-                  <View className="absolute -right-2 -top-2 h-5 min-w-[20px] items-center justify-center rounded-full bg-white px-1">
+                  <View className="absolute -right-2 -top-2 h-5 min-w-5 items-center justify-center rounded-full bg-white px-1">
                     <Text className="text-[11px] font-bold text-black">
                       {appliedCount}
                     </Text>
@@ -186,7 +182,7 @@ export default function SearchScreen() {
                       className={cn("bg-sage-200", isActive && "bg-sage-500")}
                       textClassName={cn(
                         "text-sage-700",
-                        isActive && "text-white"
+                        isActive && "text-white",
                       )}
                     />
                   </Pressable>
@@ -257,9 +253,9 @@ export default function SearchScreen() {
           </View>
         }
         contentContainerStyle={{
-          paddingBottom: Math.max(insets.bottom, 12) + 110,
+          paddingBottom: 16,
         }}
       />
-    </View>
+    </SafeAreaView>
   );
 }

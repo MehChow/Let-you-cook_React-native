@@ -8,7 +8,10 @@ import { mockAvatar, popularRecipes } from "@/features/home/mockData";
 import { useFavourites } from "@/hooks/useFavourites";
 import * as React from "react";
 import { FlatList, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 export default function FavouritesScreen() {
   const insets = useSafeAreaInsets();
@@ -17,7 +20,7 @@ export default function FavouritesScreen() {
 
   const favouritedRecipes = React.useMemo(
     () => popularRecipes.filter((r) => Boolean(favourites[r.id])),
-    [favourites]
+    [favourites],
   );
 
   const header = React.useMemo(
@@ -27,7 +30,7 @@ export default function FavouritesScreen() {
         <FavouriteViewModeToggle mode={viewMode} onModeChange={setViewMode} />
       </View>
     ),
-    [insets.top, viewMode]
+    [viewMode],
   );
 
   const empty = React.useMemo(
@@ -41,7 +44,7 @@ export default function FavouritesScreen() {
         </Text>
       </View>
     ),
-    []
+    [],
   );
 
   const renderGridItem = React.useCallback(
@@ -64,7 +67,7 @@ export default function FavouritesScreen() {
         />
       </View>
     ),
-    [isFavourite, setFavourite]
+    [isFavourite, setFavourite],
   );
 
   const renderListItem = React.useCallback(
@@ -81,11 +84,11 @@ export default function FavouritesScreen() {
         />
       </View>
     ),
-    [isFavourite, setFavourite]
+    [isFavourite, setFavourite],
   );
 
   return (
-    <View className="flex-1 bg-sage-100">
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#dce4e2" }}>
       {header}
       <FlatList
         data={favouritedRecipes}
@@ -98,6 +101,6 @@ export default function FavouritesScreen() {
           paddingBottom: Math.max(insets.bottom, 12) + 110,
         }}
       />
-    </View>
+    </SafeAreaView>
   );
 }

@@ -16,14 +16,14 @@ import * as React from "react";
 import { Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const sortOptions: Array<{ value: SortBy; label: string }> = [
+const sortOptions: { value: SortBy; label: string }[] = [
   { value: "relevance", label: "Relevance" },
   { value: "top_rated", label: "Top rated" },
   { value: "newest", label: "Newest" },
   { value: "quickest", label: "Quickest" },
 ];
 
-const cookingTimeOptions: Array<{ value: CookingTime; label: string }> = [
+const cookingTimeOptions: { value: CookingTime; label: string }[] = [
   { value: "any", label: "Any" },
   { value: "lt_15", label: "< 15 min" },
   { value: "lt_30", label: "< 30 min" },
@@ -53,7 +53,7 @@ function ChipGroup<T extends string>({
 }: {
   value: T;
   onChange: (next: T) => void;
-  options: Array<{ value: T; label: string }>;
+  options: { value: T; label: string }[];
 }) {
   return (
     <ScrollView
@@ -104,7 +104,7 @@ export default function FiltersScreen() {
         calories,
         servings,
       }),
-    [calories, cookingTime, servings, sortBy]
+    [calories, cookingTime, servings, sortBy],
   );
 
   const caloriesLabel = `${calories[0]} - ${calories[1]} kcal`;
@@ -124,7 +124,7 @@ export default function FiltersScreen() {
           <View className="flex-row items-center gap-2">
             <Text className="text-base font-bold text-foreground">Filters</Text>
             {appliedCount > 0 ? (
-              <View className="h-6 min-w-[24px] items-center justify-center rounded-full bg-sage-700 px-2">
+              <View className="h-6 min-w-6 items-center justify-center rounded-full bg-sage-700 px-2">
                 <Text className="text-xs font-bold text-white">
                   {appliedCount}
                 </Text>

@@ -14,6 +14,7 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
+      "softwareKeyboardLayoutMode": "pan",
       "predictiveBackGestureEnabled": false,
       "package": "com.meh_chow.LetYouCook"
     },
@@ -33,7 +34,25 @@
           }
         }
       ],
-      "expo-image"
+      "expo-image",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow LetYouCook to access your photos to add recipe images."
+        }
+      ],
+      "expo-web-browser",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "node_modules/@expo-google-fonts/outfit/400Regular/Outfit_400Regular.ttf",
+            "node_modules/@expo-google-fonts/outfit/500Medium/Outfit_500Medium.ttf",
+            "node_modules/@expo-google-fonts/outfit/600SemiBold/Outfit_600SemiBold.ttf",
+            "node_modules/@expo-google-fonts/outfit/700Bold/Outfit_700Bold.ttf"
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

@@ -1,5 +1,8 @@
-import CustomTabBar from "@/components/CustomTabBar";
-import { Tabs } from "expo-router";
+import { Add, Favorite, Home, Search, User } from "@/components/Icon";
+import { Icon } from "@/components/ui/icon";
+import { colors } from "@/util/twColor";
+import { router, Tabs } from "expo-router";
+import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabLayout() {
@@ -8,25 +11,35 @@ export default function TabLayout() {
   return (
     <Tabs
       safeAreaInsets={{ bottom: 0 }}
-      tabBar={(props) => <CustomTabBar {...props} />}
       initialRouteName="index"
       screenOptions={{
         headerShown: false,
-        // Allow screens to render behind the floating tab bar.
+        tabBarActiveTintColor: colors.sage[600],
+        tabBarInactiveTintColor: colors.sage[400],
+        tabBarLabelStyle: { fontSize: 11, fontFamily: "Outfit-SemiBold" },
+        tabBarActiveBackgroundColor: "transparent",
+        tabBarInactiveBackgroundColor: "transparent",
         tabBarStyle: {
-          position: "absolute",
-          backgroundColor: "transparent",
-          borderTopWidth: 0,
-          elevation: 0,
+          backgroundColor: "white",
+          paddingTop: 8,
+          height: 52 + insets.bottom,
+          borderTopWidth: 1,
+          borderTopColor: "#E5E7EB",
         },
-        // Prevent content overlap with the status bar.
-        sceneStyle: { paddingTop: insets.top },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           title: "Home",
+          tabBarIcon: ({ color, focused }) => (
+            <Icon
+              as={Home}
+              size={24}
+              color={color}
+              fill={focused ? color : "transparent"}
+            />
+          ),
         }}
       />
 
@@ -34,13 +47,53 @@ export default function TabLayout() {
         name="search"
         options={{
           title: "Search",
+          tabBarIcon: ({ color, focused }) => (
+            <Icon
+              as={Search}
+              size={24}
+              color={color}
+              fill={focused ? color : "transparent"}
+            />
+          ),
         }}
       />
 
       <Tabs.Screen
-        name="add-recipe"
+        name="add"
         options={{
-          title: "Add Recipe",
+          title: "Add",
+          tabBarLabel: () => null,
+          tabBarButton: ({
+            children,
+            onPress,
+            onLongPress,
+            accessibilityLabel,
+            accessibilityState,
+            testID,
+          }) => (
+            <View className="items-center justify-center" style={{ width: 70 }}>
+              <Pressable
+                onPress={onPress}
+                onLongPress={onLongPress}
+                accessibilityLabel={accessibilityLabel}
+                accessibilityState={accessibilityState}
+                testID={testID}
+                className="h-14 w-14 items-center justify-center rounded-full bg-sage-600 active:bg-sage-700"
+                style={{ transform: [{ translateY: -18 }], elevation: 10 }}
+              >
+                {children}
+              </Pressable>
+            </View>
+          ),
+          tabBarIcon: () => (
+            <Icon as={Add} size={32} color="white" fill="transparent" />
+          ),
+        }}
+        listeners={{
+          tabPress: (e) => {
+            e.preventDefault();
+            router.push("/add-recipe");
+          },
         }}
       />
 
@@ -48,6 +101,14 @@ export default function TabLayout() {
         name="favourites"
         options={{
           title: "Favourites",
+          tabBarIcon: ({ color, focused }) => (
+            <Icon
+              as={Favorite}
+              size={24}
+              color={color}
+              fill={focused ? color : "transparent"}
+            />
+          ),
         }}
       />
 
@@ -55,6 +116,14 @@ export default function TabLayout() {
         name="profile"
         options={{
           title: "Profile",
+          tabBarIcon: ({ color, focused }) => (
+            <Icon
+              as={User}
+              size={24}
+              color={color}
+              fill={focused ? color : "transparent"}
+            />
+          ),
         }}
       />
     </Tabs>

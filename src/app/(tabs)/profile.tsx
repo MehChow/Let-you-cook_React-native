@@ -5,7 +5,10 @@ import { UserRecipeGrid } from "@/features/profile/UserRecipeGrid";
 import { useFavourites } from "@/hooks/useFavourites";
 import * as React from "react";
 import { View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 const GRID_GAP = 2;
 const GRID_COLUMNS = 3;
@@ -30,7 +33,10 @@ export default function ProfileScreen() {
   const recipeListBottomPadding = Math.max(insets.bottom, 12) + 110;
 
   return (
-    <View className="flex-1 bg-sage-100">
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#52796f" }}
+      edges={["top", "left", "right"]}
+    >
       <View className="bg-sage-500 px-5 pt-8 pb-6">
         <UserHeader user={profileUser} avatarSource={mockAvatar} />
         <ProfileMetadata
@@ -50,6 +56,6 @@ export default function ProfileScreen() {
           onToggleFavourite={(id, next) => setFavourite(id, next)}
         />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }

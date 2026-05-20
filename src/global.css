@@ -67,6 +67,11 @@
   --radius-xl: calc(var(--radius) + 4px);
 
   --spacing-hairline: hairlineWidth();
+
+  --font-normal: "Outfit_400Regular";
+  --font-medium: "Outfit_500Medium";
+  --font-semibold: "Outfit_600SemiBold";
+  --font-bold: "Outfit_700Bold";
 }
 
 @layer theme {
