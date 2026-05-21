@@ -8,8 +8,9 @@ export function PreviewHintBanner() {
   return (
     <View className="mx-4 mb-3 flex-row items-center gap-2 rounded-xl bg-sage-200/80 px-3 py-2.5">
       <Icon as={Edit} size={18} color={colors.sage[700]} />
-      <Text className="flex-1 text-sm">
-        Tap any section to jump back and edit it.
+      <Text className="flex-1 text-sm font-medium text-sage-700">
+        Tap on any section to jump back and edit it. For images, tap the "Edit"
+        button on the top right.
       </Text>
     </View>
   );

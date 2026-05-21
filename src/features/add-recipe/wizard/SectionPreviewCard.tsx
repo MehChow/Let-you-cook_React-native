@@ -1,3 +1,5 @@
+import { Edit } from "@/components/Icon";
+import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
 import { Pressable, View } from "react-native";
 
@@ -5,21 +7,38 @@ export interface SectionPreviewCardProps {
   title: string;
   children: React.ReactNode;
   onPress?: () => void;
+  headerActionLabel?: string;
+  onHeaderAction?: () => void;
 }
 
 export function SectionPreviewCard({
   title,
   children,
   onPress,
+  headerActionLabel,
+  onHeaderAction,
 }: SectionPreviewCardProps) {
   const inner = (
     <>
-      <Text className="mb-3 text-xl font-bold text-accent-600">{title}</Text>
+      <View className="mb-3 flex-row items-center justify-between gap-3">
+        <Text className="flex-1 text-xl font-bold text-accent-600">{title}</Text>
+        {headerActionLabel && onHeaderAction ? (
+          <Pressable
+            onPress={onHeaderAction}
+            className="flex-row items-center gap-1 rounded-md bg-sage-200 px-2 py-1 active:opacity-90"
+          >
+            <Icon as={Edit} size={14} className="text-sage-700" />
+            <Text className="text-xs font-semibold uppercase text-sage-700">
+              {headerActionLabel}
+            </Text>
+          </Pressable>
+        ) : null}
+      </View>
       {children}
     </>
   );
 
-  if (onPress) {
+  if (onPress && !onHeaderAction) {
     return (
       <Pressable
         onPress={onPress}

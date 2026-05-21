@@ -1,25 +1,19 @@
 import { MAX_RECIPE_IMAGES } from "@/features/add-recipe/constants";
 import { useImagePicker } from "@/features/add-recipe/hooks/useImagePicker";
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
-import {
-    useFieldArray,
-    useFormContext,
-    useFormState,
-    useWatch,
+  useFieldArray,
+  useFormContext,
+  useFormState,
+  useWatch,
 } from "react-hook-form";
 import { ScrollView, useWindowDimensions } from "react-native";
 
 /** Matches `px-4` wizard horizontal inset for the images step. */
 export const RECIPE_IMAGES_EDIT_CONTENT_GUTTER = 32;
-/** Preview cards use `px-6` (24*2) from screen edges for image strip width. */
-export const RECIPE_IMAGES_PREVIEW_CONTENT_GUTTER = 48;
+/** Preview cards use `mx-4` + `p-4`, so image content sits 32px in from each edge. */
+export const RECIPE_IMAGES_PREVIEW_CONTENT_GUTTER = 64;
 
 export const RECIPE_IMAGES_GRID_GAP = 12;
 
@@ -59,12 +53,12 @@ export function useRecipeImagesField() {
     control,
     name: "recipeImageUris",
   });
-  const fields = recipeImageFields as (typeof recipeImageFields[number] &
+  const fields = recipeImageFields as ((typeof recipeImageFields)[number] &
     RecipeImageFieldValue)[];
 
   const photoModels = useMemo(
     () => fields.map((f) => ({ uri: f.uri, clientKey: f.clientKey })),
-    [fields]
+    [fields],
   );
 
   const resetCarouselToFirst = useCallback(() => {
@@ -77,7 +71,7 @@ export function useRecipeImagesField() {
       replace(next);
       resetCarouselToFirst();
     },
-    [replace, resetCarouselToFirst]
+    [replace, resetCarouselToFirst],
   );
 
   useEffect(() => {
@@ -101,7 +95,7 @@ export function useRecipeImagesField() {
     if (uri) {
       append(
         { uri, clientKey: newRecipeImageClientKey() },
-        { shouldFocus: false }
+        { shouldFocus: false },
       );
     }
   }, [append, pickImage, fields.length]);
@@ -117,7 +111,7 @@ export function useRecipeImagesField() {
       const idx = fields.findIndex((f) => f.clientKey === clientKey);
       if (idx >= 0) remove(idx);
     },
-    [fields, remove]
+    [fields, remove],
   );
 
   const onCarouselMomentumScrollEnd = useCallback(
@@ -125,7 +119,7 @@ export function useRecipeImagesField() {
       const idx = Math.round(contentOffsetX / contentWidth);
       setCarouselIndex(Math.min(Math.max(idx, 0), Math.max(slideCount - 1, 0)));
     },
-    [contentWidth]
+    [contentWidth],
   );
 
   const imagesError = errors.recipeImageUris?.message as string | undefined;

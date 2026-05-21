@@ -33,7 +33,7 @@ export function RecipeImagesCarousel({
         onMomentumScrollEnd={(e) =>
           onMomentumScrollEndX?.(e.nativeEvent.contentOffset.x)
         }
-        style={{ width }}
+        style={{ width, borderRadius: 16 }}
       >
         {uris.map((uri, slideIndex) => (
           <CarouselSlide
@@ -71,7 +71,7 @@ function CarouselSlide({
 }) {
   return (
     <View style={{ width }}>
-      <View className="relative overflow-hidden rounded-2xl bg-sage-100">
+      <View className="relative overflow-hidden bg-sage-100">
         <Image
           source={{ uri }}
           style={{ width, aspectRatio: 16 / 9 }}

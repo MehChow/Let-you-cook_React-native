@@ -21,37 +21,42 @@ export function BasicsSectionPreview({
   const servingsText = servings.trim() ? servings : "No servings yet";
 
   return (
-    <View className="gap-3">
-      <View className="flex-row items-center gap-2">
-        <Recipe size={18} color="#426159" />
-        <Text className="text-lg font-semibold">Recipe name</Text>
+    <View className="gap-4">
+      {/* Recipe Name */}
+      <View className="flex-col">
+        <View className="flex-row items-center gap-2">
+          <Recipe size={16} color="#426159" />
+          <Text className="text-sage-600 font-semibold">Recipe name</Text>
+        </View>
+        <Text className="text-base">{recipeNameText}</Text>
       </View>
-      <Text className="text-base">{recipeNameText}</Text>
 
-      <View className="mt-2 flex-row items-center gap-2">
-        <Description size={18} color="#426159" />
-        <Text className="text-lg font-semibold">Description (optional)</Text>
+      {/* Description */}
+      <View className="flex-col">
+        <View className="mt-2 flex-row items-center gap-2">
+          <Description size={16} color="#426159" />
+          <Text className="text-sage-600 font-semibold">
+            Description (optional)
+          </Text>
+        </View>
+        <Text className="text-base">{descriptionText}</Text>
       </View>
-      <Text className="text-base">{descriptionText}</Text>
 
       <View className="mt-2 flex-row gap-2">
         <View className="flex-1">
-          <View className="mb-1.5 flex-row items-center gap-2">
-            <Time size={18} color="#426159" />
-            <Text className="text-lg font-semibold">Cook time</Text>
+          <View className="flex-row items-center gap-2">
+            <Time size={16} color="#426159" />
+            <Text className="text-sage-600 font-semibold">Cook time</Text>
           </View>
-          <Text className="rounded-xl border border-sage-200 bg-white px-3 py-3 text-base">
-            {cookTimeText}
-          </Text>
+          <Text className="text-base">{cookTimeText}</Text>
         </View>
+
         <View className="flex-1">
-          <View className="mb-1.5 flex-row items-center gap-2">
-            <Serving size={18} color="#426159" />
-            <Text className="text-lg font-semibold">Serving</Text>
+          <View className="flex-row items-center gap-2">
+            <Serving size={16} color="#426159" />
+            <Text className="text-sage-600 font-semibold">Serving</Text>
           </View>
-          <Text className="rounded-xl border border-sage-200 bg-white px-3 py-3 text-base">
-            {servingsText}
-          </Text>
+          <Text className="text-base">{servingsText}</Text>
         </View>
       </View>
     </View>

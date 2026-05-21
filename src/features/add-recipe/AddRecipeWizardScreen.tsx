@@ -1,4 +1,6 @@
+import { isAddRecipePreviewDebugEnabled } from "@/config/addRecipePreviewDebug";
 import { addRecipeFormDefaults } from "@/features/add-recipe/addRecipeFormDefaults";
+import { addRecipePreviewDebugDefaults } from "@/features/add-recipe/addRecipePreviewDebugDefaults";
 import { useAddRecipeWizard } from "@/features/add-recipe/hooks/useAddRecipeWizard";
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
 import { WizardFooterActions } from "@/features/add-recipe/wizard/WizardFooterActions";
@@ -10,8 +12,12 @@ import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export function AddRecipeWizardScreen() {
+  const initialValues: AddRecipeFormValues = isAddRecipePreviewDebugEnabled
+    ? addRecipePreviewDebugDefaults
+    : addRecipeFormDefaults;
+
   const methods = useForm<AddRecipeFormValues>({
-    defaultValues: addRecipeFormDefaults,
+    defaultValues: initialValues,
     mode: "onSubmit",
     reValidateMode: "onChange",
   });
@@ -34,10 +40,7 @@ export function AddRecipeWizardScreen() {
         edges={["top"]}
       >
         <View style={{ flex: 1 }}>
-          <WizardTopBar
-            title="Create Recipe"
-            onExit={attemptExit}
-          />
+          <WizardTopBar title="Create Recipe" onExit={attemptExit} />
 
           <WizardStepIndicator currentStepIndex={step} />
 

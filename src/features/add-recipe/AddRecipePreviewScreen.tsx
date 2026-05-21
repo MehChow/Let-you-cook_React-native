@@ -35,6 +35,10 @@ const WIZARD_SECTION_COMPONENTS = [
 
 function AddRecipePreviewContent() {
   const setTargetStep = useAddRecipePreviewStore((s) => s.setTargetStep);
+  const jumpToStep = (stepIndex: number) => {
+    setTargetStep(stepIndex);
+    router.back();
+  };
 
   return (
     <>
@@ -50,10 +54,9 @@ function AddRecipePreviewContent() {
             <SectionPreviewCard
               key={title}
               title={title}
-              onPress={() => {
-                setTargetStep(i);
-                router.back();
-              }}
+              onPress={i === 1 ? undefined : () => jumpToStep(i)}
+              headerActionLabel={i === 1 ? "Edit" : undefined}
+              onHeaderAction={i === 1 ? () => jumpToStep(i) : undefined}
             >
               <Component mode="preview" />
             </SectionPreviewCard>

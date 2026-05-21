@@ -7,6 +7,7 @@ import { Text } from "@/components/ui/text";
 import { MAX_STEP_INSTRUCTION_LENGTH } from "@/features/add-recipe/constants";
 import { useImagePicker } from "@/features/add-recipe/hooks/useImagePicker";
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
+import { colors } from "@/util/twColor";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
 import { memo, useCallback } from "react";
@@ -61,9 +62,11 @@ export function CookingStepCard({
           delayLongPress={120}
           className="flex-1 flex-row items-center gap-2"
         >
-          <Icon as={Drag} size={20} color="#75948c" />
+          <Icon as={Drag} size={20} color={colors.sage[600]} />
           <View className="flex-row items-center gap-1">
-            <Text className="text-lg font-bold uppercase">Step</Text>
+            <Text className="text-lg font-bold uppercase text-sage-600">
+              Step
+            </Text>
             <Badge className="flex h-6 w-6 bg-sage-700 px-0" variant="default">
               <Text className="text-white">{(displayIndex ?? index) + 1}</Text>
             </Badge>
@@ -77,7 +80,7 @@ export function CookingStepCard({
           disabled={!canRemove}
           className="p-2 disabled:opacity-30"
         >
-          <Icon as={Delete} size={20} color="#e53e3e" />
+          <Icon as={Delete} size={20} color={colors.danger[500]} />
         </Pressable>
       </CardHeader>
 
