@@ -10,7 +10,7 @@ import * as React from "react";
 type Params = {
   recipes: readonly HomeRecipe[];
   searchText: string;
-  selectedCategoryLabel: string | null;
+  selectedCategoryId: string | null;
   filters: SearchFilters;
   setSortBy: (next: SearchFilters["sortBy"]) => void;
   setCookingTime: (next: SearchFilters["cookingTime"]) => void;
@@ -21,7 +21,7 @@ type Params = {
 export function useSearchDerived({
   recipes,
   searchText,
-  selectedCategoryLabel,
+  selectedCategoryId,
   filters,
   setSortBy,
   setCookingTime,
@@ -41,8 +41,7 @@ export function useSearchDerived({
         r.author.toLowerCase().includes(q);
 
       const matchesCategory =
-        !selectedCategoryLabel ||
-        r.tag.toLowerCase() === selectedCategoryLabel.toLowerCase();
+        !selectedCategoryId || r.categoryId === selectedCategoryId;
 
       const matchesCookingTime = (() => {
         switch (filters.cookingTime) {
@@ -90,7 +89,7 @@ export function useSearchDerived({
       default:
         return filtered;
     }
-  }, [filters, recipes, searchText, selectedCategoryLabel]);
+  }, [filters, recipes, searchText, selectedCategoryId]);
 
   const activeFilterChips = React.useMemo(() => {
     const chips: { key: string; label: string; onRemove: () => void }[] = [];

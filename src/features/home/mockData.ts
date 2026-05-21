@@ -15,6 +15,7 @@ export type HomeRecipe = {
   title: string;
   author: string;
   description: string;
+  categoryId: string;
   timeMin: number;
   calories: number;
   serving: string;
@@ -40,6 +41,7 @@ export const todaySpecial: HomeRecipe = {
   title: "Juicy pepper wings",
   author: "Mehhh",
   description: "",
+  categoryId: "other",
   timeMin: 10,
   calories: 420,
   serving: "4-5",
@@ -107,6 +109,7 @@ export const popularRecipes: HomeRecipe[] = [
     title: "Strawberry lemonade soda",
     author: "Mehhh",
     description: "Beautiful layers with refreshing taste. Sweet and sour.",
+    categoryId: "drinks",
     timeMin: 10,
     calories: 300,
     serving: "1-2",
@@ -120,6 +123,7 @@ export const popularRecipes: HomeRecipe[] = [
     title: "Vanilla yogurt parfait",
     author: "Mehhh",
     description: "Creamy, light, and quick to make.",
+    categoryId: "dessert",
     timeMin: 12,
     calories: 280,
     serving: "1-2",
@@ -140,6 +144,7 @@ export const myRecipes: HomeRecipe[] = [
     title: "Garden salad bowl",
     author: "Mehhh",
     description: "Fresh greens with a light dressing.",
+    categoryId: "lunch",
     timeMin: 15,
     calories: 220,
     serving: "2",

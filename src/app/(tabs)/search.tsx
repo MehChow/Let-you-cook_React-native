@@ -32,12 +32,6 @@ export default function SearchScreen() {
   const [searchText, setSearchText] = React.useState("");
   const { favourites, isFavourite, setFavourite } = useFavourites();
 
-  const selectedCategoryLabel = React.useMemo(() => {
-    if (!selectedCategoryId) return null;
-    const c = categories.find((x) => x.id === selectedCategoryId);
-    return c?.label ?? null;
-  }, [selectedCategoryId]);
-
   const sortBy = useSearchFilterStore((s) => s.sortBy);
   const cookingTime = useSearchFilterStore((s) => s.cookingTime);
   const caloriesRange = useSearchFilterStore((s) => s.calories);
@@ -61,7 +55,7 @@ export default function SearchScreen() {
     {
       recipes: popularRecipes,
       searchText,
-      selectedCategoryLabel,
+      selectedCategoryId,
       filters,
       setSortBy,
       setCookingTime,

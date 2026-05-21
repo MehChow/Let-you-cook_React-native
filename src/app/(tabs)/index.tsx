@@ -1,11 +1,9 @@
-import SectionHeader from "@/components/SectionHeader";
-import { ScrollView, View } from "react-native";
-
 import { Grid } from "@/components/Icon";
 import RecipeCard from "@/components/RecipeCard";
+import SectionHeader from "@/components/SectionHeader";
+import { Text } from "@/components/ui/text";
 import CategoryCarousel from "@/features/home/CategoryCarousel";
 import HomeHeader from "@/features/home/HomeHeader";
-import TodaySpecialCard from "@/features/home/TodaySpecialCard";
 import { useCategoryStore } from "@/features/home/categoryStore";
 import {
   categories,
@@ -14,16 +12,20 @@ import {
   popularRecipes,
   todaySpecial,
 } from "@/features/home/mockData";
+import TodaySpecialCard from "@/features/home/TodaySpecialCard";
 import { useFavourites } from "@/hooks/useFavourites";
 import { useRouter } from "expo-router";
 import * as React from "react";
+import { ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+const HOME_POPULAR_RECIPE_LIMIT = 2;
 
 export default function HomeScreen() {
   const router = useRouter();
   const selectedCategoryId = useCategoryStore((s) => s.selectedCategoryId);
   const setSelectedCategoryId = useCategoryStore(
-    (s) => s.setSelectedCategoryId
+    (s) => s.setSelectedCategoryId,
   );
   const { isFavourite, setFavourite } = useFavourites();
 
@@ -35,8 +37,16 @@ export default function HomeScreen() {
         placeholderColorClass: c.placeholderColorClass,
         imageSource: c.imageThumb,
       })),
-    []
+    [],
   );
+
+  const filteredPopularRecipes = React.useMemo(() => {
+    const filteredRecipes = selectedCategoryId
+      ? popularRecipes.filter((recipe) => recipe.categoryId === selectedCategoryId)
+      : popularRecipes;
+
+    return filteredRecipes.slice(0, HOME_POPULAR_RECIPE_LIMIT);
+  }, [selectedCategoryId]);
 
   return (
     <SafeAreaView
@@ -91,29 +101,37 @@ export default function HomeScreen() {
         <View className="gap-1">
           <SectionHeader
             title="Popular recipes"
-            actionLabel="See more ›"
-            onPressAction={() => {}}
+            actionLabel="See more"
+            onPressAction={() => router.push("/search")}
           />
-          <View className="gap-4">
-            {popularRecipes.map((r) => (
-              <RecipeCard
-                key={r.id}
-                title={r.title}
-                description={r.description}
-                author={r.author}
-                authorAvatar={mockAvatar}
-                timeMin={r.timeMin}
-                calories={r.calories}
-                serving={r.serving}
-                rating={r.rating}
-                tag={r.tag}
-                imagePlaceholderClass={r.imagePlaceholderClass}
-                imageSource={r.image}
-                isFavourite={isFavourite(r.id)}
-                onChangeFavourite={(next) => setFavourite(r.id, next)}
-              />
-            ))}
-          </View>
+          {filteredPopularRecipes.length > 0 ? (
+            <View className="gap-4">
+              {filteredPopularRecipes.map((recipe) => (
+                <RecipeCard
+                  key={recipe.id}
+                  title={recipe.title}
+                  description={recipe.description}
+                  author={recipe.author}
+                  authorAvatar={mockAvatar}
+                  timeMin={recipe.timeMin}
+                  calories={recipe.calories}
+                  serving={recipe.serving}
+                  rating={recipe.rating}
+                  tag={recipe.tag}
+                  imagePlaceholderClass={recipe.imagePlaceholderClass}
+                  imageSource={recipe.image}
+                  isFavourite={isFavourite(recipe.id)}
+                  onChangeFavourite={(next) => setFavourite(recipe.id, next)}
+                />
+              ))}
+            </View>
+          ) : (
+            <View className="rounded-2xl bg-white/60 px-4 py-4">
+              <Text className="text-sm font-semibold text-muted-foreground">
+                No results found.
+              </Text>
+            </View>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
