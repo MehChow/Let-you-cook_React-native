@@ -43,6 +43,7 @@ type FilterState = SearchFilters & {
   setCookingTime: (cookingTime: CookingTime) => void;
   setCalories: (range: Range) => void;
   setServings: (range: Range) => void;
+  setFilters: (filters: SearchFilters) => void;
   reset: () => void;
 };
 
@@ -52,6 +53,7 @@ export const useSearchFilterStore = create<FilterState>((set) => ({
   setCookingTime: (cookingTime) => set({ cookingTime }),
   setCalories: (calories) => set({ calories }),
   setServings: (servings) => set({ servings }),
+  setFilters: (filters) => set({ ...filters }),
   reset: () => set({ ...FILTER_DEFAULTS }),
 }));
 

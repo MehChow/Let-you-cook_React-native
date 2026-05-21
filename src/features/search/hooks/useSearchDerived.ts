@@ -1,4 +1,5 @@
 import type { HomeRecipe } from "@/features/home/mockData";
+import { categories } from "@/features/home/mockData";
 import type { SearchFilters } from "@/features/search/filterStore";
 import {
   FILTER_DEFAULTS,
@@ -6,6 +7,10 @@ import {
 } from "@/features/search/filterStore";
 import { parseServingRange } from "@/features/search/utils/parseServingRange";
 import * as React from "react";
+
+const categoryLabelById = new Map(
+  categories.map((category) => [category.id, category.label.toLowerCase()])
+);
 
 type Params = {
   recipes: readonly HomeRecipe[];
@@ -33,12 +38,14 @@ export function useSearchDerived({
   const filteredRecipes = React.useMemo(() => {
     const q = searchText.trim().toLowerCase();
     const filtered = recipes.filter((r) => {
+      const categoryLabel = categoryLabelById.get(r.categoryId) ?? "";
       const matchesQuery =
         q.length === 0 ||
         r.title.toLowerCase().includes(q) ||
         r.description.toLowerCase().includes(q) ||
         r.tag.toLowerCase().includes(q) ||
-        r.author.toLowerCase().includes(q);
+        r.author.toLowerCase().includes(q) ||
+        categoryLabel.includes(q);
 
       const matchesCategory =
         !selectedCategoryId || r.categoryId === selectedCategoryId;

@@ -13,7 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useRouter } from "expo-router";
 import * as React from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const sortOptions: { value: SortBy; label: string }[] = [
@@ -90,25 +90,49 @@ export default function FiltersScreen() {
   const cookingTime = useSearchFilterStore((s) => s.cookingTime);
   const calories = useSearchFilterStore((s) => s.calories);
   const servings = useSearchFilterStore((s) => s.servings);
-  const setSortBy = useSearchFilterStore((s) => s.setSortBy);
-  const setCookingTime = useSearchFilterStore((s) => s.setCookingTime);
-  const setCalories = useSearchFilterStore((s) => s.setCalories);
-  const setServings = useSearchFilterStore((s) => s.setServings);
-  const reset = useSearchFilterStore((s) => s.reset);
+  const setFilters = useSearchFilterStore((s) => s.setFilters);
 
-  const appliedCount = React.useMemo(
-    () =>
-      getAppliedCount({
-        sortBy,
-        cookingTime,
-        calories,
-        servings,
-      }),
-    [calories, cookingTime, servings, sortBy],
+  const [draftFilters, setDraftFilters] = React.useState(() => ({
+    sortBy,
+    cookingTime,
+    calories,
+    servings,
+  }));
+  const [isApplying, setIsApplying] = React.useState(false);
+  const applyTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null,
   );
 
-  const caloriesLabel = `${calories[0]} - ${calories[1]} kcal`;
-  const servingsLabel = `${servings[0]} - ${servings[1]} people`;
+  React.useEffect(() => {
+    return () => {
+      if (applyTimeoutRef.current) {
+        clearTimeout(applyTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  const appliedCount = React.useMemo(
+    () => getAppliedCount(draftFilters),
+    [draftFilters],
+  );
+
+  const caloriesLabel = `${draftFilters.calories[0]} - ${draftFilters.calories[1]} kcal`;
+  const servingsLabel = `${draftFilters.servings[0]} - ${draftFilters.servings[1]} people`;
+
+  const handleReset = React.useCallback(() => {
+    setDraftFilters({ ...FILTER_DEFAULTS });
+  }, []);
+
+  const handleApply = React.useCallback(() => {
+    if (isApplying) return;
+
+    setIsApplying(true);
+    applyTimeoutRef.current = setTimeout(() => {
+      setFilters(draftFilters);
+      setIsApplying(false);
+      router.back();
+    }, 1000);
+  }, [draftFilters, isApplying, router, setFilters]);
 
   return (
     <View
@@ -134,7 +158,8 @@ export default function FiltersScreen() {
 
           <Pressable
             accessibilityRole="button"
-            onPress={reset}
+            onPress={handleReset}
+            disabled={isApplying}
             className="flex-row items-center gap-2 rounded-full px-2 py-1 active:opacity-70"
           >
             <Icon as={Reset} className="size-4 text-muted-foreground" />
@@ -153,8 +178,10 @@ export default function FiltersScreen() {
         <View className="gap-2">
           <SectionRow title="Sort by" />
           <ChipGroup
-            value={sortBy}
-            onChange={setSortBy}
+            value={draftFilters.sortBy}
+            onChange={(next) =>
+              setDraftFilters((prev) => ({ ...prev, sortBy: next }))
+            }
             options={sortOptions}
           />
         </View>
@@ -162,8 +189,10 @@ export default function FiltersScreen() {
         <View className="gap-2">
           <SectionRow title="Cooking time" />
           <ChipGroup
-            value={cookingTime}
-            onChange={setCookingTime}
+            value={draftFilters.cookingTime}
+            onChange={(next) =>
+              setDraftFilters((prev) => ({ ...prev, cookingTime: next }))
+            }
             options={cookingTimeOptions}
           />
         </View>
@@ -183,8 +212,10 @@ export default function FiltersScreen() {
               max={FILTER_DEFAULTS.calories[1]}
               step={50}
               minGap={50}
-              value={calories}
-              onChange={setCalories}
+              value={draftFilters.calories}
+              onChange={(next) =>
+                setDraftFilters((prev) => ({ ...prev, calories: next }))
+              }
               activeTrackColor="#426159"
               thumbBorderColor="#426159"
             />
@@ -214,8 +245,10 @@ export default function FiltersScreen() {
               max={FILTER_DEFAULTS.servings[1]}
               step={1}
               minGap={1}
-              value={servings}
-              onChange={setServings}
+              value={draftFilters.servings}
+              onChange={(next) =>
+                setDraftFilters((prev) => ({ ...prev, servings: next }))
+              }
               activeTrackColor="#426159"
               thumbBorderColor="#426159"
             />
@@ -234,11 +267,16 @@ export default function FiltersScreen() {
       <View className="px-5 pb-2 pt-1">
         <Pressable
           accessibilityRole="button"
-          onPress={() => router.back()}
+          onPress={handleApply}
+          disabled={isApplying}
           className="h-12 w-full flex-row items-center justify-center gap-2 rounded-full bg-sage-700 active:opacity-90"
           style={{ elevation: 6 }}
         >
-          <Icon as={Edit} className="size-4 text-sage-100" fill="#dce4e2" />
+          {isApplying ? (
+            <ActivityIndicator size="small" color="#ffffff" />
+          ) : (
+            <Icon as={Edit} className="size-4 text-sage-100" fill="#dce4e2" />
+          )}
           <Text className="text-sm font-bold text-white">
             {appliedCount > 0 ? `Apply (${appliedCount})` : "Apply"}
           </Text>
