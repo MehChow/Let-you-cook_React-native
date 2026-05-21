@@ -1,9 +1,5 @@
 import {
-  CIRCUMFERENCE,
-  RADIUS,
-  RING_SIZE,
   SEGMENT_EASING,
-  STROKE_WIDTH,
 } from "@/features/add-recipe/components/calories/calorieRing.constants";
 import { useEffect } from "react";
 import Animated, {
@@ -19,12 +15,20 @@ export interface AnimatedRingSegmentProps {
   color: string;
   ratio: number;
   startRatio: number;
+  circumference: number;
+  radius: number;
+  ringSize: number;
+  strokeWidth: number;
 }
 
 export function AnimatedRingSegment({
   color,
   ratio,
   startRatio,
+  circumference,
+  radius,
+  ringSize,
+  strokeWidth,
 }: AnimatedRingSegmentProps) {
   const ratioValue = useSharedValue(0);
   const startValue = useSharedValue(0);
@@ -44,18 +48,18 @@ export function AnimatedRingSegment({
     const safeRatio = Math.max(ratioValue.value, 0);
     return {
       opacity: safeRatio > 0 ? 1 : 0,
-      strokeDasharray: `${Math.max(safeRatio * CIRCUMFERENCE, 0.0001)} ${CIRCUMFERENCE}`,
-      strokeDashoffset: -startValue.value * CIRCUMFERENCE,
+      strokeDasharray: `${Math.max(safeRatio * circumference, 0.0001)} ${circumference}`,
+      strokeDashoffset: -startValue.value * circumference,
     };
   });
 
   return (
     <AnimatedCircle
-      cx={RING_SIZE / 2}
-      cy={RING_SIZE / 2}
-      r={RADIUS}
+      cx={ringSize / 2}
+      cy={ringSize / 2}
+      r={radius}
       stroke={color}
-      strokeWidth={STROKE_WIDTH}
+      strokeWidth={strokeWidth}
       strokeLinecap="round"
       fill="none"
       animatedProps={animatedProps}

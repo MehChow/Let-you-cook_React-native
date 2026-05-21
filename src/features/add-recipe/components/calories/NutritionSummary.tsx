@@ -1,4 +1,4 @@
-import { AI, Check, Delete } from "@/components/Icon";
+import { AI, Check, Delete, Edit } from "@/components/Icon";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Icon } from "@/components/ui/icon";
@@ -19,6 +19,7 @@ export interface NutritionSummaryProps {
   description?: string;
   rows: NutritionSummaryRow[];
   totalCalories: number;
+  headerIcon?: "ai" | "edit";
   hideVisualization?: boolean;
   inputRows?: NutritionInputRow[];
   onChangeInputValue?: (
@@ -43,6 +44,7 @@ export function NutritionSummary({
   description,
   rows,
   totalCalories,
+  headerIcon = "ai",
   hideVisualization = false,
   inputRows,
   onChangeInputValue,
@@ -85,7 +87,10 @@ export function NutritionSummary({
         <View className={cn("gap-4", compact && "gap-3")}>
           <View className="items-center gap-2">
             <View className="p-3 bg-sage-100 rounded-full">
-              <Icon as={AI} className="bg-sage-600 text-sage-600 size-4" />
+              <Icon
+                as={headerIcon === "edit" ? Edit : AI}
+                className="bg-sage-600 text-sage-600 size-4"
+              />
             </View>
             <Text className="font-semibold text-black">{title}</Text>
             {description ? (
@@ -138,7 +143,11 @@ export function NutritionSummary({
 
           {!hideVisualization ? (
             <View className="flex-row items-center gap-4">
-              <NutritionRing rows={rows} totalCalories={totalCalories} />
+              <NutritionRing
+                rows={rows}
+                totalCalories={totalCalories}
+                compact={compact}
+              />
               {isEditable ? (
                 <EditableMacroRows
                   rows={inputRows}
@@ -181,7 +190,6 @@ export function NutritionSummary({
               </Text>
             </Button>
           ) : null}
-
         </View>
       </CardContent>
     </Card>

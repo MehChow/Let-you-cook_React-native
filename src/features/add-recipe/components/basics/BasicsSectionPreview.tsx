@@ -1,6 +1,7 @@
 import { Description, Recipe, Serving, Time } from "@/components/Icon";
 import { Text } from "@/components/ui/text";
 import type { BasicsSectionPreviewValues } from "@/features/add-recipe/hooks/useBasicsSectionField";
+import { colors } from "@/util/twColor";
 import { View } from "react-native";
 
 export type BasicsSectionPreviewProps = BasicsSectionPreviewValues;
@@ -25,7 +26,7 @@ export function BasicsSectionPreview({
       {/* Recipe Name */}
       <View className="flex-col">
         <View className="flex-row items-center gap-2">
-          <Recipe size={16} color="#426159" />
+          <Recipe size={16} color={colors.sage[600]} />
           <Text className="text-sage-600 font-semibold">Recipe name</Text>
         </View>
         <Text className="text-base">{recipeNameText}</Text>
@@ -34,7 +35,7 @@ export function BasicsSectionPreview({
       {/* Description */}
       <View className="flex-col">
         <View className="mt-2 flex-row items-center gap-2">
-          <Description size={16} color="#426159" />
+          <Description size={16} color={colors.sage[600]} />
           <Text className="text-sage-600 font-semibold">
             Description (optional)
           </Text>
@@ -45,7 +46,7 @@ export function BasicsSectionPreview({
       <View className="mt-2 flex-row gap-2">
         <View className="flex-1">
           <View className="flex-row items-center gap-2">
-            <Time size={16} color="#426159" />
+            <Time size={16} color={colors.sage[600]} />
             <Text className="text-sage-600 font-semibold">Cook time</Text>
           </View>
           <Text className="text-base">{cookTimeText}</Text>
@@ -53,7 +54,7 @@ export function BasicsSectionPreview({
 
         <View className="flex-1">
           <View className="flex-row items-center gap-2">
-            <Serving size={16} color="#426159" />
+            <Serving size={16} color={colors.sage[600]} />
             <Text className="text-sage-600 font-semibold">Serving</Text>
           </View>
           <Text className="text-base">{servingsText}</Text>

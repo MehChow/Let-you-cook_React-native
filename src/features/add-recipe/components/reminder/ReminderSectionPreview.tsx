@@ -1,6 +1,6 @@
 import { Reminder as ReminderIcon } from "@/components/Icon";
 import { Text } from "@/components/ui/text";
-import { MAX_CHEF_NOTES_LENGTH } from "@/features/add-recipe/constants";
+import { colors } from "@/util/twColor";
 import { View } from "react-native";
 
 export interface ReminderSectionPreviewProps {
@@ -9,18 +9,16 @@ export interface ReminderSectionPreviewProps {
 
 export function ReminderSectionPreview({ notes }: ReminderSectionPreviewProps) {
   return (
-    <View className="gap-3">
+    <View className="flex-col">
       <View className="flex-row items-center gap-2">
-        <ReminderIcon size={18} color="#426159" />
-        <Text className="text-sm font-semibold">
+        <ReminderIcon size={16} color={colors.sage[600]} />
+        <Text className="font-semibold text-sage-600">
           {"Chef's notes (optional)"}
         </Text>
       </View>
-      <Text className="text-base text-black">
+
+      <Text className="text-base">
         {notes.trim() ? notes : "No extra notes added"}
-      </Text>
-      <Text className="text-right text-xs text-sage-500">
-        {notes.length} / {MAX_CHEF_NOTES_LENGTH}
       </Text>
     </View>
   );

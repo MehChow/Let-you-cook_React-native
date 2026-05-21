@@ -1,4 +1,4 @@
-import { AI, Calories as CaloriesIcon, Delete, Edit } from "@/components/Icon";
+import { AI, Delete, Edit } from "@/components/Icon";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Text } from "@/components/ui/text";
 import { NutritionSummary } from "@/features/add-recipe/components/calories/NutritionSummary";
@@ -13,30 +13,11 @@ function CaloriesSectionPreview() {
   const { nutritionMode, previewSummary } = useCaloriesSection();
 
   return (
-    <View className="gap-3">
-      <View className="flex-row items-center justify-between">
-        <View className="flex-row items-center gap-2">
-          <CaloriesIcon size={18} color="#426159" />
-          <Text className="text-sm font-semibold text-black">
-            Nutritional information
-          </Text>
-        </View>
-
-        <View className="flex-row items-center gap-1 rounded-md bg-sage-200 px-2 py-1">
-          {nutritionMode === "ai" ? (
-            <AI size={14} color="#426159" />
-          ) : (
-            <Edit size={14} color="#426159" />
-          )}
-          <Text className="text-xs font-semibold uppercase text-sage-700">
-            {nutritionMode}
-          </Text>
-        </View>
-      </View>
-
+    <View>
       {previewSummary ? (
         <NutritionSummary
           compact
+          headerIcon={nutritionMode === "manual" ? "edit" : "ai"}
           title={
             nutritionMode === "manual"
               ? "Manual input"
@@ -142,6 +123,7 @@ export function CaloriesSection({ mode }: CaloriesSectionProps) {
         <TabsContent value="ai" className="mt-0">
           {aiStatus === "ready" || aiStatus === "stale" ? (
             <NutritionSummary
+              headerIcon="ai"
               title="AI Calories calculator"
               description="This estimate uses your ingredients, quantities, serving count and cooking steps."
               rows={aiSummary.rows}
@@ -161,6 +143,7 @@ export function CaloriesSection({ mode }: CaloriesSectionProps) {
             />
           ) : (
             <NutritionSummary
+              headerIcon="ai"
               title="AI Calories calculator"
               description="Tap the button below to analyze your recipe. This uses your ingredients, quantities, serving count and cooking steps."
               hideVisualization
@@ -184,6 +167,7 @@ export function CaloriesSection({ mode }: CaloriesSectionProps) {
 
         <TabsContent value="manual" className="mt-0">
           <NutritionSummary
+            headerIcon="edit"
             title="Manual input"
             description="Manually fill in the nutrients data. The chart will be updated in real time."
             rows={manualSummary.rows}

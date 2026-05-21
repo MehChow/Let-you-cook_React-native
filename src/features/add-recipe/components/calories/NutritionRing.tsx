@@ -1,12 +1,8 @@
 import { Text } from "@/components/ui/text";
 import { AnimatedRingSegment } from "@/features/add-recipe/components/calories/AnimatedRingSegment";
-import {
-  RADIUS,
-  RING_SIZE,
-  SEGMENT_EASING,
-  STROKE_WIDTH,
-} from "@/features/add-recipe/components/calories/calorieRing.constants";
+import { SEGMENT_EASING } from "@/features/add-recipe/components/calories/calorieRing.constants";
 import type { NutritionSummaryRow } from "@/features/add-recipe/hooks/useCaloriesSection";
+import { cn } from "@/lib/utils";
 import { useEffect } from "react";
 import { View } from "react-native";
 import Animated, {
@@ -19,10 +15,24 @@ import Svg, { Circle } from "react-native-svg";
 export interface NutritionRingProps {
   rows: NutritionSummaryRow[];
   totalCalories: number;
+  compact?: boolean;
 }
 
-export function NutritionRing({ rows, totalCalories }: NutritionRingProps) {
+const DEFAULT_RING_SIZE = 144;
+const DEFAULT_STROKE_WIDTH = 9;
+const COMPACT_RING_SIZE = 128;
+const COMPACT_STROKE_WIDTH = 8;
+
+export function NutritionRing({
+  rows,
+  totalCalories,
+  compact = false,
+}: NutritionRingProps) {
   const scaleValue = useSharedValue(0.92);
+  const ringSize = compact ? COMPACT_RING_SIZE : DEFAULT_RING_SIZE;
+  const strokeWidth = compact ? COMPACT_STROKE_WIDTH : DEFAULT_STROKE_WIDTH;
+  const radius = (ringSize - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
 
   useEffect(() => {
     scaleValue.value = withTiming(totalCalories > 0 ? 1 : 0.92, {
@@ -41,16 +51,16 @@ export function NutritionRing({ rows, totalCalories }: NutritionRingProps) {
     <View className="items-center justify-center">
       <View className="items-center justify-center">
         <Svg
-          width={RING_SIZE}
-          height={RING_SIZE}
+          width={ringSize}
+          height={ringSize}
           style={{ transform: [{ rotate: "-90deg" }] }}
         >
           <Circle
-            cx={RING_SIZE / 2}
-            cy={RING_SIZE / 2}
-            r={RADIUS}
+            cx={ringSize / 2}
+            cy={ringSize / 2}
+            r={radius}
             stroke="#b0b6b3"
-            strokeWidth={STROKE_WIDTH}
+            strokeWidth={strokeWidth}
             fill="none"
           />
           {rows.map((row) => {
@@ -60,6 +70,10 @@ export function NutritionRing({ rows, totalCalories }: NutritionRingProps) {
                 color={row.color}
                 ratio={row.ratio}
                 startRatio={startRatio}
+                circumference={circumference}
+                radius={radius}
+                ringSize={ringSize}
+                strokeWidth={strokeWidth}
               />
             );
             startRatio += row.ratio;
@@ -71,10 +85,22 @@ export function NutritionRing({ rows, totalCalories }: NutritionRingProps) {
           style={labelStyle}
           className="absolute items-center justify-center"
         >
-          <Text className="text-[28px] font-bold leading-none text-black">
+          <Text
+            className={cn(
+              "font-bold leading-none text-black",
+              compact ? "text-[24px]" : "text-[28px]",
+            )}
+          >
             {totalCalories}
           </Text>
-          <Text className="mt-1 text-sm font-semibold text-sage-600">kcal</Text>
+          <Text
+            className={cn(
+              "mt-1 font-semibold text-sage-600",
+              compact ? "text-xs" : "text-sm",
+            )}
+          >
+            kcal
+          </Text>
         </Animated.View>
       </View>
     </View>

@@ -26,9 +26,9 @@ export function IngredientsPreview({ groups }: IngredientsPreviewProps) {
       {groups.map((g, gi) => (
         <View
           key={`group-preview-${gi}-${g.groupName?.slice(0, 12) ?? ""}`}
-          className="rounded-2xl border border-sage-100 bg-sage-50/50 p-3"
+          className="rounded-2xl border border-sage-100 bg-sage-100/50 p-3"
         >
-          <Text className="mb-2 text-sm font-bold text-sage-700">
+          <Text className="mb-2 font-bold text-sage-700">
             {g.groupName?.trim() ? g.groupName : "Group name"}
           </Text>
 
@@ -50,8 +50,10 @@ export function IngredientsPreview({ groups }: IngredientsPreviewProps) {
                 {row.name?.trim() ? row.name : "Ingredient"}
               </Text>
               <Text className="w-24 text-base">
-                {formatIngredientQuantity(row.quantityAmount, row.quantityUnit) ||
-                  "Quantity"}
+                {formatIngredientQuantity(
+                  row.quantityAmount,
+                  row.quantityUnit,
+                ) || "Quantity"}
               </Text>
             </View>
           ))}
