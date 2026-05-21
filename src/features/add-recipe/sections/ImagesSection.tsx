@@ -18,6 +18,7 @@ export function ImagesSection({ mode }: ImagesSectionProps) {
     carouselIndex,
     gridDragging,
     setGridDragging,
+    alertDialog,
     onGridReorder,
     onAppendImage,
     removeByClientKey,
@@ -40,20 +41,23 @@ export function ImagesSection({ mode }: ImagesSectionProps) {
   }
 
   return (
-    <RecipeImagesEditView
-      carouselIndex={carouselIndex}
-      carouselRef={carouselRef}
-      contentWidth={contentWidth}
-      fields={fields}
-      gridDragging={gridDragging}
-      gridGap={gridGap}
-      imagesError={imagesError}
-      onAppendImage={onAppendImage}
-      onCarouselMomentumScrollEnd={onCarouselMomentumScrollEnd}
-      onGridReorder={onGridReorder}
-      photoModels={photoModels}
-      removeByClientKey={removeByClientKey}
-      setGridDragging={setGridDragging}
-    />
+    <>
+      <RecipeImagesEditView
+        carouselIndex={carouselIndex}
+        carouselRef={carouselRef}
+        contentWidth={contentWidth}
+        fields={fields}
+        gridDragging={gridDragging}
+        gridGap={gridGap}
+        imagesError={imagesError}
+        onAppendImage={onAppendImage}
+        onCarouselMomentumScrollEnd={onCarouselMomentumScrollEnd}
+        onGridReorder={onGridReorder}
+        photoModels={photoModels}
+        removeByClientKey={removeByClientKey}
+        setGridDragging={setGridDragging}
+      />
+      {alertDialog}
+    </>
   );
 }

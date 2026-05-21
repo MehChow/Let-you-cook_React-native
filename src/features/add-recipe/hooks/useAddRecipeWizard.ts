@@ -1,5 +1,6 @@
 import { TOTAL_WIZARD_STEPS } from "@/features/add-recipe/constants";
 import { useAddRecipePreviewStore } from "@/features/add-recipe/addRecipePreviewStore";
+import { useAddRecipeAlertDialog } from "@/features/add-recipe/hooks/useAddRecipeAlertDialog";
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
 import { sanitizeIngredientGroups } from "@/features/add-recipe/utils/ingredientGroups";
 import {
@@ -9,9 +10,9 @@ import {
 } from "@/features/add-recipe/validateStep";
 import { ADD_RECIPE_WIZARD_STEPS } from "@/features/add-recipe/wizard/wizardStepConfig";
 import { router } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import type { LayoutChangeEvent } from "react-native";
-import { Alert, BackHandler, Keyboard } from "react-native";
+import { BackHandler, Keyboard } from "react-native";
 import type { UseFormReturn } from "react-hook-form";
 import { toast } from "sonner-native";
 
@@ -21,6 +22,7 @@ export interface UseAddRecipeWizardResult {
   showStepBack: boolean;
   primaryLabel: string;
   contentBottomPadding: number;
+  alertDialog: ReactNode;
   attemptExit: () => void;
   onFooterBack: () => void;
   onPrimaryFooter: () => void;
@@ -36,24 +38,25 @@ export const useAddRecipeWizard = (
   const targetStep = useAddRecipePreviewStore((s) => s.targetStep);
   const setTargetStep = useAddRecipePreviewStore((s) => s.setTargetStep);
   const setPreviewSnapshot = useAddRecipePreviewStore((s) => s.setSnapshot);
+  const { alertDialog, presentDialog } = useAddRecipeAlertDialog();
 
   const { clearErrors, formState, getValues, setError, setValue } = methods;
 
   const attemptExit = useCallback(() => {
     if (formState.isDirty) {
-      Alert.alert("Discard changes?", "Your recipe draft will be lost.", [
-        { text: "Keep editing", style: "cancel" },
-        {
-          text: "Discard",
-          style: "destructive",
-          onPress: () => router.back(),
-        },
-      ]);
+      presentDialog({
+        title: "Discard changes?",
+        description: "Your recipe draft will be lost.",
+        cancelLabel: "Keep editing",
+        actionLabel: "Discard",
+        actionVariant: "destructive",
+        onAction: () => router.back(),
+      });
       return;
     }
 
     router.back();
-  }, [formState.isDirty]);
+  }, [formState.isDirty, presentDialog]);
 
   useEffect(() => {
     if (targetStep === null) return;
@@ -179,6 +182,7 @@ export const useAddRecipeWizard = (
     showStepBack: step > 0,
     primaryLabel: step < TOTAL_WIZARD_STEPS - 1 ? "Continue" : "Preview",
     contentBottomPadding,
+    alertDialog,
     attemptExit,
     onFooterBack,
     onPrimaryFooter,

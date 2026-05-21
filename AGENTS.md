@@ -42,6 +42,7 @@ Let You Cook is a recipe-focused mobile app prototype built around discovering, 
 - Input values: `text-black` (no explicit type needed)
 - For component that not support our custom tailwind css in className, import { colors } from "@/util/twColor", and map the tailwind color like this -> color={colors.sage[600]}
 - Consistent padding, responsive design
+- Use `src/components/ui/alert-dialog.tsx` for alert instead of the native Alert
 - Use `expo-image` for images
 
 ## Best Practices

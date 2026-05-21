@@ -21,14 +21,16 @@ export function SectionPreviewCard({
   const inner = (
     <>
       <View className="mb-3 flex-row items-center justify-between gap-3">
-        <Text className="flex-1 text-xl font-bold text-accent-600">{title}</Text>
+        <Text className="flex-1 text-xl font-bold text-accent-600">
+          {title}
+        </Text>
         {headerActionLabel && onHeaderAction ? (
           <Pressable
             onPress={onHeaderAction}
-            className="flex-row items-center gap-1 rounded-md bg-sage-200 px-2 py-1 active:opacity-90"
+            className="flex-row items-center gap-1 rounded-md bg-sage-100 px-2 py-1 active:opacity-90"
           >
-            <Icon as={Edit} size={14} className="text-sage-700" />
-            <Text className="text-xs font-semibold uppercase text-sage-700">
+            <Icon as={Edit} size={14} className="text-sage-500" />
+            <Text className="text-xs font-semibold uppercase text-sage-500">
               {headerActionLabel}
             </Text>
           </Pressable>

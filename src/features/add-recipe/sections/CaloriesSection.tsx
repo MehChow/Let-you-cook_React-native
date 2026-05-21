@@ -185,16 +185,6 @@ export function CaloriesSection({ mode }: CaloriesSectionProps) {
               manualHasAnyValue ? handleRemoveManualResult : undefined
             }
           />
-
-          <View className="px-1">
-            <Text className="text-xs text-sage-500">
-              {manualIsComplete
-                ? "All macro fields are filled. Calories are calculated automatically."
-                : manualHasAnyValidValue
-                  ? "Calories update live from any valid macro value. Missing fields count as zero."
-                  : "Enter protein, carbs, or fat in whole grams to start the live calorie estimate."}
-            </Text>
-          </View>
         </TabsContent>
       </Tabs>
     </View>

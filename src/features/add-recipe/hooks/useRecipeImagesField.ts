@@ -38,7 +38,7 @@ export function useRecipeImagesField() {
   const { control, clearErrors } = useFormContext<AddRecipeFormValues>();
   const { errors } = useFormState({ control });
   const previewImages = useWatch({ control, name: "recipeImageUris" });
-  const { pickImage } = useImagePicker();
+  const { pickImage, alertDialog } = useImagePicker();
 
   const carouselRef = useRef<ScrollView>(null);
   const [carouselIndex, setCarouselIndex] = useState(0);
@@ -135,6 +135,7 @@ export function useRecipeImagesField() {
     carouselIndex,
     gridDragging,
     setGridDragging,
+    alertDialog,
     onGridReorder,
     onAppendImage,
     removeByClientKey,

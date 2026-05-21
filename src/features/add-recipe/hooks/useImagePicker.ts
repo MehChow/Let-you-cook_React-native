@@ -1,8 +1,10 @@
 import * as ImagePicker from "expo-image-picker";
+import { useAddRecipeAlertDialog } from "@/features/add-recipe/hooks/useAddRecipeAlertDialog";
 import { useCallback } from "react";
-import { Alert } from "react-native";
 
 export const useImagePicker = () => {
+  const { alertDialog, presentDialog } = useAddRecipeAlertDialog();
+
   const pickImage = useCallback(async (
     context: "step" | "recipe" = "recipe"
   ): Promise<string | null> => {
@@ -12,10 +14,10 @@ export const useImagePicker = () => {
         recipe: "recipe images",
         step: "step photos",
       };
-      Alert.alert(
-        "Permission needed",
-        `Allow photo library access to add ${contextLabels[context]}.`
-      );
+      presentDialog({
+        title: "Permission needed",
+        description: `Allow photo library access to add ${contextLabels[context]}.`,
+      });
       return null;
     }
 
@@ -26,7 +28,7 @@ export const useImagePicker = () => {
 
     if (result.canceled || !result.assets[0]) return null;
     return result.assets[0].uri;
-  }, []);
+  }, [presentDialog]);
 
-  return { pickImage };
+  return { pickImage, alertDialog };
 };

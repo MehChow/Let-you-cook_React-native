@@ -34,7 +34,7 @@ export function CookingStepCard({
   onAnyInputFocus,
 }: CookingStepCardProps) {
   const { control, setValue } = useFormContext<AddRecipeFormValues>();
-  const { pickImage } = useImagePicker();
+  const { pickImage, alertDialog } = useImagePicker();
 
   const handlePickImage = useCallback(async () => {
     const uri = await pickImage("step");
@@ -100,6 +100,7 @@ export function CookingStepCard({
         onPickImage={handlePickImage}
         onRemoveImage={handleRemoveImage}
       />
+      {alertDialog}
     </Card>
   );
 }

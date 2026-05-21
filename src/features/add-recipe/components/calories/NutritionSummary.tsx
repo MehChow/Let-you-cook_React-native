@@ -154,7 +154,7 @@ export function NutritionSummary({
                   onChangeValue={onChangeInputValue}
                 />
               ) : (
-                <ReadOnlyMacroRows rows={rows} />
+                <ReadOnlyMacroRows rows={rows} compact={compact} />
               )}
             </View>
           ) : null}

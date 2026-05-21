@@ -22,6 +22,7 @@ export function AddRecipeWizardScreen() {
     reValidateMode: "onChange",
   });
   const {
+    alertDialog,
     attemptExit,
     contentBottomPadding,
     onFooterBack,
@@ -58,6 +59,7 @@ export function AddRecipeWizardScreen() {
               onPrimary={onPrimaryFooter}
             />
           </View>
+          {alertDialog}
         </View>
       </SafeAreaView>
     </FormProvider>
