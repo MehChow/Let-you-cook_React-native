@@ -2,6 +2,7 @@ import { Calories, Rating, Serving, Time } from "@/components/Icon";
 import UserAvatar from "@/components/UserAvatar";
 import { Badge } from "@/components/ui/badge";
 import { Icon } from "@/components/ui/icon";
+import { Separator } from "@/components/ui/separator";
 import { Text } from "@/components/ui/text";
 import type { RecipeDetail } from "@/features/recipe-detail/types";
 import * as React from "react";
@@ -47,13 +48,20 @@ export const RecipeDetailHeader: React.FC<RecipeDetailHeaderProps> = ({
         </View>
       </View>
 
-      <View className="flex-1 flex-row items-center justify-end gap-2">
+      <Separator orientation="vertical" className="bg-neutral-200" />
+
+      <View className="flex-1 flex-row items-center justify-center gap-3">
         <RecipeMetaItem
           icon={Calories}
           value={`${recipe.calories} kcal`}
           label="Calories"
+          color="text-accent-500"
         />
-        <RecipeMetaItem icon={Serving} value={recipe.servings} label="Serving" />
+        <RecipeMetaItem
+          icon={Serving}
+          value={recipe.servings}
+          label="Serving"
+        />
         <RecipeMetaItem
           icon={Time}
           value={`${recipe.cookTimeMinutes} min`}

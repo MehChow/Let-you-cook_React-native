@@ -14,7 +14,7 @@ import { ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const normalizeParam = (value: string | string[] | undefined): string =>
-  Array.isArray(value) ? value[0] ?? "" : value ?? "";
+  Array.isArray(value) ? (value[0] ?? "") : (value ?? "");
 
 const RecipeDetailRoute: React.FC = () => {
   const params = useLocalSearchParams<{ recipeId?: string | string[] }>();

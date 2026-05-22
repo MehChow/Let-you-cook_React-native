@@ -70,16 +70,22 @@ const buildDetail = (
   calories: recipe.calories,
   ingredientGroups: [
     {
-      id: `${recipe.id}-main-ingredients`,
-      title: recipe.tag,
+      id: `${recipe.id}-main-protein`,
+      title: "Main dish",
       items: [
         { id: "steak", name: "Steak", quantity: "250 g" },
-        { id: "butter", name: "Butter", quantity: "40 g" },
         { id: "rosemary", name: "Rosemary", quantity: "5 g" },
-        { id: "garlic", name: "Garlic", quantity: "2 pcs" },
         { id: "salt", name: "Salt", quantity: "a bit" },
         { id: "pepper", name: "Pepper", quantity: "a bit" },
         { id: "oil", name: "Oil", quantity: "a bit" },
+      ],
+    },
+    {
+      id: `${recipe.id}-aromatics`,
+      title: "Sauce and aromatics",
+      items: [
+        { id: "butter", name: "Butter", quantity: "40 g" },
+        { id: "garlic", name: "Garlic", quantity: "2 pcs" },
       ],
     },
   ],
