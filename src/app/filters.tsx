@@ -1,138 +1,35 @@
-import Chip from "@/components/Chip";
 import { Edit, Reset } from "@/components/Icon";
-import RangeSlider from "@/components/RangeSlider";
+import FilterChipGroup from "@/features/search/components/FilterChipGroup";
+import FilterRangeSection from "@/features/search/components/FilterRangeSection";
 import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
 import {
   FILTER_DEFAULTS,
-  getAppliedCount,
-  useSearchFilterStore,
-  type CookingTime,
-  type SortBy,
 } from "@/features/search/filterStore";
-import { cn } from "@/lib/utils";
-import { useRouter } from "expo-router";
+import { useSearchFiltersScreen } from "@/features/search/hooks/useSearchFiltersScreen";
+import {
+  cookingTimeOptions,
+  sortOptions,
+} from "@/features/search/searchFilterOptions";
 import * as React from "react";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const sortOptions: { value: SortBy; label: string }[] = [
-  { value: "relevance", label: "Relevance" },
-  { value: "top_rated", label: "Top rated" },
-  { value: "newest", label: "Newest" },
-  { value: "quickest", label: "Quickest" },
-];
-
-const cookingTimeOptions: { value: CookingTime; label: string }[] = [
-  { value: "any", label: "Any" },
-  { value: "lt_15", label: "< 15 min" },
-  { value: "lt_30", label: "< 30 min" },
-  { value: "lt_60", label: "< 1 hr" },
-  { value: "lt_120", label: "< 2 hr" },
-];
-
-function SectionRow({
-  title,
-  right,
-}: {
-  title: string;
-  right?: React.ReactNode;
-}) {
-  return (
-    <View className="flex-row items-center justify-between">
-      <Text className="text-xs font-bold text-foreground">{title}</Text>
-      {right}
-    </View>
-  );
-}
-
-function ChipGroup<T extends string>({
-  value,
-  onChange,
-  options,
-}: {
-  value: T;
-  onChange: (next: T) => void;
-  options: { value: T; label: string }[];
-}) {
-  return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerClassName="gap-2"
-    >
-      {options.map((opt) => {
-        const isActive = opt.value === value;
-        return (
-          <Pressable
-            key={opt.value}
-            accessibilityRole="button"
-            onPress={() => onChange(opt.value)}
-            className="active:opacity-80"
-          >
-            <Chip
-              label={opt.label}
-              className={cn("bg-sage-200", isActive && "bg-sage-500")}
-              textClassName={cn("text-sage-700", isActive && "text-white")}
-            />
-          </Pressable>
-        );
-      })}
-    </ScrollView>
-  );
-}
-
 export default function FiltersScreen() {
-  const router = useRouter();
   const insets = useSafeAreaInsets();
-
-  const sortBy = useSearchFilterStore((s) => s.sortBy);
-  const cookingTime = useSearchFilterStore((s) => s.cookingTime);
-  const calories = useSearchFilterStore((s) => s.calories);
-  const servings = useSearchFilterStore((s) => s.servings);
-  const setFilters = useSearchFilterStore((s) => s.setFilters);
-
-  const [draftFilters, setDraftFilters] = React.useState(() => ({
-    sortBy,
-    cookingTime,
-    calories,
-    servings,
-  }));
-  const [isApplying, setIsApplying] = React.useState(false);
-  const applyTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
-
-  React.useEffect(() => {
-    return () => {
-      if (applyTimeoutRef.current) {
-        clearTimeout(applyTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  const appliedCount = React.useMemo(
-    () => getAppliedCount(draftFilters),
-    [draftFilters],
-  );
-
-  const caloriesLabel = `${draftFilters.calories[0]} - ${draftFilters.calories[1]} kcal`;
-  const servingsLabel = `${draftFilters.servings[0]} - ${draftFilters.servings[1]} people`;
-
-  const handleReset = React.useCallback(() => {
-    setDraftFilters({ ...FILTER_DEFAULTS });
-  }, []);
-
-  const handleApply = React.useCallback(() => {
-    if (isApplying) return;
-
-    setIsApplying(true);
-    applyTimeoutRef.current = setTimeout(() => {
-      setFilters(draftFilters);
-      setIsApplying(false);
-      router.back();
-    }, 1000);
-  }, [draftFilters, isApplying, router, setFilters]);
+  const {
+    appliedCount,
+    caloriesLabel,
+    draftFilters,
+    handleApply,
+    handleReset,
+    isApplying,
+    servingsLabel,
+    setDraftCalories,
+    setDraftCookingTime,
+    setDraftServings,
+    setDraftSortBy,
+  } = useSearchFiltersScreen();
 
   return (
     <View
@@ -176,92 +73,50 @@ export default function FiltersScreen() {
         contentContainerClassName="gap-5"
       >
         <View className="gap-2">
-          <SectionRow title="Sort by" />
-          <ChipGroup
+          <Text className="text-xs font-bold text-foreground">Sort by</Text>
+          <FilterChipGroup
             value={draftFilters.sortBy}
-            onChange={(next) =>
-              setDraftFilters((prev) => ({ ...prev, sortBy: next }))
-            }
+            onChange={setDraftSortBy}
             options={sortOptions}
           />
         </View>
 
         <View className="gap-2">
-          <SectionRow title="Cooking time" />
-          <ChipGroup
+          <Text className="text-xs font-bold text-foreground">
+            Cooking time
+          </Text>
+          <FilterChipGroup
             value={draftFilters.cookingTime}
-            onChange={(next) =>
-              setDraftFilters((prev) => ({ ...prev, cookingTime: next }))
-            }
+            onChange={setDraftCookingTime}
             options={cookingTimeOptions}
           />
         </View>
 
-        <View className="gap-2">
-          <SectionRow
-            title="Calories"
-            right={
-              <Text className="text-xs font-semibold text-muted-foreground">
-                {caloriesLabel}
-              </Text>
-            }
-          />
-          <View className="px-1.5">
-            <RangeSlider
-              min={FILTER_DEFAULTS.calories[0]}
-              max={FILTER_DEFAULTS.calories[1]}
-              step={50}
-              minGap={50}
-              value={draftFilters.calories}
-              onChange={(next) =>
-                setDraftFilters((prev) => ({ ...prev, calories: next }))
-              }
-              activeTrackColor="#426159"
-              thumbBorderColor="#426159"
-            />
-          </View>
-          <View className="flex-row items-center justify-between">
-            <Text className="text-[10px] font-medium text-muted-foreground">
-              {FILTER_DEFAULTS.calories[0]} kcal
-            </Text>
-            <Text className="text-[10px] font-medium text-muted-foreground">
-              {FILTER_DEFAULTS.calories[1]} kcal
-            </Text>
-          </View>
-        </View>
+        <FilterRangeSection
+          title="Calories"
+          valueLabel={caloriesLabel}
+          min={FILTER_DEFAULTS.calories[0]}
+          max={FILTER_DEFAULTS.calories[1]}
+          step={50}
+          minGap={50}
+          value={draftFilters.calories}
+          onChange={setDraftCalories}
+          minLabel={`${FILTER_DEFAULTS.calories[0]} kcal`}
+          maxLabel={`${FILTER_DEFAULTS.calories[1]} kcal`}
+        />
 
-        <View className="gap-2">
-          <SectionRow
-            title="Servings"
-            right={
-              <Text className="text-xs font-semibold text-muted-foreground">
-                {servingsLabel}
-              </Text>
-            }
-          />
-          <View className="px-1.5">
-            <RangeSlider
-              min={FILTER_DEFAULTS.servings[0]}
-              max={FILTER_DEFAULTS.servings[1]}
-              step={1}
-              minGap={1}
-              value={draftFilters.servings}
-              onChange={(next) =>
-                setDraftFilters((prev) => ({ ...prev, servings: next }))
-              }
-              activeTrackColor="#426159"
-              thumbBorderColor="#426159"
-            />
-          </View>
-          <View className="flex-row items-center justify-between">
-            <Text className="text-[10px] font-medium text-muted-foreground">
-              {FILTER_DEFAULTS.servings[0]} person
-            </Text>
-            <Text className="text-[10px] font-medium text-muted-foreground">
-              {FILTER_DEFAULTS.servings[1]} people
-            </Text>
-          </View>
-        </View>
+        <FilterRangeSection
+          title="Servings"
+          valueLabel={servingsLabel}
+          min={FILTER_DEFAULTS.servings[0]}
+          max={FILTER_DEFAULTS.servings[1]}
+          step={1}
+          minGap={1}
+          value={draftFilters.servings}
+          onChange={setDraftServings}
+          minLabel={`${FILTER_DEFAULTS.servings[0]} person`}
+          maxLabel={`${FILTER_DEFAULTS.servings[1]} people`}
+        />
       </ScrollView>
 
       <View className="px-5 pb-2 pt-1">

@@ -12,6 +12,12 @@ const categoryLabelById = new Map(
   categories.map((category) => [category.id, category.label.toLowerCase()])
 );
 
+export type SearchActiveFilterChip = {
+  key: string;
+  label: string;
+  onRemove: () => void;
+};
+
 type Params = {
   recipes: readonly HomeRecipe[];
   searchText: string;
@@ -99,7 +105,7 @@ export function useSearchDerived({
   }, [filters, recipes, searchText, selectedCategoryId]);
 
   const activeFilterChips = React.useMemo(() => {
-    const chips: { key: string; label: string; onRemove: () => void }[] = [];
+    const chips: SearchActiveFilterChip[] = [];
 
     if (filters.sortBy !== FILTER_DEFAULTS.sortBy) {
       const sortLabel =

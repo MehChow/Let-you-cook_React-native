@@ -1,79 +1,29 @@
-import Chip from "@/components/Chip";
-import { Filter, Grid, Remove, Search } from "@/components/Icon";
 import RecipeCard from "@/components/RecipeCard";
-import SectionHeader from "@/components/SectionHeader";
-import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
-import CategoryCarousel from "@/features/home/CategoryCarousel";
-import { useCategoryStore } from "@/features/home/categoryStore";
-import {
-  categories,
-  mockAvatar,
-  popularRecipes,
-} from "@/features/home/mockData";
-import { useSearchFilterStore } from "@/features/search/filterStore";
-import { useSearchDerived } from "@/features/search/hooks/useSearchDerived";
-import { useFavourites } from "@/hooks/useFavourites";
-import { cn } from "@/lib/utils";
-import { useRouter } from "expo-router";
+import SearchScreenHeader from "@/features/search/components/SearchScreenHeader";
+import { useSearchScreen } from "@/features/search/hooks/useSearchScreen";
 import * as React from "react";
-import { FlatList, Pressable, ScrollView, TextInput, View } from "react-native";
+import { FlatList, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const RECENT_SEARCHES = ["healthy", "tiramisu", "snacks", "vegan", "cake"];
-
 export default function SearchScreen() {
-  const router = useRouter();
-  const selectedCategoryId = useCategoryStore((s) => s.selectedCategoryId);
-  const setSelectedCategoryId = useCategoryStore(
-    (s) => s.setSelectedCategoryId,
-  );
-
-  const [searchText, setSearchText] = React.useState("");
-  const { favourites, isFavourite, setFavourite } = useFavourites();
-
-  const sortBy = useSearchFilterStore((s) => s.sortBy);
-  const cookingTime = useSearchFilterStore((s) => s.cookingTime);
-  const caloriesRange = useSearchFilterStore((s) => s.calories);
-  const servingsRange = useSearchFilterStore((s) => s.servings);
-  const setSortBy = useSearchFilterStore((s) => s.setSortBy);
-  const setCookingTime = useSearchFilterStore((s) => s.setCookingTime);
-  const setCalories = useSearchFilterStore((s) => s.setCalories);
-  const setServings = useSearchFilterStore((s) => s.setServings);
-
-  const filters = React.useMemo(
-    () => ({
-      sortBy,
-      cookingTime,
-      calories: caloriesRange,
-      servings: servingsRange,
-    }),
-    [caloriesRange, cookingTime, servingsRange, sortBy],
-  );
-
-  const { appliedCount, filteredRecipes, activeFilterChips } = useSearchDerived(
-    {
-      recipes: popularRecipes,
-      searchText,
-      selectedCategoryId,
-      filters,
-      setSortBy,
-      setCookingTime,
-      setCalories,
-      setServings,
-    },
-  );
-
-  const categoryItems = React.useMemo(
-    () =>
-      categories.map((c) => ({
-        id: c.id,
-        label: c.label,
-        placeholderColorClass: c.placeholderColorClass,
-        imageSource: c.imageThumb,
-      })),
-    [],
-  );
+  const {
+    activeFilterChips,
+    appliedCount,
+    categoryItems,
+    favourites,
+    filteredRecipes,
+    handleOpenCategories,
+    handleOpenFilters,
+    handleSelectCategory,
+    handleToggleFavourite,
+    isFavourite,
+    mockAvatar,
+    recentSearches,
+    searchText,
+    selectedCategoryId,
+    setSearchText,
+  } = useSearchScreen();
 
   const renderRecipe = React.useCallback(
     ({ item: r }: { item: (typeof filteredRecipes)[number] }) => (
@@ -91,11 +41,11 @@ export default function SearchScreen() {
           imagePlaceholderClass={r.imagePlaceholderClass}
           imageSource={r.image}
           isFavourite={isFavourite(r.id)}
-          onChangeFavourite={(next) => setFavourite(r.id, next)}
+          onChangeFavourite={(next) => handleToggleFavourite(r.id, next)}
         />
       </View>
     ),
-    [isFavourite, setFavourite],
+    [handleToggleFavourite, isFavourite, mockAvatar],
   );
 
   return (
@@ -111,131 +61,18 @@ export default function SearchScreen() {
         extraData={favourites}
         ItemSeparatorComponent={() => <View className="h-4" />}
         ListHeaderComponent={
-          <View className="gap-5 px-5 pt-4">
-            <Text className="text-2xl font-bold text-foreground">
-              Find a recipe
-            </Text>
-
-            <View className="flex-row items-center gap-3">
-              <View className="h-10 flex-1 flex-row items-center gap-2 rounded-2xl border border-neutral-200 bg-white px-3">
-                <Icon as={Search} className="size-4 text-muted-foreground" />
-                <TextInput
-                  value={searchText}
-                  onChangeText={setSearchText}
-                  placeholder="Search recipes..."
-                  placeholderTextColor="#9ca3af"
-                  className="flex-1 text-[13px] font-medium text-foreground"
-                  returnKeyType="search"
-                />
-              </View>
-
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Filter"
-                onPress={() => router.push("/filters")}
-                className={cn(
-                  "h-10 w-10 items-center justify-center rounded-2xl active:opacity-80",
-                  appliedCount > 0 ? "bg-sage-500" : "bg-sage-200",
-                )}
-                style={{ elevation: 3 }}
-              >
-                <Icon
-                  as={Filter}
-                  className={cn(
-                    "size-4.5",
-                    appliedCount > 0 ? "text-white" : "text-sage-500",
-                  )}
-                />
-                {appliedCount > 0 ? (
-                  <View className="absolute -right-2 -top-2 h-5 min-w-5 items-center justify-center rounded-full bg-white px-1">
-                    <Text className="text-[11px] font-bold text-black">
-                      {appliedCount}
-                    </Text>
-                  </View>
-                ) : null}
-              </Pressable>
-            </View>
-
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerClassName="gap-2"
-            >
-              {RECENT_SEARCHES.map((label) => {
-                const isActive =
-                  searchText.trim().toLowerCase() === label.toLowerCase();
-                return (
-                  <Pressable
-                    key={label}
-                    accessibilityRole="button"
-                    onPress={() => setSearchText(label)}
-                    className="active:opacity-80"
-                  >
-                    <Chip
-                      label={label}
-                      className={cn("bg-sage-200", isActive && "bg-sage-500")}
-                      textClassName={cn(
-                        "text-sage-700",
-                        isActive && "text-white",
-                      )}
-                    />
-                  </Pressable>
-                );
-              })}
-            </ScrollView>
-
-            <View className="gap-1">
-              <SectionHeader
-                title="Browse by Category"
-                actionLabel="See all"
-                actionIcon={Grid}
-                onPressAction={() => router.push("/modal")}
-              />
-              <CategoryCarousel
-                items={categoryItems}
-                selectedId={selectedCategoryId ?? undefined}
-                onSelect={(id) =>
-                  setSelectedCategoryId(selectedCategoryId === id ? null : id)
-                }
-              />
-            </View>
-
-            {activeFilterChips.length > 0 ? (
-              <View className="flex-row items-center gap-3">
-                <Text className="text-sm font-medium text-muted-foreground">
-                  Active:
-                </Text>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerClassName="gap-2"
-                >
-                  {activeFilterChips.map((chip) => (
-                    <Pressable
-                      key={chip.key}
-                      accessibilityRole="button"
-                      onPress={chip.onRemove}
-                      className="active:opacity-80"
-                    >
-                      <View className="flex-row items-center gap-1 rounded-full bg-sage-500 px-3 py-1.5">
-                        <Text className="text-xs font-semibold text-white">
-                          {chip.label}
-                        </Text>
-                        <Icon
-                          as={Remove}
-                          className="size-3.5 text-neutral-200"
-                        />
-                      </View>
-                    </Pressable>
-                  ))}
-                </ScrollView>
-              </View>
-            ) : null}
-
-            <View className="gap-1">
-              <SectionHeader title="Search results" />
-            </View>
-          </View>
+          <SearchScreenHeader
+            searchText={searchText}
+            onChangeSearchText={setSearchText}
+            recentSearches={recentSearches}
+            appliedCount={appliedCount}
+            onOpenFilters={handleOpenFilters}
+            categoryItems={categoryItems}
+            selectedCategoryId={selectedCategoryId}
+            onSelectCategory={handleSelectCategory}
+            onOpenCategories={handleOpenCategories}
+            activeFilterChips={activeFilterChips}
+          />
         }
         ListEmptyComponent={
           <View className="px-5 pt-4">
