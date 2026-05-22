@@ -18,6 +18,7 @@ type UserRecipeGridProps = {
   contentContainerBottomPadding: number;
   isFavourite: (recipeId: string) => boolean;
   onToggleFavourite: (recipeId: string, next: boolean) => void;
+  onPressRecipe: (recipeId: string) => void;
 };
 
 export function UserRecipeGrid({
@@ -26,6 +27,7 @@ export function UserRecipeGrid({
   gap,
   contentContainerBottomPadding,
   isFavourite,
+  onPressRecipe,
   onToggleFavourite,
 }: UserRecipeGridProps) {
   const [gridWidth, setGridWidth] = React.useState(0);
@@ -46,7 +48,7 @@ export function UserRecipeGrid({
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={item.title}
-        onPress={() => {}}
+        onPress={() => onPressRecipe(item.id)}
         style={({ pressed }) => ({
           width: cellSize,
           height: cellSize,
@@ -69,7 +71,7 @@ export function UserRecipeGrid({
         />
       </Pressable>
     ),
-    [cellSize, isFavourite, onToggleFavourite]
+    [cellSize, isFavourite, onPressRecipe, onToggleFavourite]
   );
 
   const keyExtractor = React.useCallback((item: HomeRecipe) => item.id, []);

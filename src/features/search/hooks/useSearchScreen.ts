@@ -5,6 +5,7 @@ import {
   mockAvatar,
   popularRecipes,
 } from "@/features/home/mockData";
+import { pushRecipeDetail } from "@/features/recipe-detail/navigation";
 import { useSearchFilterStore } from "@/features/search/filterStore";
 import { useSearchDerived } from "@/features/search/hooks/useSearchDerived";
 import { useFavourites } from "@/hooks/useFavourites";
@@ -88,6 +89,13 @@ export function useSearchScreen() {
     [setFavourite],
   );
 
+  const handleOpenRecipe = React.useCallback(
+    (id: string) => {
+      pushRecipeDetail(router, id);
+    },
+    [router],
+  );
+
   return {
     activeFilterChips,
     appliedCount,
@@ -96,6 +104,7 @@ export function useSearchScreen() {
     filteredRecipes,
     handleOpenCategories,
     handleOpenFilters,
+    handleOpenRecipe,
     handleSelectCategory,
     handleToggleFavourite,
     isFavourite,

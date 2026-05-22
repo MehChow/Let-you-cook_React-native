@@ -35,6 +35,22 @@ export default function RootLayout() {
           }}
         />
         <Stack.Screen
+          name="recipe/[recipeId]"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="recipe/[recipeId]/reviews"
+          options={{
+            headerShown: false,
+            presentation: "formSheet",
+            sheetAllowedDetents: [0.6],
+            sheetExpandsWhenScrolledToEdge: false,
+            sheetCornerRadius: 24,
+          }}
+        />
+        <Stack.Screen
           name="modal"
           options={{
             presentation: "formSheet",

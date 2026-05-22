@@ -5,7 +5,9 @@ import RecipeCard from "@/components/RecipeCard";
 import RecipeFavouriteRowCard from "@/components/RecipeFavouriteRowCard";
 import { Text } from "@/components/ui/text";
 import { mockAvatar, popularRecipes } from "@/features/home/mockData";
+import { pushRecipeDetail } from "@/features/recipe-detail/navigation";
 import { useFavourites } from "@/hooks/useFavourites";
+import { useRouter } from "expo-router";
 import * as React from "react";
 import { FlatList, View } from "react-native";
 import {
@@ -14,6 +16,7 @@ import {
 } from "react-native-safe-area-context";
 
 export default function FavouritesScreen() {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const [viewMode, setViewMode] = React.useState<FavouriteViewMode>("grid");
   const { favourites, isFavourite, setFavourite } = useFavourites();
@@ -63,11 +66,12 @@ export default function FavouritesScreen() {
           imagePlaceholderClass={r.imagePlaceholderClass}
           imageSource={r.image}
           isFavourite={isFavourite(r.id)}
+          onPress={() => pushRecipeDetail(router, r.id)}
           onChangeFavourite={(next) => setFavourite(r.id, next)}
         />
       </View>
     ),
-    [isFavourite, setFavourite],
+    [isFavourite, router, setFavourite],
   );
 
   const renderListItem = React.useCallback(
@@ -80,11 +84,12 @@ export default function FavouritesScreen() {
           imagePlaceholderClass={r.imagePlaceholderClass}
           imageSource={r.image}
           isFavourite={isFavourite(r.id)}
+          onPress={() => pushRecipeDetail(router, r.id)}
           onChangeFavourite={(next) => setFavourite(r.id, next)}
         />
       </View>
     ),
-    [isFavourite, setFavourite],
+    [isFavourite, router, setFavourite],
   );
 
   return (

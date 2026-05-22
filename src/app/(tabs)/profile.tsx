@@ -2,7 +2,9 @@ import { mockAvatar, myRecipes, profileUser } from "@/features/home/mockData";
 import { ProfileMetadata } from "@/features/profile/ProfileMetadata";
 import { UserHeader } from "@/features/profile/UserHeader";
 import { UserRecipeGrid } from "@/features/profile/UserRecipeGrid";
+import { pushRecipeDetail } from "@/features/recipe-detail/navigation";
 import { useFavourites } from "@/hooks/useFavourites";
+import { useRouter } from "expo-router";
 import * as React from "react";
 import { View } from "react-native";
 import {
@@ -14,6 +16,7 @@ const GRID_GAP = 2;
 const GRID_COLUMNS = 3;
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const { favourites, isFavourite, setFavourite } = useFavourites();
 
@@ -54,6 +57,7 @@ export default function ProfileScreen() {
           contentContainerBottomPadding={recipeListBottomPadding}
           isFavourite={isFavourite}
           onToggleFavourite={(id, next) => setFavourite(id, next)}
+          onPressRecipe={(id) => pushRecipeDetail(router, id)}
         />
       </View>
     </SafeAreaView>

@@ -15,6 +15,7 @@ export default function SearchScreen() {
     filteredRecipes,
     handleOpenCategories,
     handleOpenFilters,
+    handleOpenRecipe,
     handleSelectCategory,
     handleToggleFavourite,
     isFavourite,
@@ -41,11 +42,12 @@ export default function SearchScreen() {
           imagePlaceholderClass={r.imagePlaceholderClass}
           imageSource={r.image}
           isFavourite={isFavourite(r.id)}
+          onPress={() => handleOpenRecipe(r.id)}
           onChangeFavourite={(next) => handleToggleFavourite(r.id, next)}
         />
       </View>
     ),
-    [handleToggleFavourite, isFavourite, mockAvatar],
+    [handleOpenRecipe, handleToggleFavourite, isFavourite, mockAvatar],
   );
 
   return (

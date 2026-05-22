@@ -13,6 +13,7 @@ import {
   todaySpecial,
 } from "@/features/home/mockData";
 import TodaySpecialCard from "@/features/home/TodaySpecialCard";
+import { pushRecipeDetail } from "@/features/recipe-detail/navigation";
 import { useFavourites } from "@/hooks/useFavourites";
 import { useRouter } from "expo-router";
 import * as React from "react";
@@ -78,6 +79,7 @@ export default function HomeScreen() {
             placeholderClassName={todaySpecial.imagePlaceholderClass}
             imageSource={todaySpecial.image}
             userAvatarSource={mockAvatar}
+            onPress={() => pushRecipeDetail(router, todaySpecial.id)}
           />
         </View>
 
@@ -121,6 +123,7 @@ export default function HomeScreen() {
                   imagePlaceholderClass={recipe.imagePlaceholderClass}
                   imageSource={recipe.image}
                   isFavourite={isFavourite(recipe.id)}
+                  onPress={() => pushRecipeDetail(router, recipe.id)}
                   onChangeFavourite={(next) => setFavourite(recipe.id, next)}
                 />
               ))}
