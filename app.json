@@ -52,7 +52,8 @@
             "node_modules/@expo-google-fonts/outfit/700Bold/Outfit_700Bold.ttf"
           ]
         }
-      ]
+      ],
+      "expo-status-bar"
     ],
     "experiments": {
       "typedRoutes": true,

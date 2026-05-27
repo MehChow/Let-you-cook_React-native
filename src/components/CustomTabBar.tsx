@@ -7,7 +7,7 @@ import {
 } from "@/components/Icon";
 import { Icon } from "@/components/ui/icon";
 import { colors } from "@/util/twColor";
-import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { BottomTabBarProps } from "expo-router/js-tabs";
 import { router, usePathname } from "expo-router";
 import { Pressable, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";

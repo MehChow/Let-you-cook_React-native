@@ -1,10 +1,10 @@
+import BottomFadeOverlay from "@/components/BottomFadeOverlay";
 import PressableCard from "@/components/PressableCard";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
-import { ScrollView, StyleSheet, View } from "react-native";
-import BottomFadeOverlay from "@/components/BottomFadeOverlay";
 import { Image } from "expo-image";
 import * as React from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
 
 export type CategoryCarouselItem = {
   id: string;
@@ -28,9 +28,9 @@ export default function CategoryCarousel({
 }: CategoryCarouselProps) {
   const scrollRef = React.useRef<ScrollView>(null);
   const containerWidthRef = React.useRef(0);
-  const itemLayoutRef = React.useRef<Record<string, { x: number; width: number }>>(
-    {}
-  );
+  const itemLayoutRef = React.useRef<
+    Record<string, { x: number; width: number }>
+  >({});
 
   React.useEffect(() => {
     if (!selectedId) return;
@@ -66,7 +66,9 @@ export default function CategoryCarousel({
             onPress={() => onSelect?.(item.id)}
             elevation={5}
             containerStyle={{ aspectRatio: 1 }}
-            containerClassName={cn("w-[88px] rounded-2xl border border-neutral-200")}
+            containerClassName={cn(
+              "w-[88px] rounded-2xl border border-neutral-200",
+            )}
             className={cn(shouldDim && "opacity-50")}
             onLayout={(e) => {
               const { x, width } = e.nativeEvent.layout;
@@ -77,17 +79,21 @@ export default function CategoryCarousel({
               <Image
                 source={item.imageSource}
                 contentFit="cover"
-                style={StyleSheet.absoluteFillObject}
+                style={StyleSheet.absoluteFill}
               />
             ) : (
               <View
                 className={cn(
                   "absolute inset-0",
-                  item.placeholderColorClass ?? "bg-neutral-200"
+                  item.placeholderColorClass ?? "bg-neutral-200",
                 )}
               />
             )}
-            <BottomFadeOverlay className="z-10" maxOpacity={0.62} heightFraction={0.5} />
+            <BottomFadeOverlay
+              className="z-10"
+              maxOpacity={0.62}
+              heightFraction={0.5}
+            />
             <Text className="absolute bottom-2 left-3 z-20 text-[12px] font-semibold text-white">
               {item.label}
             </Text>
@@ -97,4 +103,3 @@ export default function CategoryCarousel({
     </ScrollView>
   );
 }
-

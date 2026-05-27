@@ -22,7 +22,7 @@ export default function Modal() {
   const { width: windowWidth } = useWindowDimensions();
   const selectedCategoryId = useCategoryStore((s) => s.selectedCategoryId);
   const setSelectedCategoryId = useCategoryStore(
-    (s) => s.setSelectedCategoryId
+    (s) => s.setSelectedCategoryId,
   );
 
   const cardSize = React.useMemo(() => {
@@ -50,7 +50,7 @@ export default function Modal() {
       setSelectedCategoryId(selectedCategoryId === id ? null : id);
       router.back();
     },
-    [router, selectedCategoryId, setSelectedCategoryId]
+    [router, selectedCategoryId, setSelectedCategoryId],
   );
 
   return (
@@ -113,7 +113,7 @@ export default function Modal() {
               <View
                 className={cn(
                   "absolute inset-0",
-                  item.placeholderColorClass ?? "bg-neutral-200"
+                  item.placeholderColorClass ?? "bg-neutral-200",
                 )}
               />
               <Image
@@ -121,7 +121,7 @@ export default function Modal() {
                 contentFit="cover"
                 cachePolicy="memory-disk"
                 transition={160}
-                style={StyleSheet.absoluteFillObject}
+                style={StyleSheet.absoluteFill}
               />
               <BottomFadeOverlay
                 className="z-10"
@@ -146,4 +146,3 @@ const styles = StyleSheet.create({
     paddingBottom: 12,
   },
 });
-
