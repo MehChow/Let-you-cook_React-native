@@ -21,7 +21,7 @@ export default function SectionHeader({
 }: SectionHeaderProps) {
   return (
     <View className={cn("flex-row items-center justify-between", className)}>
-      <Text className="text-base font-bold text-foreground">{title}</Text>
+      <Text className="text-base font-bold text-sage-700">{title}</Text>
       <Pressable
         accessibilityRole="button"
         onPress={onPressAction}

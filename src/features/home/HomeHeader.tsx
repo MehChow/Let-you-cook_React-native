@@ -24,7 +24,7 @@ export default function HomeHeader({
   return (
     <View className={cn("flex-row items-center justify-between", className)}>
       <View className="flex-1 pr-3">
-        <Text className="text-2xl font-bold text-foreground">{title}</Text>
+        <Text className="text-2xl font-bold text-sage-900">{title}</Text>
         <Text className="text-base font-medium text-sage-400">{subtitle}</Text>
       </View>
 
@@ -38,7 +38,7 @@ export default function HomeHeader({
           as={hasNotifications ? HasNotifications : NoNotifications}
           className={cn(
             "size-5",
-            hasNotifications ? "text-sage-600" : "text-sage-500"
+            hasNotifications ? "text-sage-600" : "text-sage-500",
           )}
         />
 

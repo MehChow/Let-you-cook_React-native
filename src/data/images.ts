@@ -1,0 +1,16 @@
+export const images = {
+  avatarMock: require("@/assets/mock/icon.webp"),
+  todaySpecial: require("@/assets/mock/todays_special.webp"),
+  popularRecipe1: require("@/assets/mock/popular_recipe_1.webp"),
+  popularRecipe2: require("@/assets/mock/popular_recipe_2.webp"),
+  categoryBreakfast: require("@/assets/mock/categories/breakfast.webp"),
+  categoryLunch: require("@/assets/mock/categories/lunch.webp"),
+  categoryDinner: require("@/assets/mock/categories/dinner.webp"),
+  categoryDessert: require("@/assets/mock/categories/dessert.webp"),
+  categoryDrinks: require("@/assets/mock/categories/drinks.webp"),
+  categoryVegan: require("@/assets/mock/categories/vegan.webp"),
+  categoryOther: require("@/assets/mock/categories/other.webp"),
+  recipeDetail1: require("@/assets/mock/recipe-detail-1.webp"),
+  recipeDetail2: require("@/assets/mock/recipe-detail-2.webp"),
+  recipeDetail3: require("@/assets/mock/recipe-detail-3.webp"),
+} as const;

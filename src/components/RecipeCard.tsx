@@ -53,7 +53,7 @@ export default function RecipeCard({
   className,
 }: RecipeCardProps) {
   const [internalFavourite, setInternalFavourite] = React.useState<boolean>(
-    () => Boolean(isFavourite)
+    () => Boolean(isFavourite),
   );
 
   // Keep internal state in sync when the card is used in "controlled" mode.
@@ -103,7 +103,7 @@ export default function RecipeCard({
       <View className="px-4 pb-4 pt-3">
         <View className="flex-row items-start justify-between gap-3">
           <View className="flex-1">
-            <Text className="text-lg font-bold text-foreground" numberOfLines={1}>
+            <Text className="text-lg font-bold text-sage-800" numberOfLines={1}>
               {title}
             </Text>
             <Text
@@ -171,4 +171,3 @@ export default function RecipeCard({
     </PressableCard>
   );
 }
-

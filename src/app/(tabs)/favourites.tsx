@@ -29,7 +29,7 @@ export default function FavouritesScreen() {
   const header = React.useMemo(
     () => (
       <View className="mt-4 flex-row items-center justify-between px-5">
-        <Text className="text-2xl font-bold text-foreground">My favorites</Text>
+        <Text className="text-2xl font-bold text-sage-900">My favorites</Text>
         <FavouriteViewModeToggle mode={viewMode} onModeChange={setViewMode} />
       </View>
     ),
@@ -39,7 +39,7 @@ export default function FavouritesScreen() {
   const empty = React.useMemo(
     () => (
       <View className="mx-5 mt-6 rounded-2xl bg-white/70 px-4 py-6">
-        <Text className="text-center text-base font-semibold text-foreground">
+        <Text className="text-center text-base font-semibold text-sage-700">
           No favourites yet
         </Text>
         <Text className="mt-2 text-center text-sm text-muted-foreground">

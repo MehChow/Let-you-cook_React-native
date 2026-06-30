@@ -1,13 +1,14 @@
+import { images } from "@/data/images";
 import { mockAvatar, myRecipes, popularRecipes, todaySpecial } from "@/features/home/mockData";
 import type { RecipeDetail, RecipeReview } from "@/features/recipe-detail/types";
 
-const detailImageOne = require("../../../assets/mock_images/recipe-detail-1.jpg");
-const detailImageTwo = require("../../../assets/mock_images/recipe-detail-2.jpg");
-const detailImageThree = require("../../../assets/mock_images/recipe-detail-3.jpg");
+const detailImageOne = images.recipeDetail1;
+const detailImageTwo = images.recipeDetail2;
+const detailImageThree = images.recipeDetail3;
 
-const reviewAvatarOne = require("../../../assets/mock/icon.jpg");
-const reviewAvatarTwo = require("../../../assets/mock/categories/dessert-thumb.jpg");
-const reviewAvatarThree = require("../../../assets/mock/categories/breakfast-thumb.jpg");
+const reviewAvatarOne = images.avatarMock;
+const reviewAvatarTwo = images.categoryDessert;
+const reviewAvatarThree = images.categoryBreakfast;
 
 const baseReviews: RecipeReview[] = [
   {

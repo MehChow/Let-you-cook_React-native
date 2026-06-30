@@ -3,10 +3,10 @@ import { Filter, Grid, Search } from "@/components/Icon";
 import SectionHeader from "@/components/SectionHeader";
 import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
-import CategoryCarousel from "@/features/home/CategoryCarousel";
 import type { CategoryCarouselItem } from "@/features/home/CategoryCarousel";
-import type { SearchActiveFilterChip } from "@/features/search/hooks/useSearchDerived";
+import CategoryCarousel from "@/features/home/CategoryCarousel";
 import SearchActiveFilterChips from "@/features/search/components/SearchActiveFilterChips";
+import type { SearchActiveFilterChip } from "@/features/search/hooks/useSearchDerived";
 import { cn } from "@/lib/utils";
 import { Pressable, ScrollView, TextInput, View } from "react-native";
 
@@ -37,9 +37,7 @@ export default function SearchScreenHeader({
 }: SearchScreenHeaderProps) {
   return (
     <View className="gap-5 px-5 pt-4">
-      <Text className="text-2xl font-bold text-foreground">
-        Find a recipe
-      </Text>
+      <Text className="text-2xl font-bold text-sage-900">Find a recipe</Text>
 
       <View className="flex-row items-center gap-3">
         <View className="h-10 flex-1 flex-row items-center gap-2 rounded-2xl border border-neutral-200 bg-white px-3">
@@ -98,13 +96,8 @@ export default function SearchScreenHeader({
             >
               <Chip
                 label={label}
-                className={cn(
-                  isActive ? "bg-sage-500" : "bg-sage-200",
-                )}
-                textClassName={cn(
-                  "text-sage-700",
-                  isActive && "text-white",
-                )}
+                className={cn(isActive ? "bg-sage-500" : "bg-sage-200")}
+                textClassName={cn("text-sage-700", isActive && "text-white")}
               />
             </Pressable>
           );

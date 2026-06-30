@@ -1,6 +1,7 @@
+import { images } from "@/data/images";
 import type { ImageSourcePropType } from "react-native";
 
-export const mockAvatar: ImageSourcePropType = require("../../../assets/mock/icon.jpg");
+export const mockAvatar: ImageSourcePropType = images.avatarMock;
 
 export type HomeCategory = {
   id: string;
@@ -48,7 +49,7 @@ export const todaySpecial: HomeRecipe = {
   rating: 4.8,
   tag: "Wings",
   imagePlaceholderClass: "bg-accent-200",
-  image: require("../../../assets/mock/todays_special.jpg"),
+  image: images.todaySpecial,
 };
 
 export const categories: HomeCategory[] = [
@@ -56,50 +57,50 @@ export const categories: HomeCategory[] = [
     id: "breakfast",
     label: "Breakfast",
     placeholderColorClass: "bg-warning-200",
-    imageThumb: require("../../../assets/mock/categories/breakfast-thumb.jpg"),
-    imageLarge: require("../../../assets/mock/categories/breakfast-large.jpg"),
+    imageThumb: images.categoryBreakfast,
+    imageLarge: images.categoryBreakfast,
   },
   {
     id: "lunch",
     label: "Lunch",
     placeholderColorClass: "bg-accent-200",
-    imageThumb: require("../../../assets/mock/categories/lunch-thumb.jpg"),
-    imageLarge: require("../../../assets/mock/categories/lunch-large.jpg"),
+    imageThumb: images.categoryLunch,
+    imageLarge: images.categoryLunch,
   },
   {
     id: "dinner",
     label: "Dinner",
     placeholderColorClass: "bg-sage-200",
-    imageThumb: require("../../../assets/mock/categories/dinner-thumb.jpg"),
-    imageLarge: require("../../../assets/mock/categories/dinner-large.jpg"),
+    imageThumb: images.categoryDinner,
+    imageLarge: images.categoryDinner,
   },
   {
     id: "dessert",
     label: "Dessert",
     placeholderColorClass: "bg-neutral-200",
-    imageThumb: require("../../../assets/mock/categories/dessert-thumb.jpg"),
-    imageLarge: require("../../../assets/mock/categories/dessert-large.jpg"),
+    imageThumb: images.categoryDessert,
+    imageLarge: images.categoryDessert,
   },
   {
     id: "drinks",
     label: "Drinks",
     placeholderColorClass: "bg-neutral-200",
-    imageThumb: require("../../../assets/mock/categories/drinks-thumb.jpg"),
-    imageLarge: require("../../../assets/mock/categories/drinks-large.jpg"),
+    imageThumb: images.categoryDrinks,
+    imageLarge: images.categoryDrinks,
   },
   {
     id: "vegan",
     label: "Vegan",
     placeholderColorClass: "bg-neutral-200",
-    imageThumb: require("../../../assets/mock/categories/vegan-thumb.jpg"),
-    imageLarge: require("../../../assets/mock/categories/vegan-large.jpg"),
+    imageThumb: images.categoryVegan,
+    imageLarge: images.categoryVegan,
   },
   {
     id: "other",
     label: "Other",
     placeholderColorClass: "bg-neutral-200",
-    imageThumb: require("../../../assets/mock/categories/other-thumb.jpg"),
-    imageLarge: require("../../../assets/mock/categories/other-large.jpg"),
+    imageThumb: images.categoryOther,
+    imageLarge: images.categoryOther,
   },
 ];
 
@@ -116,7 +117,7 @@ export const popularRecipes: HomeRecipe[] = [
     rating: 4.5,
     tag: "Drinks",
     imagePlaceholderClass: "bg-accent-200",
-    image: require("../../../assets/mock/popular_recipe_1.jpg"),
+    image: images.popularRecipe1,
   },
   {
     id: "pop-2",
@@ -130,7 +131,7 @@ export const popularRecipes: HomeRecipe[] = [
     rating: 4.6,
     tag: "Dessert",
     imagePlaceholderClass: "bg-warning-200",
-    image: require("../../../assets/mock/popular_recipe_2.webp"),
+    image: images.popularRecipe2,
   },
 ];
 
@@ -151,6 +152,6 @@ export const myRecipes: HomeRecipe[] = [
     rating: 4.5,
     tag: "Lunch",
     imagePlaceholderClass: "bg-sage-200",
-    image: require("../../../assets/mock/categories/lunch-thumb.jpg"),
+    image: images.categoryLunch,
   },
 ];
