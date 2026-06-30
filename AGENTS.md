@@ -4,47 +4,53 @@ Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before 
 
 ## App Brief
 
-Let You Cook is a recipe-focused mobile app prototype built around discovering, saving, and creating recipes. The current product surface includes a home feed with featured recipes and categories, search with filters, favourites, a profile screen, and a multi-step add-recipe wizard. Most data is still mocked and some save flows are local-only, so the codebase currently reads as a polished frontend/demo build that is moving toward fuller backend integration.
+Let You Cook is a recipe-focused mobile app prototype: think Instagram for recipes. Users can discover recipe cards, search and filter recipes, favourite them, view profile/author context, read recipe details with ingredients/steps/nutrition/reviews, and create recipes through a multi-step wizard. The app has been revamped into a feature-oriented Expo Router structure: route files stay thin, shared app UI lives in `src/components`, RNR primitives stay under `src/components/ui`, feature logic/components live under `src/features/*`, and mock image imports are centralized in `src/data/images.ts`. Most data is still mocked and save flows are local-only, so treat it as a polished frontend/demo moving toward backend integration.
 
-## Tech Stack
+## Stack
 
-- **Expo 56** with React Native Reusables (RNR)
-- **Styling**: Tailwind CSS v4 (Uniwind)
-- **State**: Zustand
-- **Forms**: react-hook-form + zod
-- **API**: Tanstack Query
-- **UI**: LegendList v2 (replaces FlatList when found performance issue), RN-primitives
-- **Local storage**: react-native-mmkv
+- Expo 56 with Expo Router and React Compiler enabled
+- React Native Reusables (RNR) and RN primitives
+- Tailwind CSS v4 (Uniwind)
+- Zustand, react-hook-form, zod, TanStack Query, react-native-mmkv
+- Use LegendList v2 only after reproducing a real list performance issue
 
-## TypeScript
+## Code Rules
 
-- Use interfaces for props/state, avoid `any`
+- Write concise, modular, type-safe TypeScript
+- Use interfaces for props and shared state shapes; avoid `any`
+- Do not use `useMemo`, `useCallback`, or `React.memo` outside `src/components/ui`
+- Extract business logic into hooks or stores when it keeps UI files small and clear
+- Keep files under 150 lines when practical; split by responsibility, not abstraction
 
-## Code Style
+## Structure
 
-- Concise, type-safe TypeScript
-- Modular, feature-organized files
-- Prevent using useMemo, useCallback, React.memo as it is handled by React Complier (except RNR components under src/components/ui)
+- Keep route files thin and composition-focused
+- Keep shared app UI in `src/components`
+- Keep RNR primitives in `src/components/ui`
+- Keep feature logic and feature-only UI in `src/features/<feature>`
+- Keep direct mock asset imports in `src/data/images.ts` only
+
+## UI Rules
+
+- Use `expo-image` for images
+- Use RNR base components from `src/components/ui` where applicable
+- Use `AppScreen` for shared screen background and safe-area handling
+- Reuse shared app components before adding one-off markup
+- Prefer semantic color tokens from `src/global.css` over raw hex values
+- Keep the current sage, rounded-card visual style unless a task explicitly asks for a redesign
+- Maintain consistent padding and responsive layouts
 
 ## Naming
 
-- camelCase for variables/functions: `isFetchingData`
+- camelCase for variables and functions: `isFetchingData`
 - PascalCase for components: `UserProfile`
-- lowercase + hyphenated directories: `user-profile`
+- lowercase, hyphenated directories: `user-profile`
 
-## Styling Rules
+## Testing
 
-- Consistent padding, responsive design
-- Use `expo-image` for images
-- Utilize components from RNR under src/components/ui for base component (install if needed)
+- Keep tests lightweight and high-value
+- Prefer coverage for state transitions, persistence restore/save behavior, native failure branches, and critical error or fallback UI states
 
-## Best Practices
+## Notes
 
-- DRY principle
-- Extract business logic into custom hook
-- Keep files small, each file under 150 lines of code
-
-## Testing Notes
-
-- Keep tests secondary and lightweight; prioritize high-value coverage over broad test volume
-- Prefer tests for store/state transitions, persistence restore/save behavior, native failure branches, and critical error/fallback UI states
+- If anything goes wrong while debugging/implementing, try to checkout `docs/notes.md` for solutions

@@ -5,16 +5,13 @@ import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Toaster } from "sonner-native";
-import { useUniwind } from "uniwind";
 
 void SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const { theme } = useUniwind();
-
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <StatusBar style={theme === "dark" ? "light" : "dark"} />
+      <StatusBar style="dark" />
       <Stack initialRouteName="(tabs)">
         <Stack.Screen
           name="(tabs)"

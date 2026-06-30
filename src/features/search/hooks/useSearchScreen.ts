@@ -10,9 +10,15 @@ import { useSearchFilterStore } from "@/features/search/filterStore";
 import { useSearchDerived } from "@/features/search/hooks/useSearchDerived";
 import { useFavourites } from "@/hooks/useFavourites";
 import { useRouter } from "expo-router";
-import * as React from "react";
+import { useState } from "react";
 
 const RECENT_SEARCHES = ["healthy", "tiramisu", "snacks", "vegan", "cake"];
+const categoryItems: CategoryCarouselItem[] = categories.map((category) => ({
+  id: category.id,
+  label: category.label,
+  placeholderColorClass: category.placeholderColorClass,
+  imageSource: category.imageThumb,
+}));
 
 export function useSearchScreen() {
   const router = useRouter();
@@ -20,8 +26,7 @@ export function useSearchScreen() {
   const setSelectedCategoryId = useCategoryStore(
     (s) => s.setSelectedCategoryId,
   );
-
-  const [searchText, setSearchText] = React.useState("");
+  const [searchText, setSearchText] = useState("");
   const { favourites, isFavourite, setFavourite } = useFavourites();
 
   const sortBy = useSearchFilterStore((s) => s.sortBy);
@@ -33,15 +38,12 @@ export function useSearchScreen() {
   const setCalories = useSearchFilterStore((s) => s.setCalories);
   const setServings = useSearchFilterStore((s) => s.setServings);
 
-  const filters = React.useMemo(
-    () => ({
-      sortBy,
-      cookingTime,
-      calories: caloriesRange,
-      servings: servingsRange,
-    }),
-    [caloriesRange, cookingTime, servingsRange, sortBy],
-  );
+  const filters = {
+    sortBy,
+    cookingTime,
+    calories: caloriesRange,
+    servings: servingsRange,
+  };
 
   const { appliedCount, filteredRecipes, activeFilterChips } = useSearchDerived(
     {
@@ -56,45 +58,25 @@ export function useSearchScreen() {
     },
   );
 
-  const categoryItems = React.useMemo<CategoryCarouselItem[]>(
-    () =>
-      categories.map((c) => ({
-        id: c.id,
-        label: c.label,
-        placeholderColorClass: c.placeholderColorClass,
-        imageSource: c.imageThumb,
-      })),
-    [],
-  );
-
-  const handleOpenFilters = React.useCallback(() => {
+  const handleOpenFilters = () => {
     router.push("/filters");
-  }, [router]);
+  };
 
-  const handleOpenCategories = React.useCallback(() => {
+  const handleOpenCategories = () => {
     router.push("/modal");
-  }, [router]);
+  };
 
-  const handleSelectCategory = React.useCallback(
-    (id: string) => {
-      setSelectedCategoryId(selectedCategoryId === id ? null : id);
-    },
-    [selectedCategoryId, setSelectedCategoryId],
-  );
+  const handleSelectCategory = (id: string) => {
+    setSelectedCategoryId(selectedCategoryId === id ? null : id);
+  };
 
-  const handleToggleFavourite = React.useCallback(
-    (id: string, next: boolean) => {
-      setFavourite(id, next);
-    },
-    [setFavourite],
-  );
+  const handleToggleFavourite = (id: string, next: boolean) => {
+    setFavourite(id, next);
+  };
 
-  const handleOpenRecipe = React.useCallback(
-    (id: string) => {
-      pushRecipeDetail(router, id);
-    },
-    [router],
-  );
+  const handleOpenRecipe = (id: string) => {
+    pushRecipeDetail(router, id);
+  };
 
   return {
     activeFilterChips,

@@ -6,7 +6,6 @@ import {
   getAppliedCount,
 } from "@/features/search/filterStore";
 import { parseServingRange } from "@/features/search/utils/parseServingRange";
-import * as React from "react";
 
 const categoryLabelById = new Map(
   categories.map((category) => [category.id, category.label.toLowerCase()])
@@ -39,9 +38,8 @@ export function useSearchDerived({
   setCalories,
   setServings,
 }: Params) {
-  const appliedCount = React.useMemo(() => getAppliedCount(filters), [filters]);
-
-  const filteredRecipes = React.useMemo(() => {
+  const appliedCount = getAppliedCount(filters);
+  const filteredRecipes = (() => {
     const q = searchText.trim().toLowerCase();
     const filtered = recipes.filter((r) => {
       const categoryLabel = categoryLabelById.get(r.categoryId) ?? "";
@@ -102,9 +100,9 @@ export function useSearchDerived({
       default:
         return filtered;
     }
-  }, [filters, recipes, searchText, selectedCategoryId]);
+  })();
 
-  const activeFilterChips = React.useMemo(() => {
+  const activeFilterChips = (() => {
     const chips: SearchActiveFilterChip[] = [];
 
     if (filters.sortBy !== FILTER_DEFAULTS.sortBy) {
@@ -164,7 +162,7 @@ export function useSearchDerived({
     }
 
     return chips;
-  }, [filters, setCalories, setCookingTime, setServings, setSortBy]);
+  })();
 
   return {
     appliedCount,

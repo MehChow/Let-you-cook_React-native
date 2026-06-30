@@ -5,7 +5,7 @@ import {
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
 import { createEmptyIngredientGroup } from "@/features/add-recipe/utils/ingredientGroups";
 import { prepareIngredientGroupsForPreview } from "@/features/add-recipe/utils/previewHelpers";
-import { useCallback, useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import {
   useFieldArray,
   useFormContext,
@@ -50,31 +50,24 @@ export const useIngredientGroupsField = () => {
   });
 
   const groupCount = groupFields.length;
-
-  const totalIngredients = useMemo(() => {
-    return (watchedGroups ?? []).reduce(
-      (sum: number, g: AddRecipeFormValues["ingredientGroups"][number]) =>
-        sum + (g.items?.length ?? 0),
-      0
-    );
-  }, [watchedGroups]);
-
+  const totalIngredients = (watchedGroups ?? []).reduce(
+    (sum: number, g: AddRecipeFormValues["ingredientGroups"][number]) =>
+      sum + (g.items?.length ?? 0),
+    0,
+  );
   const canAddGroup = groupCount < MAX_INGREDIENT_GROUPS;
   const canAddIngredient = totalIngredients < MAX_INGREDIENTS;
   const previewGroups = prepareIngredientGroupsForPreview(watchedGroups);
 
-  const onAddGroup = useCallback(() => {
+  const onAddGroup = () => {
     if (!canAddGroup) return;
     appendGroup(createEmptyIngredientGroup(), { shouldFocus: false });
-  }, [appendGroup, canAddGroup]);
+  };
 
-  const onRemoveGroup = useCallback(
-    (groupIndex: number) => {
-      if (groupCount <= 1) return;
-      removeGroup(groupIndex);
-    },
-    [groupCount, removeGroup]
-  );
+  const onRemoveGroup = (groupIndex: number) => {
+    if (groupCount <= 1) return;
+    removeGroup(groupIndex);
+  };
 
   return {
     control,

@@ -44,8 +44,12 @@ export function NutritionRing({
   const labelStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scaleValue.value }],
   }));
-
-  let startRatio = 0;
+  const segmentStartRatios: number[] = [];
+  let currentRatio = 0;
+  for (const row of rows) {
+    segmentStartRatios.push(currentRatio);
+    currentRatio += row.ratio;
+  }
 
   return (
     <View className="items-center justify-center">
@@ -63,22 +67,18 @@ export function NutritionRing({
             strokeWidth={strokeWidth}
             fill="none"
           />
-          {rows.map((row) => {
-            const segment = (
-              <AnimatedRingSegment
-                key={row.key}
-                color={row.color}
-                ratio={row.ratio}
-                startRatio={startRatio}
-                circumference={circumference}
-                radius={radius}
-                ringSize={ringSize}
-                strokeWidth={strokeWidth}
-              />
-            );
-            startRatio += row.ratio;
-            return segment;
-          })}
+          {rows.map((row, index) => (
+            <AnimatedRingSegment
+              key={row.key}
+              color={row.color}
+              ratio={row.ratio}
+              startRatio={segmentStartRatios[index] ?? 0}
+              circumference={circumference}
+              radius={radius}
+              ringSize={ringSize}
+              strokeWidth={strokeWidth}
+            />
+          ))}
         </Svg>
 
         <Animated.View

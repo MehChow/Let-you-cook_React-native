@@ -10,7 +10,7 @@ import {
 } from "@/features/add-recipe/validateStep";
 import { ADD_RECIPE_WIZARD_STEPS } from "@/features/add-recipe/wizard/wizardStepConfig";
 import { router } from "expo-router";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import type { LayoutChangeEvent } from "react-native";
 import { BackHandler, Keyboard } from "react-native";
 import type { UseFormReturn } from "react-hook-form";
@@ -41,45 +41,60 @@ export const useAddRecipeWizard = (
   const { alertDialog, presentDialog } = useAddRecipeAlertDialog();
 
   const { clearErrors, formState, getValues, setError, setValue } = methods;
+  const currentStep = targetStep ?? step;
+  const syncStep = (nextStep: number) => {
+    if (targetStep !== null) {
+      setTargetStep(null);
+    }
+    setStep(nextStep);
+  };
+  const showDiscardDialog = () => {
+    presentDialog({
+      title: "Discard changes?",
+      description: "Your recipe draft will be lost.",
+      cancelLabel: "Keep editing",
+      actionLabel: "Discard",
+      actionVariant: "destructive",
+      onAction: () => router.back(),
+    });
+  };
 
-  const attemptExit = useCallback(() => {
+  const attemptExit = () => {
     if (formState.isDirty) {
-      presentDialog({
-        title: "Discard changes?",
-        description: "Your recipe draft will be lost.",
-        cancelLabel: "Keep editing",
-        actionLabel: "Discard",
-        actionVariant: "destructive",
-        onAction: () => router.back(),
-      });
+      showDiscardDialog();
       return;
     }
 
     router.back();
-  }, [formState.isDirty, presentDialog]);
-
-  useEffect(() => {
-    if (targetStep === null) return;
-    setStep(targetStep);
-    setTargetStep(null);
-  }, [setTargetStep, targetStep]);
+  };
 
   useEffect(() => {
     const subscription = BackHandler.addEventListener(
       "hardwareBackPress",
       () => {
-        if (step > 0) {
+        if (currentStep > 0) {
           setStep((currentStep) => currentStep - 1);
           return true;
         }
 
-        attemptExit();
+        if (formState.isDirty) {
+          presentDialog({
+            title: "Discard changes?",
+            description: "Your recipe draft will be lost.",
+            cancelLabel: "Keep editing",
+            actionLabel: "Discard",
+            actionVariant: "destructive",
+            onAction: () => router.back(),
+          });
+        } else {
+          router.back();
+        }
         return true;
       },
     );
 
     return () => subscription.remove();
-  }, [attemptExit, step]);
+  }, [currentStep, formState.isDirty, presentDialog]);
 
   useEffect(() => {
     const showSubscription = Keyboard.addListener("keyboardDidShow", (event) => {
@@ -95,36 +110,33 @@ export const useAddRecipeWizard = (
     };
   }, []);
 
-  const showStepValidationToast = useCallback(
-    (title: string, messages: string[]) => {
-      if (messages.length === 0) return;
+  const showStepValidationToast = (title: string, messages: string[]) => {
+    if (messages.length === 0) return;
 
-      toast.error(title, {
-        description: messages.join("\n"),
-      });
-    },
-    [],
-  );
+    toast.error(title, {
+      description: messages.join("\n"),
+    });
+  };
 
-  const goNext = useCallback(() => {
+  const goNext = () => {
     clearErrors();
 
     const values = getValues();
-    const result = validateWizardStep(step, values);
+    const result = validateWizardStep(currentStep, values);
     if (!result.ok) {
       applyZodIssuesToForm(result.error, setError);
 
       const messages = getUniqueZodIssueMessages(result.error);
-      if (step === 2) {
+      if (currentStep === 2) {
         showStepValidationToast("Please fix your ingredients", messages);
       }
-      if (step === 3) {
+      if (currentStep === 3) {
         showStepValidationToast("Please fix your cooking steps", messages);
       }
       return;
     }
 
-    if (step === 2) {
+    if (currentStep === 2) {
       setValue(
         "ingredientGroups",
         sanitizeIngredientGroups(values.ingredientGroups),
@@ -136,40 +148,33 @@ export const useAddRecipeWizard = (
       );
     }
 
-    if (step < TOTAL_WIZARD_STEPS - 1) {
-      setStep((currentStep) => currentStep + 1);
+    if (currentStep < TOTAL_WIZARD_STEPS - 1) {
+      syncStep(currentStep + 1);
     }
-  }, [
-    clearErrors,
-    getValues,
-    setError,
-    setValue,
-    showStepValidationToast,
-    step,
-  ]);
+  };
 
-  const onPrimaryFooter = useCallback(() => {
-    if (step < TOTAL_WIZARD_STEPS - 1) {
+  const onPrimaryFooter = () => {
+    if (currentStep < TOTAL_WIZARD_STEPS - 1) {
       goNext();
       return;
     }
 
     setPreviewSnapshot(getValues());
     router.push("/add-recipe/preview");
-  }, [getValues, goNext, setPreviewSnapshot, step]);
+  };
 
-  const onFooterBack = useCallback(() => {
-    if (step > 0) {
-      setStep((currentStep) => currentStep - 1);
+  const onFooterBack = () => {
+    if (currentStep > 0) {
+      syncStep(currentStep - 1);
     }
-  }, [step]);
+  };
 
-  const onFooterLayout = useCallback((event: LayoutChangeEvent) => {
+  const onFooterLayout = (event: LayoutChangeEvent) => {
     const nextFooterHeight = event.nativeEvent.layout.height;
     if (nextFooterHeight > 0) {
       setFooterHeight(nextFooterHeight);
     }
-  }, []);
+  };
 
   const contentBottomPadding =
     keyboardHeight > 0
@@ -177,10 +182,10 @@ export const useAddRecipeWizard = (
       : Math.max(footerHeight, 0) + 24;
 
   return {
-    step,
-    stepConfig: ADD_RECIPE_WIZARD_STEPS[step],
-    showStepBack: step > 0,
-    primaryLabel: step < TOTAL_WIZARD_STEPS - 1 ? "Continue" : "Preview",
+    step: currentStep,
+    stepConfig: ADD_RECIPE_WIZARD_STEPS[currentStep],
+    showStepBack: currentStep > 0,
+    primaryLabel: currentStep < TOTAL_WIZARD_STEPS - 1 ? "Continue" : "Preview",
     contentBottomPadding,
     alertDialog,
     attemptExit,

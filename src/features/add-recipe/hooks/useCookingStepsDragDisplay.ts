@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 
 export interface CookingStepDragField {
   id: string;
@@ -7,44 +7,39 @@ export interface CookingStepDragField {
 export function useCookingStepsDragDisplay(fields: CookingStepDragField[]) {
   const [dragFromIndex, setDragFromIndex] = useState<number | null>(null);
   const [placeholderIndex, setPlaceholderIndex] = useState<number | null>(null);
+  const displayIndexById = new Map<string, number>();
 
-  const displayIndexById = useMemo(() => {
-    const displayMap = new Map<string, number>();
+  fields.forEach((field, index) => {
+    let displayIndex = index;
 
-    fields.forEach((field, index) => {
-      let displayIndex = index;
-
-      if (
-        dragFromIndex !== null &&
-        placeholderIndex !== null &&
-        dragFromIndex !== placeholderIndex
-      ) {
-        if (index === dragFromIndex) {
-          displayIndex = placeholderIndex;
-        } else if (dragFromIndex < placeholderIndex) {
-          if (index > dragFromIndex && index <= placeholderIndex) {
-            displayIndex = index - 1;
-          }
-        } else if (index >= placeholderIndex && index < dragFromIndex) {
-          displayIndex = index + 1;
+    if (
+      dragFromIndex !== null &&
+      placeholderIndex !== null &&
+      dragFromIndex !== placeholderIndex
+    ) {
+      if (index === dragFromIndex) {
+        displayIndex = placeholderIndex;
+      } else if (dragFromIndex < placeholderIndex) {
+        if (index > dragFromIndex && index <= placeholderIndex) {
+          displayIndex = index - 1;
         }
+      } else if (index >= placeholderIndex && index < dragFromIndex) {
+        displayIndex = index + 1;
       }
+    }
 
-      displayMap.set(field.id, displayIndex);
-    });
+    displayIndexById.set(field.id, displayIndex);
+  });
 
-    return displayMap;
-  }, [dragFromIndex, fields, placeholderIndex]);
-
-  const resetDragState = useCallback(() => {
+  const resetDragState = () => {
     setDragFromIndex(null);
     setPlaceholderIndex(null);
-  }, []);
+  };
 
-  const beginDrag = useCallback((index: number) => {
+  const beginDrag = (index: number) => {
     setDragFromIndex(index);
     setPlaceholderIndex(index);
-  }, []);
+  };
 
   return {
     beginDrag,

@@ -55,21 +55,14 @@ export default function RecipeCard({
   const [internalFavourite, setInternalFavourite] = React.useState<boolean>(
     () => Boolean(isFavourite),
   );
-
-  // Keep internal state in sync when the card is used in "controlled" mode.
-  React.useEffect(() => {
-    if (isFavourite !== undefined) {
-      setInternalFavourite(Boolean(isFavourite));
+  const favourite = isFavourite ?? internalFavourite;
+  const toggleFavourite = () => {
+    const next = !favourite;
+    if (isFavourite === undefined) {
+      setInternalFavourite(next);
     }
-  }, [isFavourite]);
-
-  const favourite = internalFavourite;
-
-  const toggleFavourite = React.useCallback(() => {
-    const next = !internalFavourite;
-    setInternalFavourite(next);
     onChangeFavourite?.(next);
-  }, [internalFavourite, onChangeFavourite]);
+  };
 
   return (
     <PressableCard
@@ -100,7 +93,7 @@ export default function RecipeCard({
         className="absolute right-3 top-3"
       />
 
-      <View className="px-4 pb-4 pt-3">
+      <View className="bg-white px-4 pb-4 pt-3">
         <View className="flex-row items-start justify-between gap-3">
           <View className="flex-1">
             <Text className="text-lg font-bold text-sage-800" numberOfLines={1}>

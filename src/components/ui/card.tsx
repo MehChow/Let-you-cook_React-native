@@ -28,12 +28,10 @@ function CardHeader({
 
 function CardTitle({
   className,
-  ref,
   ...props
-}: React.ComponentProps<typeof Text> & React.RefAttributes<typeof Text>) {
+}: React.ComponentProps<typeof Text>) {
   return (
     <Text
-      ref={ref}
       role="heading"
       aria-level={3}
       className={cn('font-semibold leading-none', className)}

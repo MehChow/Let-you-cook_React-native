@@ -1,7 +1,7 @@
 import { getRecipeDetailById } from "@/features/recipe-detail/mockData";
 import { useFavourites } from "@/hooks/useFavourites";
 import { router, type Href } from "expo-router";
-import * as React from "react";
+import { useState } from "react";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 
 interface UseRecipeDetailScreenParams {
@@ -11,35 +11,33 @@ interface UseRecipeDetailScreenParams {
 export const useRecipeDetailScreen = ({
   recipeId,
 }: UseRecipeDetailScreenParams) => {
-  const recipe = React.useMemo(() => getRecipeDetailById(recipeId), [recipeId]);
+  const recipe = getRecipeDetailById(recipeId);
   const { isFavourite, setFavourite } = useFavourites();
-  const [activeImageIndex, setActiveImageIndex] = React.useState(0);
-
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const favourite = recipe ? isFavourite(recipe.id) : false;
 
-  const handleBack = React.useCallback(() => {
+  const handleBack = () => {
     router.back();
-  }, []);
+  };
 
-  const handleToggleFavourite = React.useCallback(() => {
+  const handleToggleFavourite = () => {
     if (!recipe) return;
     setFavourite(recipe.id, !isFavourite(recipe.id));
-  }, [isFavourite, recipe, setFavourite]);
+  };
 
-  const handleImageScroll = React.useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const viewWidth = event.nativeEvent.layoutMeasurement.width;
-      if (viewWidth <= 0) return;
-      const nextIndex = Math.round(event.nativeEvent.contentOffset.x / viewWidth);
-      setActiveImageIndex(nextIndex);
-    },
-    [],
-  );
+  const handleImageScroll = (
+    event: NativeSyntheticEvent<NativeScrollEvent>,
+  ) => {
+    const viewWidth = event.nativeEvent.layoutMeasurement.width;
+    if (viewWidth <= 0) return;
+    const nextIndex = Math.round(event.nativeEvent.contentOffset.x / viewWidth);
+    setActiveImageIndex(nextIndex);
+  };
 
-  const handleOpenReviews = React.useCallback(() => {
+  const handleOpenReviews = () => {
     if (!recipe) return;
     router.push(`/recipe/${encodeURIComponent(recipe.id)}/reviews` as Href);
-  }, [recipe]);
+  };
 
   return {
     activeImageIndex,

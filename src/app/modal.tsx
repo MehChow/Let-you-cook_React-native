@@ -6,7 +6,6 @@ import { categories } from "@/features/home/mockData";
 import { cn } from "@/lib/utils";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
-import * as React from "react";
 import { FlatList, StyleSheet, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -24,34 +23,27 @@ export default function Modal() {
   const setSelectedCategoryId = useCategoryStore(
     (s) => s.setSelectedCategoryId,
   );
+  const contentWidth = windowWidth - GRID_HORIZONTAL_PADDING * 2;
+  const totalGap = GRID_GAP * (GRID_COLUMNS - 1);
+  const cardSize = Math.floor((contentWidth - totalGap) / GRID_COLUMNS);
+  const data =
+    categories.length % GRID_COLUMNS === 0
+      ? categories
+      : [
+          ...categories,
+          {
+            id: "__spacer__",
+            label: "",
+            placeholderColorClass: "",
+            imageThumb: null,
+            imageLarge: null,
+          },
+        ];
 
-  const cardSize = React.useMemo(() => {
-    const contentWidth = windowWidth - GRID_HORIZONTAL_PADDING * 2;
-    const totalGap = GRID_GAP * (GRID_COLUMNS - 1);
-    return Math.floor((contentWidth - totalGap) / GRID_COLUMNS);
-  }, [windowWidth]);
-
-  const data = React.useMemo(() => {
-    if (categories.length % GRID_COLUMNS === 0) return categories;
-    return [
-      ...categories,
-      {
-        id: "__spacer__",
-        label: "",
-        placeholderColorClass: "",
-        imageThumb: null,
-        imageLarge: null,
-      },
-    ];
-  }, []);
-
-  const handleSelect = React.useCallback(
-    (id: string) => {
-      setSelectedCategoryId(selectedCategoryId === id ? null : id);
-      router.back();
-    },
-    [router, selectedCategoryId, setSelectedCategoryId],
-  );
+  const handleSelect = (id: string) => {
+    setSelectedCategoryId(selectedCategoryId === id ? null : id);
+    router.back();
+  };
 
   return (
     <View

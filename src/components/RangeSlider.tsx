@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/immutability, react-hooks/refs */
 import * as React from "react";
 import { View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -99,9 +100,9 @@ export default function RangeSlider({
   const lastEmittedRight = useSharedValue(value[1]);
   const isDraggingSv = useSharedValue(false);
 
-  const setDraggingState = React.useCallback((next: boolean) => {
+  const setDraggingState = (next: boolean) => {
     isDraggingRef.current = next;
-  }, []);
+  };
 
   React.useEffect(() => {
     minSv.value = min;
@@ -110,7 +111,7 @@ export default function RangeSlider({
     minGapSv.value = Math.max(minGap, step);
   }, [max, maxSv, min, minGap, minGapSv, minSv, step, stepSv]);
 
-  const syncFromValue = React.useCallback(() => {
+  const syncFromValue = () => {
     if (isDraggingRef.current) return;
     const w = widthRef.current;
     if (!w) return;
@@ -125,61 +126,41 @@ export default function RangeSlider({
     lastValueRef.current = [nextLeft, nextRight];
     leftPx.value = valueToPxWorklet(nextLeft, minV, maxV, w);
     rightPx.value = valueToPxWorklet(nextRight, minV, maxV, w);
-  }, [
-    isDraggingRef,
-    leftPx,
-    leftValue,
-    max,
-    min,
-    rightPx,
-    rightValue,
-    value,
-    lastEmittedLeft,
-    lastEmittedRight,
-  ]);
+  };
 
   React.useEffect(() => {
     syncFromValue();
-  }, [syncFromValue]);
+  });
 
-  const emitChange = React.useCallback(
-    (next: Range) => {
-      const prev = lastValueRef.current;
-      if (prev[0] === next[0] && prev[1] === next[1]) return;
-      lastValueRef.current = next;
-      onChange(next);
-    },
-    [onChange]
-  );
+  const emitChange = (next: Range) => {
+    const prev = lastValueRef.current;
+    if (prev[0] === next[0] && prev[1] === next[1]) return;
+    lastValueRef.current = next;
+    onChange(next);
+  };
 
-  const flushQueuedEmit = React.useCallback(() => {
+  const flushQueuedEmit = () => {
     rafRef.current = null;
     const next = pendingValueRef.current;
     if (!next) return;
     pendingValueRef.current = null;
     emitChange(next);
-  }, [emitChange]);
+  };
 
-  const queueEmitChange = React.useCallback(
-    (next: Range) => {
-      pendingValueRef.current = next;
-      if (rafRef.current != null) return;
-      rafRef.current = requestAnimationFrame(flushQueuedEmit);
-    },
-    [flushQueuedEmit]
-  );
+  const queueEmitChange = (next: Range) => {
+    pendingValueRef.current = next;
+    if (rafRef.current != null) return;
+    rafRef.current = requestAnimationFrame(flushQueuedEmit);
+  };
 
-  const emitChangeImmediate = React.useCallback(
-    (next: Range) => {
-      pendingValueRef.current = null;
-      if (rafRef.current != null) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = null;
-      }
-      emitChange(next);
-    },
-    [emitChange]
-  );
+  const emitChangeImmediate = (next: Range) => {
+    pendingValueRef.current = null;
+    if (rafRef.current != null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    emitChange(next);
+  };
 
   React.useEffect(() => {
     return () => {
@@ -192,135 +173,79 @@ export default function RangeSlider({
   const leftStart = useSharedValue(0);
   const rightStart = useSharedValue(0);
 
-  const leftGesture = React.useMemo(() => {
-    return Gesture.Pan()
-      .hitSlop({ top: 14, bottom: 14, left: 18, right: 18 })
-      .onBegin(() => {
-        isDraggingSv.value = true;
-        runOnJS(setDraggingState)(true);
-        leftStart.value = leftPx.value;
-      })
-      .onUpdate((e) => {
-        const w = widthSv.value;
-        if (!w) return;
-        const nextPx = clamp(
-          leftStart.value + e.translationX,
-          0,
-          rightPx.value
-        );
-        const nextVal = pxToValueWorklet(
-          nextPx,
-          minSv.value,
-          maxSv.value,
-          w,
-          stepSv.value
-        );
-        const maxAllowed = rightValue.value - minGapSv.value;
-        const clampedVal = clamp(nextVal, minSv.value, maxAllowed);
-        leftValue.value = clampedVal;
-        leftPx.value = valueToPxWorklet(
-          clampedVal,
-          minSv.value,
-          maxSv.value,
-          w
-        );
-        if (
-          clampedVal !== lastEmittedLeft.value ||
-          rightValue.value !== lastEmittedRight.value
-        ) {
-          lastEmittedLeft.value = clampedVal;
-          lastEmittedRight.value = rightValue.value;
-          runOnJS(queueEmitChange)([clampedVal, rightValue.value]);
-        }
-      })
-      .onFinalize(() => {
-        isDraggingSv.value = false;
-        runOnJS(setDraggingState)(false);
-        runOnJS(emitChangeImmediate)([leftValue.value, rightValue.value]);
-      });
-  }, [
-    emitChangeImmediate,
-    isDraggingSv,
-    leftPx,
-    leftStart,
-    leftValue,
-    maxSv,
-    minGapSv,
-    minSv,
-    rightPx,
-    rightValue,
-    stepSv,
-    widthSv,
-    lastEmittedLeft,
-    lastEmittedRight,
-    queueEmitChange,
-    setDraggingState,
-  ]);
+  const leftGesture = Gesture.Pan()
+    .hitSlop({ top: 14, bottom: 14, left: 18, right: 18 })
+    .onBegin(() => {
+      isDraggingSv.value = true;
+      runOnJS(setDraggingState)(true);
+      leftStart.value = leftPx.value;
+    })
+    .onUpdate((e) => {
+      const w = widthSv.value;
+      if (!w) return;
+      const nextPx = clamp(leftStart.value + e.translationX, 0, rightPx.value);
+      const nextVal = pxToValueWorklet(
+        nextPx,
+        minSv.value,
+        maxSv.value,
+        w,
+        stepSv.value
+      );
+      const maxAllowed = rightValue.value - minGapSv.value;
+      const clampedVal = clamp(nextVal, minSv.value, maxAllowed);
+      leftValue.value = clampedVal;
+      leftPx.value = valueToPxWorklet(clampedVal, minSv.value, maxSv.value, w);
+      if (
+        clampedVal !== lastEmittedLeft.value ||
+        rightValue.value !== lastEmittedRight.value
+      ) {
+        lastEmittedLeft.value = clampedVal;
+        lastEmittedRight.value = rightValue.value;
+        runOnJS(queueEmitChange)([clampedVal, rightValue.value]);
+      }
+    })
+    .onFinalize(() => {
+      isDraggingSv.value = false;
+      runOnJS(setDraggingState)(false);
+      runOnJS(emitChangeImmediate)([leftValue.value, rightValue.value]);
+    });
 
-  const rightGesture = React.useMemo(() => {
-    return Gesture.Pan()
-      .hitSlop({ top: 14, bottom: 14, left: 18, right: 18 })
-      .onBegin(() => {
-        isDraggingSv.value = true;
-        runOnJS(setDraggingState)(true);
-        rightStart.value = rightPx.value;
-      })
-      .onUpdate((e) => {
-        const w = widthSv.value;
-        if (!w) return;
-        const nextPx = clamp(
-          rightStart.value + e.translationX,
-          leftPx.value,
-          w
-        );
-        const nextVal = pxToValueWorklet(
-          nextPx,
-          minSv.value,
-          maxSv.value,
-          w,
-          stepSv.value
-        );
-        const minAllowed = leftValue.value + minGapSv.value;
-        const clampedVal = clamp(nextVal, minAllowed, maxSv.value);
-        rightValue.value = clampedVal;
-        rightPx.value = valueToPxWorklet(
-          clampedVal,
-          minSv.value,
-          maxSv.value,
-          w
-        );
-        if (
-          leftValue.value !== lastEmittedLeft.value ||
-          clampedVal !== lastEmittedRight.value
-        ) {
-          lastEmittedLeft.value = leftValue.value;
-          lastEmittedRight.value = clampedVal;
-          runOnJS(queueEmitChange)([leftValue.value, clampedVal]);
-        }
-      })
-      .onFinalize(() => {
-        isDraggingSv.value = false;
-        runOnJS(setDraggingState)(false);
-        runOnJS(emitChangeImmediate)([leftValue.value, rightValue.value]);
-      });
-  }, [
-    emitChangeImmediate,
-    isDraggingSv,
-    leftPx,
-    leftValue,
-    maxSv,
-    minGapSv,
-    minSv,
-    rightPx,
-    rightStart,
-    rightValue,
-    stepSv,
-    widthSv,
-    lastEmittedLeft,
-    lastEmittedRight,
-    queueEmitChange,
-    setDraggingState,
-  ]);
+  const rightGesture = Gesture.Pan()
+    .hitSlop({ top: 14, bottom: 14, left: 18, right: 18 })
+    .onBegin(() => {
+      isDraggingSv.value = true;
+      runOnJS(setDraggingState)(true);
+      rightStart.value = rightPx.value;
+    })
+    .onUpdate((e) => {
+      const w = widthSv.value;
+      if (!w) return;
+      const nextPx = clamp(rightStart.value + e.translationX, leftPx.value, w);
+      const nextVal = pxToValueWorklet(
+        nextPx,
+        minSv.value,
+        maxSv.value,
+        w,
+        stepSv.value
+      );
+      const minAllowed = leftValue.value + minGapSv.value;
+      const clampedVal = clamp(nextVal, minAllowed, maxSv.value);
+      rightValue.value = clampedVal;
+      rightPx.value = valueToPxWorklet(clampedVal, minSv.value, maxSv.value, w);
+      if (
+        leftValue.value !== lastEmittedLeft.value ||
+        clampedVal !== lastEmittedRight.value
+      ) {
+        lastEmittedLeft.value = leftValue.value;
+        lastEmittedRight.value = clampedVal;
+        runOnJS(queueEmitChange)([leftValue.value, clampedVal]);
+      }
+    })
+    .onFinalize(() => {
+      isDraggingSv.value = false;
+      runOnJS(setDraggingState)(false);
+      runOnJS(emitChangeImmediate)([leftValue.value, rightValue.value]);
+    });
 
   const activeStyle = useAnimatedStyle(() => {
     const left = Math.min(leftPx.value, rightPx.value);

@@ -5,7 +5,7 @@ import {
   type SearchFilters,
 } from "@/features/search/filterStore";
 import { useRouter } from "expo-router";
-import * as React from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function useSearchFiltersScreen() {
   const router = useRouter();
@@ -15,18 +15,16 @@ export function useSearchFiltersScreen() {
   const servings = useSearchFilterStore((s) => s.servings);
   const setFilters = useSearchFilterStore((s) => s.setFilters);
 
-  const [draftFilters, setDraftFilters] = React.useState<SearchFilters>(() => ({
+  const [draftFilters, setDraftFilters] = useState<SearchFilters>(() => ({
     sortBy,
     cookingTime,
     calories,
     servings,
   }));
-  const [isApplying, setIsApplying] = React.useState(false);
-  const applyTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
+  const [isApplying, setIsApplying] = useState(false);
+  const applyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     return () => {
       if (applyTimeoutRef.current) {
         clearTimeout(applyTimeoutRef.current);
@@ -34,19 +32,15 @@ export function useSearchFiltersScreen() {
     };
   }, []);
 
-  const appliedCount = React.useMemo(
-    () => getAppliedCount(draftFilters),
-    [draftFilters],
-  );
-
+  const appliedCount = getAppliedCount(draftFilters);
   const caloriesLabel = `${draftFilters.calories[0]} - ${draftFilters.calories[1]} kcal`;
   const servingsLabel = `${draftFilters.servings[0]} - ${draftFilters.servings[1]} people`;
 
-  const handleReset = React.useCallback(() => {
+  const handleReset = () => {
     setDraftFilters({ ...FILTER_DEFAULTS });
-  }, []);
+  };
 
-  const handleApply = React.useCallback(() => {
+  const handleApply = () => {
     if (isApplying) return;
 
     setIsApplying(true);
@@ -55,35 +49,23 @@ export function useSearchFiltersScreen() {
       setIsApplying(false);
       router.back();
     }, 1000);
-  }, [draftFilters, isApplying, router, setFilters]);
+  };
 
-  const setDraftSortBy = React.useCallback(
-    (sortBy: SearchFilters["sortBy"]) => {
-      setDraftFilters((prev) => ({ ...prev, sortBy }));
-    },
-    [],
-  );
+  const setDraftSortBy = (sortBy: SearchFilters["sortBy"]) => {
+    setDraftFilters((prev) => ({ ...prev, sortBy }));
+  };
 
-  const setDraftCookingTime = React.useCallback(
-    (cookingTime: SearchFilters["cookingTime"]) => {
-      setDraftFilters((prev) => ({ ...prev, cookingTime }));
-    },
-    [],
-  );
+  const setDraftCookingTime = (cookingTime: SearchFilters["cookingTime"]) => {
+    setDraftFilters((prev) => ({ ...prev, cookingTime }));
+  };
 
-  const setDraftCalories = React.useCallback(
-    (calories: SearchFilters["calories"]) => {
-      setDraftFilters((prev) => ({ ...prev, calories }));
-    },
-    [],
-  );
+  const setDraftCalories = (calories: SearchFilters["calories"]) => {
+    setDraftFilters((prev) => ({ ...prev, calories }));
+  };
 
-  const setDraftServings = React.useCallback(
-    (servings: SearchFilters["servings"]) => {
-      setDraftFilters((prev) => ({ ...prev, servings }));
-    },
-    [],
-  );
+  const setDraftServings = (servings: SearchFilters["servings"]) => {
+    setDraftFilters((prev) => ({ ...prev, servings }));
+  };
 
   return {
     appliedCount,

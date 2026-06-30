@@ -6,7 +6,6 @@ import { MAX_COOKING_STEPS } from "@/features/add-recipe/constants";
 import { useKeyboardAwareFieldScroll } from "@/features/add-recipe/hooks/useKeyboardAwareFieldScroll";
 import { useCookingStepsField } from "@/features/add-recipe/hooks/useCookingStepsField";
 import { useCookingStepsDragDisplay } from "@/features/add-recipe/hooks/useCookingStepsDragDisplay";
-import { useCallback } from "react";
 import type { ScrollView as GestureHandlerScrollView } from "react-native-gesture-handler";
 import { View } from "react-native";
 import type { RenderItemParams } from "react-native-draggable-flatlist";
@@ -42,29 +41,6 @@ export function CookingStepsSection({
     resetDragState,
     setPlaceholderIndex,
   } = useCookingStepsDragDisplay(fields);
-
-  const renderItem = useCallback(
-    ({
-      item,
-      getIndex,
-      drag,
-      isActive,
-    }: RenderItemParams<(typeof fields)[number]>) => {
-      const index = getIndex() ?? 0;
-      return (
-        <MemoizedCookingStepCard
-          index={index}
-          displayIndex={displayIndexById.get(item.id) ?? index}
-          isActive={isActive}
-          onDrag={drag}
-          onRemove={() => handleRemoveStep(index)}
-          canRemove={canRemoveStep(index)}
-          onAnyInputFocus={onInputFocus}
-        />
-      );
-    },
-    [canRemoveStep, displayIndexById, handleRemoveStep, onInputFocus]
-  );
 
   if (mode === "preview") {
     return <CookingStepsPreview steps={previewSteps} />;
@@ -114,7 +90,25 @@ export function CookingStepsSection({
           onDragBegin={(index) => {
             beginDrag(index);
           }}
-          renderItem={renderItem}
+          renderItem={({
+            item,
+            getIndex,
+            drag,
+            isActive,
+          }: RenderItemParams<(typeof fields)[number]>) => {
+            const index = getIndex() ?? 0;
+            return (
+              <MemoizedCookingStepCard
+                index={index}
+                displayIndex={displayIndexById.get(item.id) ?? index}
+                isActive={isActive}
+                onDrag={drag}
+                onRemove={() => handleRemoveStep(index)}
+                canRemove={canRemoveStep(index)}
+                onAnyInputFocus={onInputFocus}
+              />
+            );
+          }}
           ListFooterComponent={
             <AddRecipeDashedActionButton
               label="+ Add step"

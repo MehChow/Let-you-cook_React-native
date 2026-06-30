@@ -1,6 +1,5 @@
 import { MAX_COOKING_STEPS } from "@/features/add-recipe/constants";
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
-import { useCallback } from "react";
 import {
   type FieldArrayWithId,
   useFieldArray,
@@ -18,34 +17,25 @@ export function useCookingStepsField() {
   });
 
   const canAddStep = fields.length < MAX_COOKING_STEPS;
-  const canRemoveStep = useCallback((index: number) => index > 0, []);
+  const canRemoveStep = (index: number) => index > 0;
 
-  const handleAddStep = useCallback(() => {
+  const handleAddStep = () => {
     if (!canAddStep) return;
     append({ instruction: "", imageUri: "" });
-  }, [append, canAddStep]);
+  };
 
-  const handleRemoveStep = useCallback(
-    (index: number) => {
-      if (!canRemoveStep(index)) return;
-      remove(index);
-    },
-    [canRemoveStep, remove],
-  );
+  const handleRemoveStep = (index: number) => {
+    if (!canRemoveStep(index)) return;
+    remove(index);
+  };
 
-  const handleMoveStep = useCallback(
-    (from: number, to: number) => {
-      move(from, to);
-    },
-    [move],
-  );
+  const handleMoveStep = (from: number, to: number) => {
+    move(from, to);
+  };
 
-  const keyExtractor = useCallback(
-    (item: FieldArrayWithId<AddRecipeFormValues, "cookingSteps", "id">) => {
-      return item.id;
-    },
-    [],
-  );
+  const keyExtractor = (
+    item: FieldArrayWithId<AddRecipeFormValues, "cookingSteps", "id">,
+  ) => item.id;
 
   return {
     fields,

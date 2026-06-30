@@ -21,7 +21,13 @@ export const RecipeNutritionSection: React.FC<RecipeNutritionSectionProps> = ({
     (sum, macro) => sum + macro.grams,
     0,
   );
-  let startRatio = 0;
+  const segmentStartRatios: number[] = [];
+  let currentRatio = 0;
+  for (const macro of nutrition.macros) {
+    const ratio = totalMacroGrams > 0 ? macro.grams / totalMacroGrams : 0;
+    segmentStartRatios.push(currentRatio);
+    currentRatio += ratio;
+  }
 
   const sourceBadge = (
     <View className="rounded-full bg-sage-500 px-4 py-1">
@@ -48,12 +54,11 @@ export const RecipeNutritionSection: React.FC<RecipeNutritionSectionProps> = ({
               strokeWidth={STROKE_WIDTH}
               fill="none"
             />
-            {nutrition.macros.map((macro) => {
+            {nutrition.macros.map((macro, index) => {
               const ratio =
                 totalMacroGrams > 0 ? macro.grams / totalMacroGrams : 0;
               const dashOffset = circumference * (1 - ratio);
-              const rotation = startRatio * 360;
-              startRatio += ratio;
+              const rotation = (segmentStartRatios[index] ?? 0) * 360;
 
               return (
                 <Circle

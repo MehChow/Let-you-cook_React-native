@@ -4,7 +4,6 @@ import { Text } from "@/components/ui/text";
 import { MAX_RECIPE_IMAGES } from "@/features/add-recipe/constants";
 import { Image } from "expo-image";
 import { Star } from "lucide-react-native";
-import { useMemo } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { DraggableGrid } from "react-native-draggable-grid";
 
@@ -77,8 +76,7 @@ export function ImagesDraggableGrid({
   onRemoveByClientKey,
   onDraggingChange,
 }: ImagesDraggableGridProps) {
-  const gridData = useMemo(() => buildRecipeGridData(photos), [photos]);
-
+  const gridData = buildRecipeGridData(photos);
   /** Lib Block wraps TouchableWithoutFeedback with no intrinsic size — use fixed sizes, not % / flex:1 fills. */
   const cellOuter = contentWidth / 3;
   const thumbSide = Math.max(0, cellOuter - gapVisual);

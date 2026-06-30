@@ -10,7 +10,6 @@ import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
 import { colors } from "@/util/twColor";
 import * as Haptics from "expo-haptics";
 import { Image } from "expo-image";
-import { memo, useCallback } from "react";
 import { Controller, useFormContext, type Control } from "react-hook-form";
 import { Pressable, View } from "react-native";
 
@@ -36,16 +35,16 @@ export function CookingStepCard({
   const { control, setValue } = useFormContext<AddRecipeFormValues>();
   const { pickImage, alertDialog } = useImagePicker();
 
-  const handlePickImage = useCallback(async () => {
+  const handlePickImage = async () => {
     const uri = await pickImage("step");
     if (uri) {
       setValue(`cookingSteps.${index}.imageUri`, uri);
     }
-  }, [index, pickImage, setValue]);
+  };
 
-  const handleRemoveImage = useCallback(() => {
+  const handleRemoveImage = () => {
     setValue(`cookingSteps.${index}.imageUri`, "");
-  }, [index, setValue]);
+  };
 
   return (
     <Card
@@ -105,7 +104,7 @@ export function CookingStepCard({
   );
 }
 
-export const MemoizedCookingStepCard = memo(CookingStepCard);
+export const MemoizedCookingStepCard = CookingStepCard;
 
 function ControllerImageField({
   control,

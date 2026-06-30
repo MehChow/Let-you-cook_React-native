@@ -1,7 +1,8 @@
+import { EmptyState } from "@/components/EmptyState";
 import { Grid } from "@/components/Icon";
+import { AppScreen } from "@/components/layout/AppScreen";
 import RecipeCard from "@/components/RecipeCard";
 import SectionHeader from "@/components/SectionHeader";
-import { Text } from "@/components/ui/text";
 import CategoryCarousel from "@/features/home/CategoryCarousel";
 import HomeHeader from "@/features/home/HomeHeader";
 import { useCategoryStore } from "@/features/home/categoryStore";
@@ -16,11 +17,15 @@ import TodaySpecialCard from "@/features/home/TodaySpecialCard";
 import { pushRecipeDetail } from "@/features/recipe-detail/navigation";
 import { useFavourites } from "@/hooks/useFavourites";
 import { useRouter } from "expo-router";
-import * as React from "react";
 import { ScrollView, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 const HOME_POPULAR_RECIPE_LIMIT = 2;
+const categoryItems = categories.map((category) => ({
+  id: category.id,
+  label: category.label,
+  placeholderColorClass: category.placeholderColorClass,
+  imageSource: category.imageThumb,
+}));
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -29,31 +34,14 @@ export default function HomeScreen() {
     (s) => s.setSelectedCategoryId,
   );
   const { isFavourite, setFavourite } = useFavourites();
-
-  const categoryItems = React.useMemo(
-    () =>
-      categories.map((c) => ({
-        id: c.id,
-        label: c.label,
-        placeholderColorClass: c.placeholderColorClass,
-        imageSource: c.imageThumb,
-      })),
-    [],
-  );
-
-  const filteredPopularRecipes = React.useMemo(() => {
-    const filteredRecipes = selectedCategoryId
+  const filteredPopularRecipes = (
+    selectedCategoryId
       ? popularRecipes.filter((recipe) => recipe.categoryId === selectedCategoryId)
-      : popularRecipes;
-
-    return filteredRecipes.slice(0, HOME_POPULAR_RECIPE_LIMIT);
-  }, [selectedCategoryId]);
+      : popularRecipes
+  ).slice(0, HOME_POPULAR_RECIPE_LIMIT);
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#dce4e2" }}
-      edges={["top", "left", "right"]}
-    >
+    <AppScreen>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerClassName="px-5 gap-5"
@@ -129,14 +117,10 @@ export default function HomeScreen() {
               ))}
             </View>
           ) : (
-            <View className="rounded-2xl bg-white/60 px-4 py-4">
-              <Text className="text-sm font-semibold text-muted-foreground">
-                No results found.
-              </Text>
-            </View>
+            <EmptyState title="No results found." />
           )}
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </AppScreen>
   );
 }

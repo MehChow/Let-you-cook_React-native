@@ -3,7 +3,7 @@ import PressableCard from "@/components/PressableCard";
 import { Text } from "@/components/ui/text";
 import { cn } from "@/lib/utils";
 import { Image } from "expo-image";
-import * as React from "react";
+import { useEffect, useRef } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 
 export type CategoryCarouselItem = {
@@ -26,13 +26,13 @@ export default function CategoryCarousel({
   onSelect,
   className,
 }: CategoryCarouselProps) {
-  const scrollRef = React.useRef<ScrollView>(null);
-  const containerWidthRef = React.useRef(0);
-  const itemLayoutRef = React.useRef<
+  const scrollRef = useRef<ScrollView>(null);
+  const containerWidthRef = useRef(0);
+  const itemLayoutRef = useRef<
     Record<string, { x: number; width: number }>
   >({});
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!selectedId) return;
     const layout = itemLayoutRef.current[selectedId];
     const containerWidth = containerWidthRef.current;

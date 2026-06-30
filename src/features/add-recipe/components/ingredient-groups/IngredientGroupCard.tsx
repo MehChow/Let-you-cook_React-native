@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Text } from "@/components/ui/text";
 import { DEFAULT_INGREDIENT_UNIT } from "@/features/add-recipe/constants";
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Controller, useFieldArray, type Control } from "react-hook-form";
 import { Pressable, TextInput, View } from "react-native";
 import { IngredientRow } from "./IngredientRow";
@@ -31,10 +31,7 @@ export const IngredientGroupCard = ({
   const [editingName, setEditingName] = useState(false);
   const groupNameInputRef = useRef<TextInput | null>(null);
   const fallbackName = "Group name";
-  const groupNameFieldPath = useMemo(
-    () => `ingredientGroups.${groupIndex}.groupName` as const,
-    [groupIndex],
-  );
+  const groupNameFieldPath = `ingredientGroups.${groupIndex}.groupName` as const;
 
   return (
     <Card className="py-3 gap-4 border border-neutral-200 bg-white">

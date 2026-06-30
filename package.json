@@ -10,7 +10,8 @@
     "convert-assets": "node scripts/convert-assets.cjs",
     "android": "expo run:android",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "check": "npm run lint && npx tsc --noEmit"
   },
   "dependencies": {
     "@expo-google-fonts/outfit": "^0.4.3",

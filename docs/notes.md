@@ -1,5 +1,7 @@
 # Notes
 
+These are the problems/issues encountered before. It might help debugging in the future.
+
 ## 2026-06-30 Asset cleanup
 
 - Cleaned up `assets/mock` and `assets/mock_images` to keep only canonical source assets.
@@ -24,3 +26,11 @@ Current long-edge caps:
 Reason:
 
 - Some original images were far larger than their on-screen render size, which caused avoidable decode and render cost on mobile.
+
+## 2026-06-30 Uniwind semantic color token rule
+
+- `text-muted-foreground` and the other semantic `text-*` / `bg-*` / `border-*` color utilities only work when their `--color-*` tokens are declared inside `@theme` in `src/global.css`.
+- Defining a semantic token only under `@layer theme { :root { ... } }` keeps the runtime CSS variable, but Uniwind does not generate the utility class from that alone.
+- Keep shared semantic tokens duplicated in both places when needed:
+  - `@theme` for utility generation.
+  - `:root` for runtime values and theming.

@@ -1,7 +1,7 @@
 import FavoriteButton from "@/components/FavoriteButton";
 import type { HomeRecipe } from "@/features/home/mockData";
 import { Image } from "expo-image";
-import * as React from "react";
+import { useState } from "react";
 import {
   FlatList,
   type LayoutChangeEvent,
@@ -30,51 +30,13 @@ export function UserRecipeGrid({
   onPressRecipe,
   onToggleFavourite,
 }: UserRecipeGridProps) {
-  const [gridWidth, setGridWidth] = React.useState(0);
-
-  const onGridShellLayout = React.useCallback((e: LayoutChangeEvent) => {
+  const [gridWidth, setGridWidth] = useState(0);
+  const onGridShellLayout = (e: LayoutChangeEvent) => {
     const w = Math.round(e.nativeEvent.layout.width);
     setGridWidth((prev) => (w > 0 && w !== prev ? w : prev));
-  }, []);
-
-  const cellSize = React.useMemo(() => {
-    if (gridWidth <= 0) return 0;
-    const inner = gridWidth - gap * (columns - 1);
-    return inner / columns;
-  }, [gridWidth, columns, gap]);
-
-  const renderItem = React.useCallback(
-    ({ item }: ListRenderItemInfo<HomeRecipe>) => (
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={item.title}
-        onPress={() => onPressRecipe(item.id)}
-        style={({ pressed }) => ({
-          width: cellSize,
-          height: cellSize,
-          opacity: pressed ? 0.9 : 1,
-        })}
-        className="overflow-hidden bg-sage-200"
-      >
-        <Image
-          source={item.image}
-          contentFit="cover"
-          cachePolicy="memory-disk"
-          transition={150}
-          style={{ width: "100%", height: "100%" }}
-        />
-        <FavoriteButton
-          size="compact"
-          isActive={isFavourite(item.id)}
-          onPress={() => onToggleFavourite(item.id, !isFavourite(item.id))}
-          className="absolute right-1 top-1"
-        />
-      </Pressable>
-    ),
-    [cellSize, isFavourite, onPressRecipe, onToggleFavourite]
-  );
-
-  const keyExtractor = React.useCallback((item: HomeRecipe) => item.id, []);
+  };
+  const cellSize =
+    gridWidth <= 0 ? 0 : (gridWidth - gap * (columns - 1)) / columns;
 
   return (
     <View
@@ -87,8 +49,34 @@ export function UserRecipeGrid({
           key={`profile-recipe-grid-${columns}`}
           data={recipes}
           numColumns={columns}
-          keyExtractor={keyExtractor}
-          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }: ListRenderItemInfo<HomeRecipe>) => (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={item.title}
+              onPress={() => onPressRecipe(item.id)}
+              style={({ pressed }) => ({
+                width: cellSize,
+                height: cellSize,
+                opacity: pressed ? 0.9 : 1,
+              })}
+              className="overflow-hidden bg-sage-200"
+            >
+              <Image
+                source={item.image}
+                contentFit="cover"
+                cachePolicy="memory-disk"
+                transition={150}
+                style={{ width: "100%", height: "100%" }}
+              />
+              <FavoriteButton
+                size="compact"
+                isActive={isFavourite(item.id)}
+                onPress={() => onToggleFavourite(item.id, !isFavourite(item.id))}
+                className="absolute right-1 top-1"
+              />
+            </Pressable>
+          )}
           style={{ flex: 1 }}
           contentContainerStyle={{
             paddingBottom: contentContainerBottomPadding,

@@ -1,5 +1,9 @@
-import type { Href, Router } from "expo-router";
+import type { Href } from "expo-router";
 
-export const pushRecipeDetail = (router: Router, recipeId: string) => {
+interface RouterLike {
+  push: (href: Href) => void;
+}
+
+export const pushRecipeDetail = (router: RouterLike, recipeId: string) => {
   router.push(`/recipe/${encodeURIComponent(recipeId)}` as Href);
 };

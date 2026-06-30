@@ -1,11 +1,10 @@
 import * as ImagePicker from "expo-image-picker";
 import { useAddRecipeAlertDialog } from "@/features/add-recipe/hooks/useAddRecipeAlertDialog";
-import { useCallback } from "react";
 
 export const useImagePicker = () => {
   const { alertDialog, presentDialog } = useAddRecipeAlertDialog();
 
-  const pickImage = useCallback(async (
+  const pickImage = async (
     context: "step" | "recipe" = "recipe"
   ): Promise<string | null> => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -28,7 +27,7 @@ export const useImagePicker = () => {
 
     if (result.canceled || !result.assets[0]) return null;
     return result.assets[0].uri;
-  }, [presentDialog]);
+  };
 
   return { pickImage, alertDialog };
 };

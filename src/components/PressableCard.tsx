@@ -20,14 +20,13 @@ export default function PressableCard({
   return (
     <Pressable
       className={cn(
-        "overflow-hidden rounded-2xl border border-neutral-200 bg-white",
+        "overflow-hidden rounded-3xl border border-neutral-200/80 bg-white",
         pressEffect === "opacity" && "active:opacity-90",
         containerClassName,
         className
       )}
-      style={[{ elevation }, containerStyle]}
+      style={[{ elevation, shadowColor: "#00000014" }, containerStyle]}
       {...props}
     />
   );
 }
-

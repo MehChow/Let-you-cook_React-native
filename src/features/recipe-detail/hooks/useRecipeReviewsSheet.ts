@@ -2,7 +2,7 @@ import { getRecipeDetailById } from "@/features/recipe-detail/mockData";
 import type { RecipeReview } from "@/features/recipe-detail/types";
 import { mockAvatar } from "@/features/home/mockData";
 import { toast } from "sonner-native";
-import * as React from "react";
+import { useState } from "react";
 
 interface UseRecipeReviewsSheetParams {
   recipeId: string;
@@ -11,18 +11,13 @@ interface UseRecipeReviewsSheetParams {
 export const useRecipeReviewsSheet = ({
   recipeId,
 }: UseRecipeReviewsSheetParams) => {
-  const recipe = React.useMemo(() => getRecipeDetailById(recipeId), [recipeId]);
-  const [reviews, setReviews] = React.useState<RecipeReview[]>(
+  const recipe = getRecipeDetailById(recipeId);
+  const [reviews, setReviews] = useState<RecipeReview[]>(
     () => recipe?.reviews ?? [],
   );
-  const [rating, setRating] = React.useState(5);
-  const [comment, setComment] = React.useState("");
-
-  React.useEffect(() => {
-    setReviews(recipe?.reviews ?? []);
-  }, [recipe]);
-
-  const handleSubmitReview = React.useCallback(() => {
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState("");
+  const handleSubmitReview = () => {
     if (!recipe) return;
     const nextReview: RecipeReview = {
       id: `local-review-${Date.now()}`,
@@ -39,7 +34,7 @@ export const useRecipeReviewsSheet = ({
     toast.success("Review submitted", {
       description: "Saved locally in this frontend build.",
     });
-  }, [comment, rating, recipe]);
+  };
 
   return {
     comment,

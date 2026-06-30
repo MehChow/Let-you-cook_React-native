@@ -26,7 +26,7 @@ export interface RecipeFavouriteRowCardProps {
   className?: string;
 }
 
-const RecipeFavouriteRowCard: React.FC<RecipeFavouriteRowCardProps> = ({
+const RecipeFavouriteRowCard = ({
   title,
   timeMin,
   tag,
@@ -36,25 +36,18 @@ const RecipeFavouriteRowCard: React.FC<RecipeFavouriteRowCardProps> = ({
   onPress,
   onChangeFavourite,
   className,
-}) => {
+}: RecipeFavouriteRowCardProps) => {
   const [internalFavourite, setInternalFavourite] = React.useState<boolean>(
     () => Boolean(isFavourite),
   );
-
-  // Keep internal state in sync when the card is used in "controlled" mode.
-  React.useEffect(() => {
-    if (isFavourite !== undefined) {
-      setInternalFavourite(Boolean(isFavourite));
+  const favourite = isFavourite ?? internalFavourite;
+  const toggleFavourite = () => {
+    const next = !favourite;
+    if (isFavourite === undefined) {
+      setInternalFavourite(next);
     }
-  }, [isFavourite]);
-
-  const favourite = internalFavourite;
-
-  const toggleFavourite = React.useCallback(() => {
-    const next = !internalFavourite;
-    setInternalFavourite(next);
     onChangeFavourite?.(next);
-  }, [internalFavourite, onChangeFavourite]);
+  };
 
   return (
     <PressableCard

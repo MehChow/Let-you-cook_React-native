@@ -15,27 +15,33 @@ type SectionHeaderProps = {
 export default function SectionHeader({
   title,
   actionLabel,
-  onPressAction = () => {},
+  onPressAction,
   actionIcon,
   className,
 }: SectionHeaderProps) {
+  const hasAction = Boolean(onPressAction && (actionLabel || actionIcon));
+
   return (
     <View className={cn("flex-row items-center justify-between", className)}>
       <Text className="text-base font-bold text-sage-700">{title}</Text>
-      <Pressable
-        accessibilityRole="button"
-        onPress={onPressAction}
-        className="rounded-full px-2 py-1 active:opacity-70"
-      >
-        <View className="flex-row items-center gap-1.5">
-          <Text className="text-sm font-semibold text-sage-400">
-            {actionLabel}
-          </Text>
-          {actionIcon ? (
-            <Icon as={actionIcon} className="size-4 text-sage-400" />
-          ) : null}
-        </View>
-      </Pressable>
+      {hasAction ? (
+        <Pressable
+          accessibilityRole="button"
+          onPress={onPressAction}
+          className="rounded-full px-2 py-1 active:opacity-70"
+        >
+          <View className="flex-row items-center gap-1.5">
+            {actionLabel ? (
+              <Text className="text-sm font-semibold text-sage-400">
+                {actionLabel}
+              </Text>
+            ) : null}
+            {actionIcon ? (
+              <Icon as={actionIcon} className="size-4 text-sage-400" />
+            ) : null}
+          </View>
+        </Pressable>
+      ) : null}
     </View>
   );
 }

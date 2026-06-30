@@ -2,7 +2,7 @@ import sharp from "sharp";
 
 const checks = [
   {
-    path: "assets/mock/todays_special.jpg",
+    path: "assets/mock/todays_special.webp",
     maxWidth: 1200,
     maxHeight: 800,
     maxBytes: 350 * 1024,

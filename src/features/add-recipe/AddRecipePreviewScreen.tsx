@@ -1,3 +1,4 @@
+import { AppScreen } from "@/components/layout/AppScreen";
 import { useAddRecipePreviewStore } from "@/features/add-recipe/addRecipePreviewStore";
 import {
   SECTION_PREVIEW_TITLES,
@@ -23,7 +24,6 @@ import { WizardTopBar } from "@/features/add-recipe/wizard/WizardTopBar";
 import { router } from "expo-router";
 import { FormProvider, useForm } from "react-hook-form";
 import { ScrollView, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 const WIZARD_SECTION_COMPONENTS = [
   BasicsSection,
@@ -155,10 +155,7 @@ export function AddRecipePreviewScreen() {
 
   return (
     <FormProvider {...methods}>
-      <SafeAreaView
-        style={{ flex: 1, backgroundColor: "#dce4e2" }}
-        edges={["top"]}
-      >
+      <AppScreen edges={["top"]}>
         <View style={{ flex: 1 }}>
           <WizardTopBar
             title="Preview"
@@ -174,7 +171,7 @@ export function AddRecipePreviewScreen() {
           />
           {alertDialog}
         </View>
-      </SafeAreaView>
+      </AppScreen>
     </FormProvider>
   );
 }

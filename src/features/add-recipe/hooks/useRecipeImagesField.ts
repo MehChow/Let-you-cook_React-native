@@ -1,7 +1,7 @@
 import { MAX_RECIPE_IMAGES } from "@/features/add-recipe/constants";
 import { useImagePicker } from "@/features/add-recipe/hooks/useImagePicker";
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   useFieldArray,
   useFormContext,
@@ -55,41 +55,21 @@ export function useRecipeImagesField() {
   });
   const fields = recipeImageFields as ((typeof recipeImageFields)[number] &
     RecipeImageFieldValue)[];
-
-  const photoModels = useMemo(
-    () => fields.map((f) => ({ uri: f.uri, clientKey: f.clientKey })),
-    [fields],
-  );
-
-  const resetCarouselToFirst = useCallback(() => {
+  const photoModels = fields.map((field) => ({
+    uri: field.uri,
+    clientKey: field.clientKey,
+  }));
+  const resetCarouselToFirst = () => {
     setCarouselIndex(0);
     carouselRef.current?.scrollTo({ x: 0, y: 0, animated: false });
-  }, []);
+  };
 
-  const onGridReorder = useCallback(
-    (next: { uri: string; clientKey: string }[]) => {
-      replace(next);
-      resetCarouselToFirst();
-    },
-    [replace, resetCarouselToFirst],
-  );
+  const onGridReorder = (next: { uri: string; clientKey: string }[]) => {
+    replace(next);
+    resetCarouselToFirst();
+  };
 
-  useEffect(() => {
-    if (fields.length === 0) {
-      setCarouselIndex(0);
-      return;
-    }
-    if (carouselIndex >= fields.length) {
-      setCarouselIndex(fields.length - 1);
-      carouselRef.current?.scrollTo({
-        x: contentWidth * (fields.length - 1),
-        y: 0,
-        animated: false,
-      });
-    }
-  }, [carouselIndex, contentWidth, fields.length]);
-
-  const onAppendImage = useCallback(async () => {
+  const onAppendImage = async () => {
     if (fields.length >= MAX_RECIPE_IMAGES) return;
     const uri = await pickImage("recipe");
     if (uri) {
@@ -98,7 +78,7 @@ export function useRecipeImagesField() {
         { shouldFocus: false },
       );
     }
-  }, [append, pickImage, fields.length]);
+  };
 
   useEffect(() => {
     if (fields.length > 0 && errors.recipeImageUris) {
@@ -106,21 +86,27 @@ export function useRecipeImagesField() {
     }
   }, [clearErrors, errors.recipeImageUris, fields.length]);
 
-  const removeByClientKey = useCallback(
-    (clientKey: string) => {
-      const idx = fields.findIndex((f) => f.clientKey === clientKey);
-      if (idx >= 0) remove(idx);
-    },
-    [fields, remove],
-  );
+  const removeByClientKey = (clientKey: string) => {
+    const idx = fields.findIndex((field) => field.clientKey === clientKey);
+    if (idx < 0) return;
+    remove(idx);
+    const nextCount = fields.length - 1;
+    const nextIndex = nextCount <= 0 ? 0 : Math.min(carouselIndex, nextCount - 1);
+    setCarouselIndex(nextIndex);
+    carouselRef.current?.scrollTo({
+      x: contentWidth * nextIndex,
+      y: 0,
+      animated: false,
+    });
+  };
 
-  const onCarouselMomentumScrollEnd = useCallback(
-    (contentOffsetX: number, slideCount: number) => {
-      const idx = Math.round(contentOffsetX / contentWidth);
-      setCarouselIndex(Math.min(Math.max(idx, 0), Math.max(slideCount - 1, 0)));
-    },
-    [contentWidth],
-  );
+  const onCarouselMomentumScrollEnd = (
+    contentOffsetX: number,
+    slideCount: number,
+  ) => {
+    const idx = Math.round(contentOffsetX / contentWidth);
+    setCarouselIndex(Math.min(Math.max(idx, 0), Math.max(slideCount - 1, 0)));
+  };
 
   const imagesError = errors.recipeImageUris?.message as string | undefined;
 

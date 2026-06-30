@@ -1,5 +1,5 @@
 import { AddRecipeAlertDialog } from "@/features/add-recipe/components/AddRecipeAlertDialog";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 
 export interface AddRecipeDialogOptions {
   title: string;
@@ -15,45 +15,42 @@ export const useAddRecipeAlertDialog = () => {
   const [dialogOptions, setDialogOptions] =
     useState<AddRecipeDialogOptions | null>(null);
 
-  const closeDialog = useCallback(() => {
+  const closeDialog = () => {
     setDialogOptions(null);
-  }, []);
+  };
 
-  const presentDialog = useCallback((options: AddRecipeDialogOptions) => {
+  const presentDialog = (options: AddRecipeDialogOptions) => {
     setDialogOptions(options);
-  }, []);
+  };
 
-  const handleCancel = useCallback(() => {
+  const handleCancel = () => {
     const onCancel = dialogOptions?.onCancel;
     closeDialog();
     onCancel?.();
-  }, [closeDialog, dialogOptions]);
+  };
 
-  const handleAction = useCallback(() => {
+  const handleAction = () => {
     const onAction = dialogOptions?.onAction;
     closeDialog();
     onAction?.();
-  }, [closeDialog, dialogOptions]);
+  };
 
-  const alertDialog = useMemo(
-    () => (
-      <AddRecipeAlertDialog
-        open={dialogOptions !== null}
-        title={dialogOptions?.title ?? ""}
-        description={dialogOptions?.description}
-        actionLabel={dialogOptions?.actionLabel}
-        cancelLabel={dialogOptions?.cancelLabel}
-        actionVariant={dialogOptions?.actionVariant}
-        onOpenChange={(open) => {
-          if (!open) {
-            closeDialog();
-          }
-        }}
-        onAction={handleAction}
-        onCancel={handleCancel}
-      />
-    ),
-    [closeDialog, dialogOptions, handleAction, handleCancel]
+  const alertDialog = (
+    <AddRecipeAlertDialog
+      open={dialogOptions !== null}
+      title={dialogOptions?.title ?? ""}
+      description={dialogOptions?.description}
+      actionLabel={dialogOptions?.actionLabel}
+      cancelLabel={dialogOptions?.cancelLabel}
+      actionVariant={dialogOptions?.actionVariant}
+      onOpenChange={(open) => {
+        if (!open) {
+          closeDialog();
+        }
+      }}
+      onAction={handleAction}
+      onCancel={handleCancel}
+    />
   );
 
   return {
