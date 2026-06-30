@@ -120,7 +120,7 @@ export default function SearchScreenHeader({
 
       <SearchActiveFilterChips chips={activeFilterChips} />
 
-      <View className="gap-1">
+      <View className="mb-2">
         <SectionHeader title="Search results" />
       </View>
     </View>

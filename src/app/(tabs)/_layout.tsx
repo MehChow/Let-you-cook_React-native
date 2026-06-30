@@ -5,6 +5,8 @@ import { router, Tabs } from "expo-router";
 import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+const TAB_BAR_BOTTOM_GAP = 12;
+
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
 
@@ -22,7 +24,8 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: "white",
           paddingTop: 8,
-          height: 52 + insets.bottom,
+          paddingBottom: TAB_BAR_BOTTOM_GAP,
+          height: 52 + insets.bottom + TAB_BAR_BOTTOM_GAP,
           borderTopWidth: 1,
           borderTopColor: "#E5E7EB",
         },

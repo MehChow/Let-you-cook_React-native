@@ -3,7 +3,6 @@ const path = require("node:path");
 const sharp = require("sharp");
 const { glob } = require("glob");
 
-const TARGET_DIRS = ["assets/mock"];
 const WEBP_QUALITY = 80;
 
 const MAX_LONG_EDGE_BY_PATH = [
@@ -18,16 +17,27 @@ const getMaxLongEdge = (file) =>
   MAX_LONG_EDGE_BY_PATH.find(({ pattern }) => pattern.test(file))?.maxLongEdge ??
   1440;
 
-async function convertAssets() {
-  const files = (
-    await Promise.all(
-      TARGET_DIRS.map((dir) =>
-        glob(`${dir}/**/*.{jpg,jpeg,png,webp,avif}`, {
-          nodir: true,
-        }),
-      ),
-    )
-  ).flat();
+function resolveSearchRoot({
+  initCwd = process.env.INIT_CWD,
+  cwd = process.cwd(),
+} = {}) {
+  return path.resolve(initCwd || cwd);
+}
+
+async function findConvertibleFiles(searchRoot, globImpl = glob) {
+  const files = await globImpl("**/*.{jpg,jpeg,png}", {
+    cwd: searchRoot,
+    nodir: true,
+    absolute: true,
+  });
+
+  return files
+    .filter((file) => [".jpg", ".jpeg", ".png"].includes(path.extname(file).toLowerCase()))
+    .sort();
+}
+
+async function convertAssets(searchRoot = resolveSearchRoot()) {
+  const files = await findConvertibleFiles(searchRoot);
 
   if (files.length === 0) {
     console.log("No convertible assets found.");
@@ -67,12 +77,21 @@ async function convertAssets() {
     }
 
     console.log(
-      `${file} -> ${outputFilePath} (${width}x${height}${needsResize ? ` resized to <= ${maxLongEdge}` : ""})`,
+      `${path.relative(process.cwd(), file)} -> ${path.relative(process.cwd(), outputFilePath)} (${width}x${height}${needsResize ? ` resized to <= ${maxLongEdge}` : ""})`,
     );
   }
 }
 
-convertAssets().catch((error) => {
-  console.error("Failed to convert assets:", error);
-  process.exit(1);
-});
+module.exports = {
+  convertAssets,
+  findConvertibleFiles,
+  getMaxLongEdge,
+  resolveSearchRoot,
+};
+
+if (require.main === module) {
+  convertAssets().catch((error) => {
+    console.error("Failed to convert assets:", error);
+    process.exit(1);
+  });
+}
