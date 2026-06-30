@@ -45,7 +45,7 @@ export function WizardFooterActions({
           <Button
             variant="default"
             className={cn(
-              "h-12 w-full rounded-full bg-sage-600 active:bg-sage-700"
+              "h-12 w-full rounded-full bg-sage-600 active:bg-sage-700",
             )}
             onPress={onPrimary}
             disabled={primaryDisabled}

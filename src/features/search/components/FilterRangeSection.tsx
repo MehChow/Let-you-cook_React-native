@@ -30,7 +30,7 @@ export default function FilterRangeSection({
   return (
     <View className="gap-2">
       <View className="flex-row items-center justify-between">
-        <Text className="text-xs font-bold text-foreground">{title}</Text>
+        <Text className="text-xs font-bold text-sage-800">{title}</Text>
         <Text className="text-xs font-semibold text-muted-foreground">
           {valueLabel}
         </Text>

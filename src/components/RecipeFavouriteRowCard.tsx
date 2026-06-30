@@ -38,7 +38,7 @@ const RecipeFavouriteRowCard: React.FC<RecipeFavouriteRowCardProps> = ({
   className,
 }) => {
   const [internalFavourite, setInternalFavourite] = React.useState<boolean>(
-    () => Boolean(isFavourite)
+    () => Boolean(isFavourite),
   );
 
   // Keep internal state in sync when the card is used in "controlled" mode.
@@ -80,7 +80,7 @@ const RecipeFavouriteRowCard: React.FC<RecipeFavouriteRowCardProps> = ({
         <View
           className={cn(
             "h-28 w-28 rounded-l-2xl",
-            imagePlaceholderClass ?? "bg-accent-200"
+            imagePlaceholderClass ?? "bg-accent-200",
           )}
           style={{
             width: IMAGE_W,
@@ -100,9 +100,9 @@ const RecipeFavouriteRowCard: React.FC<RecipeFavouriteRowCardProps> = ({
 
         <View className="pr-12">
           <Text
-            className="text-base font-bold text-foreground"
-              numberOfLines={1}
-              ellipsizeMode="tail"
+            className="text-base font-bold text-sage-800"
+            numberOfLines={1}
+            ellipsizeMode="tail"
           >
             {title}
           </Text>

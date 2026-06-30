@@ -59,7 +59,7 @@ export default function Modal() {
       style={{ paddingBottom: Math.max(insets.bottom, 12) }}
     >
       <View className="px-5 pt-4">
-        <Text className="text-center text-base font-sans-bold text-foreground">
+        <Text className="text-center text-base font-bold text-sage-700">
           Category
         </Text>
       </View>

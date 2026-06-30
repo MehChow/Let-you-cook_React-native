@@ -22,7 +22,7 @@ export function ReminderNotesCard({
         <View className="gap-2">
           <View className="flex-row items-center gap-2">
             <ReminderIcon size={18} color="#426159" />
-            <Text className="text-base font-semibold">
+            <Text className="text-base font-semibold text-sage-800">
               {"Chef's notes (optional)"}
             </Text>
           </View>

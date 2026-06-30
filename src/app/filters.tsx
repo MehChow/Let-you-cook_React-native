@@ -1,17 +1,14 @@
 import { Edit, Reset } from "@/components/Icon";
-import FilterChipGroup from "@/features/search/components/FilterChipGroup";
-import FilterRangeSection from "@/features/search/components/FilterRangeSection";
 import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
-import {
-  FILTER_DEFAULTS,
-} from "@/features/search/filterStore";
+import FilterChipGroup from "@/features/search/components/FilterChipGroup";
+import FilterRangeSection from "@/features/search/components/FilterRangeSection";
+import { FILTER_DEFAULTS } from "@/features/search/filterStore";
 import { useSearchFiltersScreen } from "@/features/search/hooks/useSearchFiltersScreen";
 import {
   cookingTimeOptions,
   sortOptions,
 } from "@/features/search/searchFilterOptions";
-import * as React from "react";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -43,7 +40,7 @@ export default function FiltersScreen() {
       <View className="px-5 pb-4 pt-3">
         <View className="flex-row items-center justify-between">
           <View className="flex-row items-center gap-2">
-            <Text className="text-base font-bold text-foreground">Filters</Text>
+            <Text className="text-base font-bold text-sage-900">Filters</Text>
             {appliedCount > 0 ? (
               <View className="h-6 min-w-6 items-center justify-center rounded-full bg-sage-700 px-2">
                 <Text className="text-xs font-bold text-white">
@@ -73,7 +70,7 @@ export default function FiltersScreen() {
         contentContainerClassName="gap-5"
       >
         <View className="gap-2">
-          <Text className="text-xs font-bold text-foreground">Sort by</Text>
+          <Text className="text-xs font-bold text-sage-800">Sort by</Text>
           <FilterChipGroup
             value={draftFilters.sortBy}
             onChange={setDraftSortBy}
@@ -82,9 +79,7 @@ export default function FiltersScreen() {
         </View>
 
         <View className="gap-2">
-          <Text className="text-xs font-bold text-foreground">
-            Cooking time
-          </Text>
+          <Text className="text-xs font-bold text-sage-800">Cooking time</Text>
           <FilterChipGroup
             value={draftFilters.cookingTime}
             onChange={setDraftCookingTime}

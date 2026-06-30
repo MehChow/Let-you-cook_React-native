@@ -17,7 +17,7 @@ export function WizardStepHeader({
       <Text className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
         {preTitle}
       </Text>
-      <Text className="text-lg font-semibold">{title}</Text>
+      <Text className="text-lg font-semibold text-sage-800">{title}</Text>
       {description ? (
         <Text className=" text-[12px] font-medium text-neutral-400">
           {description}

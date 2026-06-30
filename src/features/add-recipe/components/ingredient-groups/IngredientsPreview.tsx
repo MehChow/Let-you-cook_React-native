@@ -46,10 +46,10 @@ export function IngredientsPreview({ groups }: IngredientsPreviewProps) {
               key={`group-${gi}-row-${i}-${row.name}-${row.quantityAmount}-${row.quantityUnit}`}
               className="flex-row border-b border-sage-100 py-2"
             >
-              <Text className="flex-1 pr-2 text-base">
+              <Text className="flex-1 pr-2 text-base text-black">
                 {row.name?.trim() ? row.name : "Ingredient"}
               </Text>
-              <Text className="w-24 text-base">
+              <Text className="w-24 text-base text-black">
                 {formatIngredientQuantity(
                   row.quantityAmount,
                   row.quantityUnit,

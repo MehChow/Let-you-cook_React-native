@@ -28,7 +28,7 @@ export function CookingStepsPreview({ steps }: CookingStepsPreviewProps) {
               Step {i + 1}
             </Text>
 
-            <Text className="text-base">{instructionText}</Text>
+            <Text className="text-base text-black">{instructionText}</Text>
 
             {step.imageUri ? (
               <Image

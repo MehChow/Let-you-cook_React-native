@@ -17,7 +17,7 @@ export function ReminderSectionPreview({ notes }: ReminderSectionPreviewProps) {
         </Text>
       </View>
 
-      <Text className="text-base">
+      <Text className="text-base text-black">
         {notes.trim() ? notes : "No extra notes added"}
       </Text>
     </View>

@@ -1,7 +1,7 @@
-import { DEFAULT_INGREDIENT_UNIT } from "@/features/add-recipe/constants";
 import { Ingredients as IngredientsIcon } from "@/components/Icon";
 import { Card, CardContent } from "@/components/ui/card";
 import { Text } from "@/components/ui/text";
+import { DEFAULT_INGREDIENT_UNIT } from "@/features/add-recipe/constants";
 import type { AddRecipeFormValues } from "@/features/add-recipe/schema";
 import { useMemo, useRef, useState } from "react";
 import { Controller, useFieldArray, type Control } from "react-hook-form";
@@ -37,7 +37,7 @@ export const IngredientGroupCard = ({
   );
 
   return (
-    <Card className="py-3 gap-4 border border-neutral-200">
+    <Card className="py-3 gap-4 border border-neutral-200 bg-white">
       <CardContent className="px-4">
         {/* Header */}
         <View className="flex-row items-center justify-between border-b border-neutral-200 pb-1">
@@ -68,13 +68,20 @@ export const IngredientGroupCard = ({
                     onSubmitEditing={commitGroupName}
                     onBlur={commitGroupName}
                     maxLength={50}
-                    className={`flex-1 border-b py-1 text-base font-semibold ${
-                      fieldState.invalid ? "border-danger-300 text-danger-500" : "border-sage-200"
+                    className={`flex-1 border-b py-1 text-base text-sage-800 font-semibold ${
+                      fieldState.invalid
+                        ? "border-danger-300 text-danger-500"
+                        : "border-sage-200"
                     }`}
                   />
                 ) : (
-                  <Pressable onPress={() => setEditingName(true)} className="flex-1 py-1">
-                    <Text className="text-base font-semibold">{displayName}</Text>
+                  <Pressable
+                    onPress={() => setEditingName(true)}
+                    className="flex-1 py-1"
+                  >
+                    <Text className="text-base font-semibold text-sage-800">
+                      {displayName}
+                    </Text>
                   </Pressable>
                 );
               }}
@@ -140,7 +147,9 @@ export const IngredientGroupCard = ({
           disabled={!canAddIngredient}
           className="mt-2 self-start px-1 active:opacity-80 disabled:opacity-40"
         >
-          <Text className="text-[10px] font-semibold text-sage-700">+ Add ingredient</Text>
+          <Text className="text-[10px] font-semibold text-sage-700">
+            + Add ingredient
+          </Text>
         </Pressable>
       </CardContent>
     </Card>

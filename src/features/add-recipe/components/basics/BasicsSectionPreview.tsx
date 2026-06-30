@@ -29,7 +29,7 @@ export function BasicsSectionPreview({
           <Recipe size={16} color={colors.sage[600]} />
           <Text className="text-sage-600 font-semibold">Recipe name</Text>
         </View>
-        <Text className="text-base">{recipeNameText}</Text>
+        <Text className="text-base text-black">{recipeNameText}</Text>
       </View>
 
       {/* Description */}
@@ -40,7 +40,7 @@ export function BasicsSectionPreview({
             Description (optional)
           </Text>
         </View>
-        <Text className="text-base">{descriptionText}</Text>
+        <Text className="text-base text-black">{descriptionText}</Text>
       </View>
 
       <View className="mt-2 flex-row gap-2">
@@ -49,7 +49,7 @@ export function BasicsSectionPreview({
             <Time size={16} color={colors.sage[600]} />
             <Text className="text-sage-600 font-semibold">Cook time</Text>
           </View>
-          <Text className="text-base">{cookTimeText}</Text>
+          <Text className="text-base text-black">{cookTimeText}</Text>
         </View>
 
         <View className="flex-1">
@@ -57,7 +57,7 @@ export function BasicsSectionPreview({
             <Serving size={16} color={colors.sage[600]} />
             <Text className="text-sage-600 font-semibold">Serving</Text>
           </View>
-          <Text className="text-base">{servingsText}</Text>
+          <Text className="text-base text-black">{servingsText}</Text>
         </View>
       </View>
     </View>

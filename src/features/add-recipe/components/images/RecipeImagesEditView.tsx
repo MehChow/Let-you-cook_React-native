@@ -25,7 +25,10 @@ export interface RecipeImagesEditViewProps {
   gridGap: number;
   imagesError?: string;
   onAppendImage: () => void;
-  onCarouselMomentumScrollEnd: (contentOffsetX: number, slideCount: number) => void;
+  onCarouselMomentumScrollEnd: (
+    contentOffsetX: number,
+    slideCount: number,
+  ) => void;
   onGridReorder: (next: RecipeImageGridModel[]) => void;
   photoModels: RecipeImageGridModel[];
   removeByClientKey: (clientKey: string) => void;
@@ -114,7 +117,9 @@ function CarouselPlaceholder({
         <View className="rounded-full bg-sage-100 p-3">
           <Icon as={ImageIcon} size={28} className="text-sage-500" />
         </View>
-        <Text className="text-center font-bold">Tap to upload images</Text>
+        <Text className="text-center font-bold text-sage-800">
+          Tap to upload images
+        </Text>
         <Text className="text-center text-xs text-neutral-500">
           JPG, PNG, WEBP — up to 10 MB each
         </Text>

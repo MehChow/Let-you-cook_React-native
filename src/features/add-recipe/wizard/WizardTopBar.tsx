@@ -32,7 +32,9 @@ export function WizardTopBar({
         >
           <Icon as={ChevronLeft} size={16} color={colors.sage[500]} />
         </Pressable>
-        <Text className="flex-1 text-center text-lg font-bold">{title}</Text>
+        <Text className="flex-1 text-center text-sage-900 text-lg font-bold">
+          {title}
+        </Text>
         {showPreviewButton && onTogglePreview ? (
           <Pressable
             accessibilityRole="button"

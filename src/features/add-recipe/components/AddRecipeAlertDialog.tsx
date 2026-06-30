@@ -35,7 +35,7 @@ export const AddRecipeAlertDialog = ({
 }: AddRecipeAlertDialogProps) => {
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="w-[90%] min-w-[90%]">
+      <AlertDialogContent className="w-[90%] min-w-[90%] bg-white">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-center">
             <Text className="text-xl font-bold text-sage-600">{title}</Text>
