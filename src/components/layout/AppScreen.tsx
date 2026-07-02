@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 import type { PropsWithChildren } from "react";
-import type { ViewStyle } from "react-native";
 import type { Edge } from "react-native-safe-area-context";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -10,14 +9,13 @@ interface AppScreenProps extends PropsWithChildren {
   edges?: readonly Edge[];
 }
 
-const backgroundColor: Record<
+const backgroundClass: Record<
   NonNullable<AppScreenProps["background"]>,
-  ViewStyle["backgroundColor"]
-> =
-  {
-    default: "#dce4e2",
-    profile: "#52796f",
-  };
+  string
+> = {
+  default: "bg-app-screen",
+  profile: "bg-app-profile",
+};
 
 export function AppScreen({
   children,
@@ -28,8 +26,7 @@ export function AppScreen({
   return (
     <SafeAreaView
       edges={edges}
-      style={{ flex: 1, backgroundColor: backgroundColor[background] }}
-      className={cn(className)}
+      className={cn("flex-1", backgroundClass[background], className)}
     >
       {children}
     </SafeAreaView>
