@@ -13,6 +13,10 @@ import {
 import { db } from "../db/client";
 import { profiles, refreshTokens, users } from "../db/schema";
 
+interface DatabaseError {
+  code?: string;
+}
+
 const authBodySchema = z.object({
   email: z.email().transform((email) => email.toLowerCase()),
   password: z.string().min(8),
@@ -63,8 +67,12 @@ export const authRoutes = new Hono()
       const tokens = await createTokenPair(user.id);
 
       return c.json({ user, tokens }, 201);
-    } catch {
-      return c.json({ message: "Email is already registered" }, 409);
+    } catch (error) {
+      if (typeof error === "object" && error && (error as DatabaseError).code === "23505") {
+        return c.json({ message: "Email is already registered" }, 409);
+      }
+
+      throw error;
     }
   })
   .post("/login", zValidator("json", authBodySchema), async (c) => {

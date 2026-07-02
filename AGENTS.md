@@ -71,6 +71,7 @@ Let You Cook is a recipe-focused mobile app prototype: think Instagram for recip
 - Do not import mobile app code into `server/`.
 - Do not add Redis, queues, GraphQL, tRPC, NestJS, or extra services until a real backend bottleneck requires it.
 - Prefer plain Node/Web APIs and existing dependencies before adding backend packages.
+- Current backend development uses Docker with a local Postgres container named `letyoucook-postgres`; default DB URL is `postgres://postgres:postgres@localhost:5432/letyoucook`.
 - Database changes must update `server/src/db/schema.ts`, generate a Drizzle migration, and pass `npm run server:check`.
 - For auth, keep access tokens short-lived, refresh tokens opaque and hashed, and refresh rotation server-side.
 - Use `npm run server:dev`, `npm run server:check`, `npm run server:test`, `npm run server:db:generate`, and `npm run server:db:migrate`.

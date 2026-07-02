@@ -30,6 +30,8 @@ Run the API:
 npm run server:dev
 ```
 
+This loads `server/.env` automatically.
+
 Type-check:
 
 ```bash
