@@ -1,3 +1,9 @@
+# Repo Routing
+
+If you are handling backend-related work, skip to [Backend Rules](#backend-rules) at line 64. Do not read Expo docs unless the backend change touches the mobile app.
+
+If you are handling frontend/mobile work, follow the Expo section first.
+
 # Expo HAS CHANGED
 
 Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before writing any code.
@@ -54,3 +60,18 @@ Let You Cook is a recipe-focused mobile app prototype: think Instagram for recip
 ## Notes
 
 - If anything goes wrong while debugging/implementing, try to checkout `docs/notes.md` for solutions
+
+## Backend Rules
+
+- Backend code lives in `server/`; backend docs live in `server/docs/`.
+- Use Hono for HTTP routing, Drizzle for PostgreSQL schema/migrations, Zod for boundary validation, and Node 20+.
+- Keep `server/src/app.ts` responsible for app creation and route mounting; keep `server/src/index.ts` limited to starting the server.
+- Keep route files small and REST-shaped under `server/src/routes`.
+- Validate params, query strings, and JSON bodies with Zod at the route boundary.
+- Do not import mobile app code into `server/`.
+- Do not add Redis, queues, GraphQL, tRPC, NestJS, or extra services until a real backend bottleneck requires it.
+- Prefer plain Node/Web APIs and existing dependencies before adding backend packages.
+- Database changes must update `server/src/db/schema.ts`, generate a Drizzle migration, and pass `npm run server:check`.
+- For auth, keep access tokens short-lived, refresh tokens opaque and hashed, and refresh rotation server-side.
+- Use `npm run server:dev`, `npm run server:check`, `npm run server:test`, `npm run server:db:generate`, and `npm run server:db:migrate`.
+- Before backend work, skim `server/docs/progress.md` and the relevant doc in `server/docs/`.

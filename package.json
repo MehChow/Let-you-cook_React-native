@@ -11,7 +11,12 @@
     "android": "expo run:android",
     "web": "expo start --web",
     "lint": "expo lint",
-    "check": "npm run lint && npx tsc --noEmit"
+    "check": "npm run lint && npx tsc --noEmit",
+    "server:dev": "npm --prefix server run dev",
+    "server:check": "npm --prefix server run check",
+    "server:test": "npm --prefix server test",
+    "server:db:generate": "npm --prefix server run db:generate",
+    "server:db:migrate": "npm --prefix server run db:migrate"
   },
   "dependencies": {
     "@expo-google-fonts/outfit": "^0.4.3",
