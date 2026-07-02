@@ -13,7 +13,7 @@ This file is the backend handoff. When asked to continue backend work:
    - any new verification under [Verified](#verified)
    - the next unchecked task
 
-Current task to begin: add a shared API client wrapper that retries once after token refresh.
+Current task to begin: move one frontend feature off mocks, starting with profile or auth.
 
 ## Current State
 
@@ -38,7 +38,7 @@ Current task to begin: add a shared API client wrapper that retries once after t
 
 - [x] Add app-side auth API wrappers under `src/features/auth/api.ts`.
 - [x] Install and wire `expo-secure-store` for access and refresh token storage.
-- [ ] Add a shared API client wrapper that retries once after token refresh.
+- [x] Add a shared API client wrapper that retries once after token refresh.
 - [ ] Move one frontend feature off mocks, starting with profile or auth.
 - [ ] Implement recipe read endpoints:
   - `GET /recipes`
@@ -79,6 +79,12 @@ Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
 - Added focused token storage coverage with a native-free storage adapter.
 - Verified the focused auth storage/API tests and root app check.
 
+### 2026-07-02 15:09:27 HKT
+
+- Added a shared app API client wrapper with access-token auth headers, one retry after refresh, shared in-flight refresh handling, and refresh-token rejection cleanup.
+- Added focused API client coverage for retry, token clearing, and concurrent expired requests.
+- Verified the focused API client test.
+
 ## Done
 
 - Created a standalone `server/` package for the backend.
@@ -113,6 +119,7 @@ Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
 - Added API smoke checks for signup, login, refresh, logout, and `/profiles/me` against local Postgres.
 - Added app-side auth API wrappers under `src/features/auth/api.ts`.
 - Added SecureStore-backed auth token storage under `src/features/auth`.
+- Added a shared app API client wrapper under `src/lib`.
 - Added automatic `server/.env` loading for backend dev and test scripts.
 - Added root scripts:
   - `npm run server:dev`
@@ -135,6 +142,7 @@ Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
 - Passed root app check with `npm run check`.
 - Passed focused auth API wrapper test with `./server/node_modules/.bin/tsx --test src/features/auth/api.test.ts`.
 - Passed focused auth token storage test with `./server/node_modules/.bin/tsx --test src/features/auth/tokenStorage.test.ts`.
+- Passed focused API client test with `./server/node_modules/.bin/tsx --test src/lib/apiClient.test.ts`.
 
 ## Local Database
 
