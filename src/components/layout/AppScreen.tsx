@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils";
+import { colors } from "@/util/twColor";
 import type { PropsWithChildren } from "react";
+import { View } from "react-native";
 import type { Edge } from "react-native-safe-area-context";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -17,6 +19,14 @@ const backgroundClass: Record<
   profile: "bg-app-profile",
 };
 
+const backgroundStyle: Record<
+  NonNullable<AppScreenProps["background"]>,
+  string
+> = {
+  default: colors.sage[100],
+  profile: colors.sage[500],
+};
+
 export function AppScreen({
   children,
   className,
@@ -26,9 +36,11 @@ export function AppScreen({
   return (
     <SafeAreaView
       edges={edges}
-      className={cn("flex-1", backgroundClass[background], className)}
+      style={{ backgroundColor: backgroundStyle[background], flex: 1 }}
     >
-      {children}
+      <View className={cn("flex-1", backgroundClass[background], className)}>
+        {children}
+      </View>
     </SafeAreaView>
   );
 }

@@ -79,7 +79,7 @@ export function AddRecipePreviewScreen() {
   });
 
   if (!snapshot) {
-    router.replace("/add-recipe");
+    router.replace("/private/add-recipe");
     return null;
   }
 

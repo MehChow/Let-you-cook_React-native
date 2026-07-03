@@ -34,3 +34,36 @@ Reason:
 - Keep shared semantic tokens duplicated in both places when needed:
   - `@theme` for utility generation.
   - `:root` for runtime values and theming.
+
+## 2026-07-03 Shared `AppScreen` blank-screen regression
+
+- Symptom: both the auth flow and the private tabs could render as blank screens on app start, even though the router was still performing the initial push animation.
+- Root cause: `src/components/layout/AppScreen.tsx` applied layout-critical `flex: 1` through `className` directly on `react-native-safe-area-context`'s `SafeAreaView` again.
+- Fix: keep `SafeAreaView` layout on native `style={{ flex: 1 }}` and move the Tailwind background/layout classes onto an inner `View`.
+- Debugging hint: if multiple unrelated screens go blank at once, check shared wrappers like `AppScreen` before assuming auth hydration or route guards are broken.
+
+## 2026-07-03 Auth UI follow-up
+
+- Restyled the auth screens to match the supplied mockup more closely without touching auth/session behavior.
+- `src/components/layout/AppScreen.tsx` now also paints the `SafeAreaView` background color directly so the top safe-area/status-bar region keeps the intended sage background.
+- Reworked `src/features/auth/components/AuthShell.tsx` into a simpler decorated shell and moved the page-specific composition into each auth screen.
+- Used the transparent assets from `assets/images/auth/` through `src/data/images.ts` as real screen decoration:
+  - `login-bg.webp` for the login hero dish.
+  - `login-bg2.webp` for the login corner herb accent.
+  - `forget-password.webp` for the centered envelope illustration.
+  - `forget-password2.webp` for the forgot-password bottom-right herb accent.
+  - `email-otp.webp` for the OTP illustration.
+  - `create-new-password.webp` for the reset-password whisk decoration.
+- Added `src/features/auth/components/AuthOtpField.tsx` for the 6-cell OTP UI and `src/features/auth/presentation.ts` for masked-email and password-strength presentation helpers.
+
+## 2026-07-03 Jest-only app testing
+
+- Standardized the mobile app repo on Jest only; removed the separate `node:test` path and migrated those checks into root `__tests__/`.
+- Added the lightweight Expo 56 Jest setup:
+  - `jest-expo`
+  - `@testing-library/react-native`
+  - `jest.setup.ts`
+- Current test split:
+  - `__tests__/auth-screens.test.tsx` covers focused auth screen copy/layout regression checks with local mocks for native-heavy leaves.
+  - `__tests__/auth-presentation.test.ts`, `auth-api.test.ts`, `auth-session.test.ts`, `auth-token-storage.test.ts`, `api-client.test.ts`, and `convert-assets.test.ts` cover small logic/service helpers.
+- If future Expo screen tests fail on native-heavy imports, prefer local `jest.mock(...)` in the test file over growing global Jest setup.

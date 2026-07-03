@@ -1,35 +1,17 @@
-// src/app/index.tsx
+import { useAuth } from "@/features/auth/useAuth";
 import { Redirect } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 
 export default function Index() {
-  const [loading, setLoading] = useState(true);
-  // Replace with your real hook, e.g., const { isLoggedIn } = useAuth();
-  const isLoggedIn = false;
+  const { isHydrating, isLoggedIn } = useAuth();
 
-  useEffect(() => {
-    // Hide splash screen once your auth state is verified
-    const prepare = async () => {
-      setLoading(false);
-      await SplashScreen.hideAsync();
-    };
-    prepare();
-  }, []);
-
-  if (loading) {
+  if (isHydrating) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" />
+      <View className="flex-1 items-center justify-center bg-app-screen">
+        <ActivityIndicator />
       </View>
     );
   }
 
-  // Fallback anchor redirect based on the exact same guard conditions
-  return isLoggedIn ? (
-    <Redirect href="/private/(tabs)" />
-  ) : (
-    <Redirect href="/auth/login" />
-  );
+  return <Redirect href={isLoggedIn ? "/private/(tabs)" : "/auth/login"} />;
 }

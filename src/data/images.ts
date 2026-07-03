@@ -13,4 +13,10 @@ export const images = {
   recipeDetail1: require("@/assets/mock/recipe-detail-1.webp"),
   recipeDetail2: require("@/assets/mock/recipe-detail-2.webp"),
   recipeDetail3: require("@/assets/mock/recipe-detail-3.webp"),
+  authLoginBg: require("@/assets/images/auth/login-bg.webp"),
+  authLoginBg2: require("@/assets/images/auth/login-bg2.webp"),
+  authForgotPassword: require("@/assets/images/auth/forget-password.webp"),
+  authForgotPassword2: require("@/assets/images/auth/forget-password2.webp"),
+  authEmailOtp: require("@/assets/images/auth/email-otp.webp"),
+  authCreateNewPassword: require("@/assets/images/auth/create-new-password.webp"),
 } as const;

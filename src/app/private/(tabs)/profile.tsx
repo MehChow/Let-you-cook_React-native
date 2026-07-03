@@ -1,4 +1,7 @@
 import { AppScreen } from "@/components/layout/AppScreen";
+import { Button } from "@/components/ui/button";
+import { Text } from "@/components/ui/text";
+import { useAuth } from "@/features/auth/useAuth";
 import { mockAvatar, myRecipes, profileUser } from "@/features/home/mockData";
 import { ProfileMetadata } from "@/features/profile/ProfileMetadata";
 import { UserHeader } from "@/features/profile/UserHeader";
@@ -18,6 +21,7 @@ const avgRating =
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const { logout } = useAuth();
   const insets = useSafeAreaInsets();
   const { favourites, isFavourite, setFavourite } = useFavourites();
   const favouritedCount = Object.values(favourites).filter(Boolean).length;
@@ -33,6 +37,13 @@ export default function ProfileScreen() {
           heartsCount={favouritedCount}
           avgRatingLabel={avgRating.toFixed(1)}
         />
+        <Button
+          variant="secondary"
+          className="mt-4 self-start rounded-full bg-white/90 px-4"
+          onPress={() => void logout()}
+        >
+          <Text className="font-semibold text-sage-700">Log out</Text>
+        </Button>
       </View>
 
       <View className="min-h-0 flex-1">

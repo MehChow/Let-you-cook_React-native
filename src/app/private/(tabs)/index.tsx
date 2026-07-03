@@ -76,7 +76,7 @@ export default function HomeScreen() {
             title="Categories"
             actionLabel="See all"
             actionIcon={Grid}
-            onPressAction={() => router.push("/modal")}
+            onPressAction={() => router.push("/private/modal")}
           />
           <CategoryCarousel
             className=""
@@ -92,7 +92,7 @@ export default function HomeScreen() {
           <SectionHeader
             title="Popular recipes"
             actionLabel="See more"
-            onPressAction={() => router.push("/search")}
+            onPressAction={() => router.push("/private/search")}
           />
           {filteredPopularRecipes.length > 0 ? (
             <View className="gap-4">

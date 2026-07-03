@@ -56,6 +56,7 @@ Let You Cook is a recipe-focused mobile app prototype: think Instagram for recip
 
 - Keep tests lightweight and high-value
 - Prefer coverage for state transitions, persistence restore/save behavior, native failure branches, and critical error or fallback UI states
+- Use `npm test` for the Expo/Jest suite in root `__tests__/`; keep screen tests focused and mock native-heavy leaves locally
 
 ## Notes
 

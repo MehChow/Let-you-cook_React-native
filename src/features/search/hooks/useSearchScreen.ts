@@ -59,11 +59,11 @@ export function useSearchScreen() {
   );
 
   const handleOpenFilters = () => {
-    router.push("/filters");
+    router.push("/private/filters");
   };
 
   const handleOpenCategories = () => {
-    router.push("/modal");
+    router.push("/private/modal");
   };
 
   const handleSelectCategory = (id: string) => {

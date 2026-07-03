@@ -160,7 +160,7 @@ export const useAddRecipeWizard = (
     }
 
     setPreviewSnapshot(getValues());
-    router.push("/add-recipe/preview");
+    router.push("/private/add-recipe/preview");
   };
 
   const onFooterBack = () => {

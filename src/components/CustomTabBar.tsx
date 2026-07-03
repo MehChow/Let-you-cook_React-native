@@ -110,7 +110,7 @@ export default function CustomTabBar({
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Add recipe"
-          onPress={() => router.push("/add-recipe")}
+          onPress={() => router.push("/private/add-recipe")}
           className="absolute left-1/2 z-2 h-14 w-14 -translate-x-1/2 items-center justify-center rounded-full bg-sage-600 active:bg-sage-700"
           style={[{ top: -20 }, fabElevationStyle]}
         >

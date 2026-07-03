@@ -95,7 +95,7 @@ export default function TabLayout() {
         listeners={{
           tabPress: (e) => {
             e.preventDefault();
-            router.push("/add-recipe");
+            router.push("/private/add-recipe");
           },
         }}
       />
