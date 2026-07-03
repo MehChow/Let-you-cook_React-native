@@ -47,7 +47,14 @@ export function CreateNewPasswordScreen() {
         <Image
           source={images.authCreateNewPassword}
           contentFit="contain"
-          className="absolute bottom-3 right-0 h-36 w-36 opacity-80"
+          style={{
+            width: 144,
+            height: 144,
+            opacity: 0.8,
+            position: "absolute",
+            right: 0,
+            bottom: 12,
+          }}
         />
       }
     >

@@ -59,7 +59,10 @@ export function EmailOtpScreen() {
           <Image
             source={images.authEmailOtp}
             contentFit="contain"
-            className="h-40 w-full"
+            style={{
+              width: "100%",
+              height: 160,
+            }}
           />
         </View>
         <AuthOtpField value={code} onChangeText={setCode} />

@@ -39,6 +39,7 @@ Let You Cook is a recipe-focused mobile app prototype: think Instagram for recip
 ## UI Rules
 
 - Use `expo-image` for images
+- When styling `expo-image`'s `Image`, do not use Tailwind classes in `className`; use native `style` props instead
 - Use RNR base components from `src/components/ui` where applicable
 - Use `AppScreen` for shared screen background and safe-area handling
 - Reuse shared app components before adding one-off markup

@@ -42,7 +42,14 @@ export function LoginScreen() {
         <Image
           source={images.authLoginBg2}
           contentFit="contain"
-          className="absolute bottom-2 left-0 h-24 w-24 opacity-80"
+          style={{
+            width: 100,
+            height: 100,
+            opacity: 0.75,
+            position: "absolute",
+            bottom: 2,
+            left: 2,
+          }}
         />
       }
     >
@@ -51,16 +58,22 @@ export function LoginScreen() {
           <Image
             source={images.authLoginBg}
             contentFit="contain"
-            className="absolute -right-10 -top-10 h-[260px] w-[260px]"
+            style={{
+              height: 400,
+              width: 400,
+              position: "absolute",
+              right: -35,
+              top: -50,
+            }}
           />
-          <Text className="text-5xl font-bold leading-[52px] text-sage-900">
+          <Text className="text-4xl font-bold text-sage-800">
             Welcome{"\n"}back
           </Text>
-          <Text className="mt-3 text-xl text-sage-600">
+          <Text className="mt-3 text-lg font-semibold text-sage-400">
             Ready to cook again?
           </Text>
         </View>
-        <View className="overflow-hidden rounded-[32px] bg-app-card px-6 py-6 shadow-sm shadow-black/10">
+        <View className="overflow-hidden rounded-4xl bg-app-card/70 px-6 py-6 shadow-sm shadow-black/10">
           <View className="gap-4">
             <AuthTextField
               label="Email"
@@ -121,7 +134,9 @@ export function LoginScreen() {
               label="New here?"
               actionLabel="Create account"
               onPress={() =>
-                setErrorMessage("Account creation is not part of this demo yet.")
+                setErrorMessage(
+                  "Account creation is not part of this demo yet.",
+                )
               }
             />
           </View>

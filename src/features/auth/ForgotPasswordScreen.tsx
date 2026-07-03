@@ -43,7 +43,14 @@ export function ForgotPasswordScreen() {
         <Image
           source={images.authForgotPassword2}
           contentFit="contain"
-          className="absolute bottom-3 right-3 h-28 w-28 opacity-80"
+          style={{
+            width: 112,
+            height: 112,
+            opacity: 0.8,
+            position: "absolute",
+            right: 12,
+            bottom: 12,
+          }}
         />
       }
     >
@@ -62,7 +69,10 @@ export function ForgotPasswordScreen() {
           <Image
             source={images.authForgotPassword}
             contentFit="contain"
-            className="h-48 w-56"
+            style={{
+              width: 224,
+              height: 192,
+            }}
           />
         </View>
         <View className="gap-4">
