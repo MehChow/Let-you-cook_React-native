@@ -18,7 +18,9 @@ export function AuthFooterLink({
 }: AuthFooterLinkProps) {
   return (
     <View className="flex-row items-center justify-center gap-1">
-      {label ? <Text className="text-sm text-sage-600">{label}</Text> : null}
+      {label ? (
+        <Text className="text-sm text-neutral-600 font-medium">{label}</Text>
+      ) : null}
       <Pressable
         onPress={onPress}
         className="flex-row items-center gap-2 active:opacity-70"
@@ -26,7 +28,7 @@ export function AuthFooterLink({
         {showChevron ? (
           <Icon as={ChevronLeft} className="size-4 text-sage-500" />
         ) : null}
-        <Text className="text-sm font-semibold text-sage-800">{actionLabel}</Text>
+        <Text className="text-sm font-bold text-sage-600">{actionLabel}</Text>
       </Pressable>
     </View>
   );

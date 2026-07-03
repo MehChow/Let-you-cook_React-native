@@ -46,16 +46,19 @@ export function AuthTextField({
 
   return (
     <View className="gap-2">
+      {/* Label */}
       {label ? (
-        <Text className="text-base font-semibold text-sage-900">{label}</Text>
+        <Text className="text-md font-bold text-sage-600">{label}</Text>
       ) : null}
-      <View className="flex-row items-center gap-3 rounded-2xl border border-sage-200 bg-white px-4 py-1">
-        <Icon as={icon} className="size-5 text-sage-500" />
+
+      {/* Input field */}
+      <View className="flex-row items-center gap-3 rounded-2xl border border-neutral-200 bg-white px-4">
+        <Icon as={icon} className="size-5 text-black" />
         <TextInput
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}
-          placeholderTextColor={colors.sage[400]}
+          placeholderTextColor={colors.neutral[400]}
           keyboardType={keyboardType}
           autoCapitalize={autoCapitalize}
           autoComplete={autoComplete}
@@ -63,8 +66,10 @@ export function AuthTextField({
           returnKeyType={returnKeyType}
           secureTextEntry={secureTextEntry && isSecure}
           maxLength={maxLength}
-          className="min-w-0 flex-1 py-4 text-base text-sage-800"
+          className="min-w-0 flex-1 py-3 text-base font-medium text-sage-800"
         />
+
+        {/* Eye icon */}
         {secureTextEntry ? (
           <Pressable
             onPress={() => setIsSecure((current) => !current)}
@@ -72,7 +77,7 @@ export function AuthTextField({
           >
             <Icon
               as={isSecure ? EyeIcon : EyeOffIcon}
-              className="size-5 text-sage-500"
+              className="size-5 text-neutral-600"
             />
           </Pressable>
         ) : null}
