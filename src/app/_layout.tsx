@@ -8,66 +8,59 @@ import { Toaster } from "sonner-native";
 
 void SplashScreen.preventAutoHideAsync();
 
+const isLoggedIn = false;
+
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar style="dark" />
-      <Stack initialRouteName="(tabs)">
-        <Stack.Screen
-          name="(tabs)"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="add-recipe/index"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="add-recipe/preview"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="recipe/[recipeId]"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="recipe/[recipeId]/reviews"
-          options={{
-            headerShown: false,
-            presentation: "formSheet",
-            sheetAllowedDetents: [0.6],
-            sheetExpandsWhenScrolledToEdge: false,
-            sheetCornerRadius: 24,
-          }}
-        />
-        <Stack.Screen
-          name="modal"
-          options={{
-            presentation: "formSheet",
-            sheetAllowedDetents: [0.7],
-            // Prevent the scroll view "pull down" gesture from being interpreted
-            // as a sheet drag-to-dismiss.
-            sheetExpandsWhenScrolledToEdge: false,
-            sheetCornerRadius: 24,
-          }}
-        />
-        <Stack.Screen
-          name="filters"
-          options={{
-            headerShown: false,
-            presentation: "formSheet",
-            sheetAllowedDetents: [0.62],
-            sheetExpandsWhenScrolledToEdge: false,
-            sheetCornerRadius: 24,
-          }}
-        />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+
+        <Stack.Protected guard={!isLoggedIn}>
+          <Stack.Screen name="auth/login" />
+        </Stack.Protected>
+
+        <Stack.Protected guard={isLoggedIn}>
+          <Stack.Screen
+            name="private/(tabs)"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen name="private/add-recipe/index" />
+          <Stack.Screen name="private/add-recipe/preview" />
+          <Stack.Screen name="private/recipe/[recipeId]" />
+          <Stack.Screen
+            name="private/recipe/[recipeId]/reviews"
+            options={{
+              presentation: "formSheet",
+              sheetAllowedDetents: [0.6],
+              sheetExpandsWhenScrolledToEdge: false,
+              sheetCornerRadius: 24,
+            }}
+          />
+          <Stack.Screen
+            name="private/modal"
+            options={{
+              presentation: "formSheet",
+              sheetAllowedDetents: [0.7],
+              // Prevent the scroll view "pull down" gesture from being interpreted
+              // as a sheet drag-to-dismiss.
+              sheetExpandsWhenScrolledToEdge: false,
+              sheetCornerRadius: 24,
+            }}
+          />
+          <Stack.Screen
+            name="private/filters"
+            options={{
+              presentation: "formSheet",
+              sheetAllowedDetents: [0.62],
+              sheetExpandsWhenScrolledToEdge: false,
+              sheetCornerRadius: 24,
+            }}
+          />
+        </Stack.Protected>
       </Stack>
       <Toaster />
       <PortalHost />
