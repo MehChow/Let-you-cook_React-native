@@ -30,6 +30,10 @@ export interface LogoutResponse {
   ok: boolean;
 }
 
+export interface PasswordResetCodeInput {
+  email: string;
+}
+
 interface AuthApiOptions {
   baseUrl?: string;
   fetch?: typeof fetch;
@@ -82,6 +86,13 @@ export const createAuthApi = (options: AuthApiOptions = {}) => {
       postJson<AuthTokens>(fetchImpl, baseUrl, "/auth/refresh", body),
     logout: (body: RefreshTokenInput) =>
       postJson<LogoutResponse>(fetchImpl, baseUrl, "/auth/logout", body),
+    sendPasswordResetCode: async (body: PasswordResetCodeInput) => {
+      if (!body.email.trim()) {
+        throw new Error("Enter your email address.");
+      }
+
+      return { ok: true as const };
+    },
   };
 };
 

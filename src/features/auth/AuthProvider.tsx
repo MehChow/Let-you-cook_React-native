@@ -7,6 +7,7 @@ import {
 } from "react";
 
 import type { StoredAuthSession } from "./authTypes";
+import { authApi } from "./api";
 import { createMockAuthSession, isAccessTokenExpired } from "./session";
 import { authTokenStorage } from "./tokenStorage";
 
@@ -75,9 +76,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   };
 
   const sendPasswordResetCode = async (email: string) => {
-    if (!email.trim()) {
-      throw new Error("Enter your email address.");
-    }
+    await authApi.sendPasswordResetCode({ email });
   };
 
   const verifyOtp = async (code: string) => {

@@ -1,10 +1,11 @@
+import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { images } from "@/data/images";
 import { useAuth } from "@/features/auth/useAuth";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 import { toast } from "sonner-native";
 
 import { AuthBackButton } from "./components/AuthBackButton";
@@ -13,23 +14,61 @@ import { AuthOtpField } from "./components/AuthOtpField";
 import { AuthPrimaryButton } from "./components/AuthPrimaryButton";
 import { AuthShell } from "./components/AuthShell";
 import { maskEmailAddress } from "./presentation";
+import {
+  clearPasswordResetFlow,
+  usePasswordResetCooldown,
+  useSendPasswordResetCode,
+} from "./useSendPasswordResetCode";
 
 const getErrorMessage = (error: unknown) =>
   error instanceof Error
     ? error.message
     : "Unable to verify the code right now.";
 
+const formatCountdown = (remainingSeconds: number) => {
+  const minutes = Math.floor(remainingSeconds / 60)
+    .toString()
+    .padStart(2, "0");
+  const seconds = (remainingSeconds % 60).toString().padStart(2, "0");
+
+  return `${minutes}:${seconds}`;
+};
+
 export function EmailOtpScreen() {
   const router = useRouter();
   const { email } = useLocalSearchParams<{ email?: string }>();
   const { verifyOtp } = useAuth();
+  const { sendCode, isSending } = useSendPasswordResetCode();
+  const { remainingSeconds, isCoolingDown } = usePasswordResetCooldown();
   const [code, setCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleUseAnotherEmail = () => {
+    router.dismissTo({
+      pathname: "/auth/forgot-password",
+      params: { mode: "another-email" },
+    });
+  };
+
+  const handleResend = async () => {
+    if (!email) {
+      toast.error("Unable to resend the code without an email address.");
+      return;
+    }
+
+    try {
+      await sendCode(email);
+      toast.success("A new code was sent.");
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+    }
+  };
 
   const handleContinue = async () => {
     try {
       setIsSubmitting(true);
       await verifyOtp(code);
+      clearPasswordResetFlow();
       router.push({
         pathname: "/auth/create-new-password",
         params: email ? { email } : undefined,
@@ -67,15 +106,45 @@ export function EmailOtpScreen() {
           />
         </View>
         <AuthOtpField value={code} onChangeText={setCode} />
-        <Text className="text-center text-sm text-sage-700">
-          Didn&apos;t receive the code?{" "}
-          <Text className="font-semibold text-accent-500">Resend in 00:45</Text>
-        </Text>
-        <AuthPrimaryButton
-          label={isSubmitting ? "Verifying..." : "Verify"}
-          onPress={() => void handleContinue()}
-          disabled={isSubmitting}
-        />
+        <View className="flex-row justify-center">
+          <Text className="text-center text-sm text-sage-700">
+            Didn&apos;t receive the code?{" "}
+          </Text>
+          <Pressable
+            accessibilityRole="button"
+            disabled={isCoolingDown || isSending}
+            onPress={() => void handleResend()}
+          >
+            <Text
+              className={
+                isCoolingDown
+                  ? "text-sm font-semibold text-accent-500"
+                  : "text-sm font-semibold text-sage-600"
+              }
+            >
+              {isCoolingDown
+                ? `Resend in ${formatCountdown(remainingSeconds)}`
+                : "Resend code"}
+            </Text>
+          </Pressable>
+        </View>
+
+        <View className="gap-2">
+          <AuthPrimaryButton
+            label={isSubmitting ? "Verifying..." : "Verify"}
+            onPress={() => void handleContinue()}
+            disabled={isSubmitting}
+          />
+          <Button
+            variant="outline"
+            onPress={handleUseAnotherEmail}
+            className="h-12 rounded-full border-sage-300 bg-white active:bg-sage-100"
+          >
+            <Text className="text-base font-semibold text-sage-600">
+              Use another email
+            </Text>
+          </Button>
+        </View>
         <AuthFooterLink
           actionLabel="Back to login"
           onPress={() => router.replace("/auth/login")}

@@ -12,6 +12,22 @@ const jsonResponse = (body: unknown, status = 200): Response =>
   });
 
 describe("createAuthApi", () => {
+  it("accepts a password reset email through the placeholder API", async () => {
+    const api = createAuthApi();
+
+    await expect(api.sendPasswordResetCode({ email: "cook@example.com" })).resolves.toEqual({
+      ok: true,
+    });
+  });
+
+  it("rejects a blank password reset email", async () => {
+    const api = createAuthApi();
+
+    await expect(api.sendPasswordResetCode({ email: "  " })).rejects.toThrow(
+      "Enter your email address.",
+    );
+  });
+
   it("posts credentials and returns the auth response", async () => {
     const calls: FetchCall[] = [];
     const api = createAuthApi({

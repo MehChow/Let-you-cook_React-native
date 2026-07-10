@@ -1,9 +1,0 @@
----
-alwaysApply: true
----
-
-Zod validation text style:
-
-- Use `text-[11px] font-medium text-danger-500` for all error messages.
-- Use `text-neutral-400` for placeholder value in Input field.
-- Use `text-black` (which does not need to be specify) for real value in Input field.

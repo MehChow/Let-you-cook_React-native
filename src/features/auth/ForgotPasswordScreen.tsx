@@ -1,10 +1,14 @@
 import { Text } from "@/components/ui/text";
 import { images } from "@/data/images";
-import { useAuth } from "@/features/auth/useAuth";
+import {
+  usePasswordResetResume,
+  usePasswordResetCooldown,
+  useSendPasswordResetCode,
+} from "@/features/auth/useSendPasswordResetCode";
 import { Image } from "expo-image";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { MailIcon } from "lucide-react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { View } from "react-native";
 import { toast } from "sonner-native";
 
@@ -17,25 +21,42 @@ import { AuthTextField } from "./components/AuthTextField";
 const getErrorMessage = (error: unknown) =>
   error instanceof Error ? error.message : "Unable to send the code right now.";
 
+const formatCountdown = (remainingSeconds: number) => {
+  const minutes = Math.floor(remainingSeconds / 60)
+    .toString()
+    .padStart(2, "0");
+  const seconds = (remainingSeconds % 60).toString().padStart(2, "0");
+
+  return `${minutes}:${seconds}`;
+};
+
 export function ForgotPasswordScreen() {
   const router = useRouter();
-  const { sendPasswordResetCode } = useAuth();
+  const { mode } = useLocalSearchParams<{ mode?: string }>();
+  const { sendCode, isSending } = useSendPasswordResetCode();
+  const { remainingSeconds, isCoolingDown } = usePasswordResetCooldown();
+  const { pendingEmail, shouldResume } = usePasswordResetResume();
   const [email, setEmail] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (mode !== "another-email" && shouldResume && pendingEmail) {
+      router.replace({
+        pathname: "/auth/email-otp",
+        params: { email: pendingEmail },
+      });
+    }
+  }, [mode, pendingEmail, router, shouldResume]);
 
   const handleContinue = async () => {
     try {
-      setIsSubmitting(true);
       const nextEmail = email.trim();
-      await sendPasswordResetCode(nextEmail);
+      await sendCode(nextEmail);
       router.push({
         pathname: "/auth/email-otp",
         params: { email: nextEmail },
       });
     } catch (error) {
       toast.error(getErrorMessage(error));
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -89,9 +110,15 @@ export function ForgotPasswordScreen() {
             keyboardType="email-address"
           />
           <AuthPrimaryButton
-            label={isSubmitting ? "Sending..." : "Send code"}
+            label={
+              isSending
+                ? "Sending..."
+                : isCoolingDown
+                  ? `Available in ${formatCountdown(remainingSeconds)}`
+                  : "Send code"
+            }
             onPress={() => void handleContinue()}
-            disabled={isSubmitting}
+            disabled={isSending || isCoolingDown}
           />
         </View>
         <AuthFooterLink

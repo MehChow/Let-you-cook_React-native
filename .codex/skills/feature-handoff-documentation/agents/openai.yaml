@@ -1,0 +1,4 @@
+interface:
+  display_name: "Feature Handoff Documentation"
+  short_description: "Document completed features for future developers"
+  default_prompt: "Use $feature-handoff-documentation to document this completed feature for future developers."

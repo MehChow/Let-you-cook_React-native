@@ -1,6 +1,8 @@
 import { AuthProvider, useAuth } from "@/features/auth/AuthProvider";
+import { queryClient } from "@/lib/queryClient";
 import "@/global.css";
 import { PortalHost } from "@rn-primitives/portal";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -46,12 +48,14 @@ function RootStack() {
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <AuthProvider>
-        <StatusBar style="dark" />
-        <RootStack />
-        <Toaster position="top-center" />
-        <PortalHost />
-      </AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <StatusBar style="dark" />
+          <RootStack />
+          <Toaster position="top-center" />
+          <PortalHost />
+        </AuthProvider>
+      </QueryClientProvider>
     </GestureHandlerRootView>
   );
 }
