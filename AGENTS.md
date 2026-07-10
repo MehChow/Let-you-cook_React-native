@@ -67,6 +67,7 @@ Let You Cook is a recipe-focused mobile app prototype: think Instagram for recip
 ## Backend Rules
 
 - Backend code lives in `server/`; backend docs live in `server/docs/`.
+- When designing backend APIs for frontend integration, read the relevant guidance in `docs/backend-integration/` first.
 - Use Hono for HTTP routing, Drizzle for PostgreSQL schema/migrations, Zod for boundary validation, and Node 20+.
 - Keep `server/src/app.ts` responsible for app creation and route mounting; keep `server/src/index.ts` limited to starting the server.
 - Keep route files small and REST-shaped under `server/src/routes`.

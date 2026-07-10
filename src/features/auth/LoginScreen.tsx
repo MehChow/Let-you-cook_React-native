@@ -145,7 +145,7 @@ export function LoginScreen() {
           <AuthFooterLink
             label="New here?"
             actionLabel="Create account"
-            onPress={() => toast.info("Account creation is not part of this demo yet.")}
+            onPress={() => router.push("/auth/create-account")}
           />
         </View>
       </View>

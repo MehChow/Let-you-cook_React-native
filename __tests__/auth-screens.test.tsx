@@ -1,4 +1,5 @@
 import { LoginScreen } from "@/features/auth/LoginScreen";
+import { CreateAccountScreen } from "@/features/auth/CreateAccountScreen";
 import { CreateNewPasswordScreen } from "@/features/auth/CreateNewPasswordScreen";
 import { EmailOtpScreen } from "@/features/auth/EmailOtpScreen";
 import { ForgotPasswordScreen } from "@/features/auth/ForgotPasswordScreen";
@@ -6,6 +7,11 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react-nativ
 import { toast } from "sonner-native";
 
 const mockLogin = jest.fn();
+const mockCreateAccount = jest.fn();
+const mockUseCreateAccount = jest.fn(() => ({
+  createAccount: mockCreateAccount,
+  isCreating: false,
+}));
 const mockSendPasswordResetCode = jest.fn();
 const mockVerifyOtp = jest.fn();
 const mockResetPassword = jest.fn();
@@ -86,6 +92,7 @@ jest.mock("@/data/images", () => ({
     authForgotPassword: "forget-password",
     authForgotPassword2: "forget-password2",
     authEmailOtp: "email-otp",
+    authCreateAccount: "create-account",
     authCreateNewPassword: "create-new-password",
   },
 }));
@@ -115,6 +122,10 @@ jest.mock("@/features/auth/useAuth", () => ({
   }),
 }));
 
+jest.mock("@/features/auth/useCreateAccount", () => ({
+  useCreateAccount: () => mockUseCreateAccount(),
+}));
+
 jest.mock("@/features/auth/useSendPasswordResetCode", () => ({
   useSendPasswordResetCode: () => ({ sendCode: mockSendCode, isSending: false }),
   usePasswordResetCooldown: () => mockCooldown,
@@ -126,6 +137,11 @@ jest.mock("@/features/auth/useSendPasswordResetCode", () => ({
 describe("auth screens", () => {
   beforeEach(() => {
     mockLogin.mockReset();
+    mockCreateAccount.mockReset();
+    mockUseCreateAccount.mockReturnValue({
+      createAccount: mockCreateAccount,
+      isCreating: false,
+    });
     mockSendPasswordResetCode.mockReset();
     mockVerifyOtp.mockReset();
     mockResetPassword.mockReset();
@@ -153,6 +169,80 @@ describe("auth screens", () => {
     expect(screen.getByText("Password")).toBeTruthy();
     expect(screen.getByText("Continue with Google")).toBeTruthy();
     expect(screen.getByText("Create account")).toBeTruthy();
+  });
+
+  it("renders the create-account fields and action", () => {
+    render(<CreateAccountScreen />);
+
+    expect(screen.getByText("Create your account")).toBeTruthy();
+    expect(screen.getByPlaceholderText("Your name")).toBeTruthy();
+    expect(screen.getByPlaceholderText("name@example.com")).toBeTruthy();
+    expect(screen.getByPlaceholderText("Enter your password")).toBeTruthy();
+    expect(screen.getByPlaceholderText("Confirm your password")).toBeTruthy();
+    expect(screen.getByText("Create account")).toBeTruthy();
+  });
+
+  it("blocks an invalid create-account submission", async () => {
+    render(<CreateAccountScreen />);
+
+    fireEvent.press(screen.getByText("Create account"));
+
+    await waitFor(() => expect(mockToastError).toHaveBeenCalledWith("Enter your name."));
+    expect(mockCreateAccount).not.toHaveBeenCalled();
+  });
+
+  it("normalizes valid create-account values before the local mutation", async () => {
+    mockCreateAccount.mockResolvedValueOnce(undefined);
+
+    render(<CreateAccountScreen />);
+    fireEvent.changeText(screen.getByPlaceholderText("Your name"), "  Mei Lin  ");
+    fireEvent.changeText(screen.getByPlaceholderText("name@example.com"), " MEI@EXAMPLE.COM ");
+    fireEvent.changeText(screen.getByPlaceholderText("Enter your password"), "cook1234");
+    fireEvent.changeText(screen.getByPlaceholderText("Confirm your password"), "cook1234");
+    fireEvent.press(screen.getByText("Create account"));
+
+    await waitFor(() =>
+      expect(mockCreateAccount).toHaveBeenCalledWith({
+        displayName: "Mei Lin",
+        email: "mei@example.com",
+        password: "cook1234",
+      }),
+    );
+    await waitFor(() =>
+      expect(mockLogin).toHaveBeenCalledWith({
+        email: "mei@example.com",
+        password: "cook1234",
+      }),
+    );
+    expect(mockToastSuccess).toHaveBeenCalledWith("Account created.");
+    expect(mockReplace).toHaveBeenCalledWith("/private/(tabs)");
+  });
+
+  it("shows the local mutation failure as a toast", async () => {
+    mockCreateAccount.mockRejectedValueOnce(new Error("Unable to create account."));
+
+    render(<CreateAccountScreen />);
+    fireEvent.changeText(screen.getByPlaceholderText("Your name"), "Mei Lin");
+    fireEvent.changeText(screen.getByPlaceholderText("name@example.com"), "mei@example.com");
+    fireEvent.changeText(screen.getByPlaceholderText("Enter your password"), "cook1234");
+    fireEvent.changeText(screen.getByPlaceholderText("Confirm your password"), "cook1234");
+    fireEvent.press(screen.getByText("Create account"));
+
+    await waitFor(() =>
+      expect(mockToastError).toHaveBeenCalledWith("Unable to create account."),
+    );
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it("disables the create-account action while creating", () => {
+    mockUseCreateAccount.mockReturnValue({
+      createAccount: mockCreateAccount,
+      isCreating: true,
+    });
+
+    render(<CreateAccountScreen />);
+
+    expect(screen.getByText("Creating...")).toBeTruthy();
   });
 
   it("shows login failures as a toast instead of inline text", async () => {
