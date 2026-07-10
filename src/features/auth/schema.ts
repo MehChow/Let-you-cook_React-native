@@ -1,6 +1,22 @@
 import type { SignUpInput } from "./api";
 import { z } from "zod";
 
+export const loginSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .pipe(z.email("Enter a valid email address.")),
+  password: z.string().min(1, "Enter your password."),
+});
+
+export type LoginFormValues = z.infer<typeof loginSchema>;
+
+export const toLoginInput = ({ email, password }: LoginFormValues) => ({
+  email,
+  password,
+});
+
 export const createAccountSchema = z
   .object({
     name: z.string().trim().min(1, "Enter your name.").max(80),

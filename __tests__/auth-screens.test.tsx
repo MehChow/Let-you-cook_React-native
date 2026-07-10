@@ -7,6 +7,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react-nativ
 import { toast } from "sonner-native";
 
 const mockLogin = jest.fn();
+const mockValidateLogin = jest.fn();
 const mockCreateAccount = jest.fn();
 const mockUseCreateAccount = jest.fn(() => ({
   createAccount: mockCreateAccount,
@@ -126,6 +127,10 @@ jest.mock("@/features/auth/useCreateAccount", () => ({
   useCreateAccount: () => mockUseCreateAccount(),
 }));
 
+jest.mock("@/features/auth/useLogin", () => ({
+  useLogin: () => ({ login: mockValidateLogin, isLoggingIn: false }),
+}));
+
 jest.mock("@/features/auth/useSendPasswordResetCode", () => ({
   useSendPasswordResetCode: () => ({ sendCode: mockSendCode, isSending: false }),
   usePasswordResetCooldown: () => mockCooldown,
@@ -137,6 +142,7 @@ jest.mock("@/features/auth/useSendPasswordResetCode", () => ({
 describe("auth screens", () => {
   beforeEach(() => {
     mockLogin.mockReset();
+    mockValidateLogin.mockReset();
     mockCreateAccount.mockReset();
     mockUseCreateAccount.mockReturnValue({
       createAccount: mockCreateAccount,
@@ -246,15 +252,36 @@ describe("auth screens", () => {
   });
 
   it("shows login failures as a toast instead of inline text", async () => {
-    mockLogin.mockRejectedValueOnce(new Error("Enter your email and password."));
+    mockValidateLogin.mockRejectedValueOnce(new Error("Invalid credentials."));
 
     render(<LoginScreen />);
+    fireEvent.changeText(screen.getByPlaceholderText("name@example.com"), "wrong@example.com");
+    fireEvent.changeText(screen.getByPlaceholderText("Enter your password"), "coffee123");
     fireEvent.press(screen.getByText("Log in"));
 
     await waitFor(() =>
-      expect(mockToastError).toHaveBeenCalledWith("Enter your email and password."),
+      expect(mockToastError).toHaveBeenCalledWith("Invalid credentials."),
     );
-    expect(screen.queryByText("Enter your email and password.")).toBeNull();
+    expect(screen.queryByText("Invalid credentials.")).toBeNull();
+  });
+
+  it("normalizes demo login values before creating a local session", async () => {
+    mockValidateLogin.mockResolvedValueOnce(undefined);
+    mockLogin.mockResolvedValueOnce(undefined);
+
+    render(<LoginScreen />);
+    fireEvent.changeText(screen.getByPlaceholderText("name@example.com"), " GG@GMAIL.COM ");
+    fireEvent.changeText(screen.getByPlaceholderText("Enter your password"), "coffee123");
+    fireEvent.press(screen.getByText("Log in"));
+
+    await waitFor(() =>
+      expect(mockValidateLogin).toHaveBeenCalledWith({
+        email: "gg@gmail.com",
+        password: "coffee123",
+      }),
+    );
+    expect(mockLogin).toHaveBeenCalledWith({ email: "gg@gmail.com", password: "coffee123" });
+    expect(mockReplace).toHaveBeenCalledWith("/private/(tabs)");
   });
 
   it("shows password-reset failures as a toast instead of inline text", async () => {

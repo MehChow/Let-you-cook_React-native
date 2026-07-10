@@ -4,14 +4,17 @@ import { useAuth } from "@/features/auth/useAuth";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { LockIcon, MailIcon } from "lucide-react-native";
-import { useState } from "react";
 import { Pressable, View } from "react-native";
 import { toast } from "sonner-native";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Controller, useForm } from "react-hook-form";
 
 import { AuthFooterLink } from "./components/AuthFooterLink";
 import { AuthPrimaryButton } from "./components/AuthPrimaryButton";
 import { AuthShell } from "./components/AuthShell";
 import { AuthTextField } from "./components/AuthTextField";
+import { loginSchema, toLoginInput, type LoginFormValues } from "./schema";
+import { useLogin } from "./useLogin";
 
 const getErrorMessage = (error: unknown) =>
   error instanceof Error ? error.message : "Unable to log in right now.";
@@ -19,21 +22,30 @@ const getErrorMessage = (error: unknown) =>
 export function LoginScreen() {
   const router = useRouter();
   const { login } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { login: validateLogin, isLoggingIn } = useLogin();
+  const form = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "" },
+    mode: "onSubmit",
+    reValidateMode: "onChange",
+  });
 
-  const handleLogin = async () => {
-    try {
-      setIsSubmitting(true);
-      await login({ email, password });
-      router.replace("/private/(tabs)");
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const handleSubmit = form.handleSubmit(
+    async (values) => {
+      const input = toLoginInput(values);
+      try {
+        await validateLogin(input);
+        await login(input);
+        router.replace("/private/(tabs)");
+      } catch (error) {
+        toast.error(getErrorMessage(error));
+      }
+    },
+    (errors) => {
+      const message = errors.email?.message ?? errors.password?.message;
+      toast.error(typeof message === "string" ? message : "Check your login details.");
+    },
+  );
 
   return (
     <AuthShell
@@ -76,26 +88,38 @@ export function LoginScreen() {
       {/* Login card */}
       <View className="overflow-hidden rounded-4xl bg-app-card/80 px-6 py-6 shadow-lg shadow-black/10">
         <View className="gap-4">
-          <AuthTextField
-            label="Email"
-            icon={MailIcon}
-            value={email}
-            onChangeText={setEmail}
-            placeholder="name@example.com"
-            autoComplete="email"
-            textContentType="emailAddress"
-            keyboardType="email-address"
+          <Controller
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <AuthTextField
+                label="Email"
+                icon={MailIcon}
+                value={field.value}
+                onChangeText={field.onChange}
+                placeholder="name@example.com"
+                autoComplete="email"
+                textContentType="emailAddress"
+                keyboardType="email-address"
+              />
+            )}
           />
-          <AuthTextField
-            label="Password"
-            icon={LockIcon}
-            value={password}
-            onChangeText={setPassword}
-            placeholder="Enter your password"
-            autoComplete="password"
-            textContentType="password"
-            returnKeyType="done"
-            secureTextEntry
+          <Controller
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <AuthTextField
+                label="Password"
+                icon={LockIcon}
+                value={field.value}
+                onChangeText={field.onChange}
+                placeholder="Enter your password"
+                autoComplete="password"
+                textContentType="password"
+                returnKeyType="done"
+                secureTextEntry
+              />
+            )}
           />
 
           {/* Forgot password */}
@@ -109,9 +133,9 @@ export function LoginScreen() {
           </Pressable>
           {/* Login button */}
           <AuthPrimaryButton
-            label={isSubmitting ? "Signing in..." : "Log in"}
-            onPress={() => void handleLogin()}
-            disabled={isSubmitting}
+            label={isLoggingIn ? "Signing in..." : "Log in"}
+            onPress={() => void handleSubmit()}
+            disabled={isLoggingIn}
           />
         </View>
 
