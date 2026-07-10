@@ -7,8 +7,8 @@ import {
 } from "react";
 
 import type { StoredAuthSession } from "./authTypes";
-import { authApi } from "./api";
-import { createMockAuthSession, isAccessTokenExpired } from "./session";
+import { authApi, type AuthResponse } from "./api";
+import { createAuthSession, createMockAuthSession, isAccessTokenExpired } from "./session";
 import { authTokenStorage } from "./tokenStorage";
 
 interface AuthContextValue {
@@ -16,6 +16,7 @@ interface AuthContextValue {
   isLoggedIn: boolean;
   session: StoredAuthSession | null;
   login(input: { email: string; password: string }): Promise<void>;
+  establishSession(response: AuthResponse): Promise<void>;
   logout(): Promise<void>;
   sendPasswordResetCode(email: string): Promise<void>;
   verifyOtp(code: string): Promise<void>;
@@ -75,6 +76,12 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setSession(null);
   };
 
+  const establishSession = async (response: AuthResponse) => {
+    const nextSession = createAuthSession(response);
+    await authTokenStorage.saveSession(nextSession);
+    setSession(nextSession);
+  };
+
   const sendPasswordResetCode = async (email: string) => {
     await authApi.sendPasswordResetCode({ email });
   };
@@ -104,6 +111,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         isLoggedIn: !isAccessTokenExpired(session),
         session,
         login,
+        establishSession,
         logout,
         sendPasswordResetCode,
         verifyOtp,

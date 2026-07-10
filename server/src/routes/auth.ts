@@ -19,7 +19,7 @@ interface DatabaseError {
 
 const authBodySchema = z.object({
   email: z.email().transform((email) => email.toLowerCase()),
-  password: z.string().min(8),
+  password: z.string().min(8).max(20),
 });
 
 const signupBodySchema = authBodySchema.extend({

@@ -7,12 +7,17 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react-nativ
 import { toast } from "sonner-native";
 
 const mockLogin = jest.fn();
+const mockEstablishSession = jest.fn();
 const mockValidateLogin = jest.fn();
 const mockCreateAccount = jest.fn();
 const mockUseCreateAccount = jest.fn(() => ({
   createAccount: mockCreateAccount,
   isCreating: false,
 }));
+const authResponse = {
+  user: { id: "user-1", email: "mei@example.com" },
+  tokens: { accessToken: "access", refreshToken: "refresh" },
+};
 const mockSendPasswordResetCode = jest.fn();
 const mockVerifyOtp = jest.fn();
 const mockResetPassword = jest.fn();
@@ -117,6 +122,7 @@ jest.mock("expo-router", () => ({
 jest.mock("@/features/auth/useAuth", () => ({
   useAuth: () => ({
     login: mockLogin,
+    establishSession: mockEstablishSession,
     sendPasswordResetCode: mockSendPasswordResetCode,
     verifyOtp: mockVerifyOtp,
     resetPassword: mockResetPassword,
@@ -142,6 +148,7 @@ jest.mock("@/features/auth/useSendPasswordResetCode", () => ({
 describe("auth screens", () => {
   beforeEach(() => {
     mockLogin.mockReset();
+    mockEstablishSession.mockReset();
     mockValidateLogin.mockReset();
     mockCreateAccount.mockReset();
     mockUseCreateAccount.mockReturnValue({
@@ -197,8 +204,8 @@ describe("auth screens", () => {
     expect(mockCreateAccount).not.toHaveBeenCalled();
   });
 
-  it("normalizes valid create-account values before the local mutation", async () => {
-    mockCreateAccount.mockResolvedValueOnce(undefined);
+  it("normalizes valid create-account values before establishing the server session", async () => {
+    mockCreateAccount.mockResolvedValueOnce(authResponse);
 
     render(<CreateAccountScreen />);
     fireEvent.changeText(screen.getByPlaceholderText("Your name"), "  Mei Lin  ");
@@ -214,12 +221,8 @@ describe("auth screens", () => {
         password: "cook1234",
       }),
     );
-    await waitFor(() =>
-      expect(mockLogin).toHaveBeenCalledWith({
-        email: "mei@example.com",
-        password: "cook1234",
-      }),
-    );
+    expect(mockEstablishSession).toHaveBeenCalledWith(authResponse);
+    expect(mockLogin).not.toHaveBeenCalled();
     expect(mockToastSuccess).toHaveBeenCalledWith("Account created.");
     expect(mockReplace).toHaveBeenCalledWith("/private/(tabs)");
   });

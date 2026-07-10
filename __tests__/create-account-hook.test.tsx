@@ -4,6 +4,12 @@ import type { PropsWithChildren } from "react";
 
 import { useCreateAccount } from "@/features/auth/useCreateAccount";
 
+jest.mock("@/features/auth/api", () => ({
+  authApi: { signUp: jest.fn() },
+}));
+
+import { authApi } from "@/features/auth/api";
+
 const input = {
   displayName: "Mei Lin",
   email: "mei@example.com",
@@ -30,15 +36,22 @@ describe("useCreateAccount", () => {
     queryClients.length = 0;
   });
 
-  it("resolves locally", async () => {
+  it("creates an account through the auth API", async () => {
+    const response = {
+      user: { id: "user-1", email: "mei@example.com" },
+      tokens: { accessToken: "access", refreshToken: "refresh" },
+    };
+    jest.mocked(authApi.signUp).mockResolvedValueOnce(response);
+
     const { result } = renderHook(() => useCreateAccount(), {
       wrapper: createWrapper(),
     });
 
     await act(async () => {
-      await result.current.createAccount(input);
+      await expect(result.current.createAccount(input)).resolves.toEqual(response);
     });
 
+    expect(authApi.signUp).toHaveBeenCalledWith(input);
     expect(result.current.isCreating).toBe(false);
   });
 });

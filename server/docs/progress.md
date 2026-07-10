@@ -23,7 +23,7 @@ Current task to begin: move one frontend feature off mocks, starting with profil
 - `server/.env` is loaded automatically by `npm run server:dev` and `npm run server:test`.
 - Auth endpoints and protected profile endpoints exist and have smoke coverage against local Postgres.
 - Route groups for recipes, images, favourites, reports, and blocks exist but are still mostly stubs.
-- Frontend/mobile auth integration has started with auth API wrappers.
+- Frontend/mobile auth integration now uses the real signup endpoint; login and refresh hydration remain pending.
 
 ## Do Not Redo
 
@@ -48,6 +48,13 @@ Current task to begin: move one frontend feature off mocks, starting with profil
 ## Progress Log
 
 Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
+
+### 2026-07-10 00:00:00 HKT
+
+- Aligned the signup password contract to 8–20 characters on the backend.
+- Wired the mobile create-account flow to `POST /auth/signup`.
+- Persisted the returned server user and access/refresh token pair through the existing SecureStore session boundary.
+- Left forgot-password, login integration, and refresh-on-hydration out of scope.
 
 ### 2026-07-02 13:38:34 HKT
 
@@ -85,6 +92,13 @@ Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
 - Added focused API client coverage for retry, token clearing, and concurrent expired requests.
 - Verified the focused API client test.
 
+### 2026-07-10 00:00:00 HKT
+
+- Aligned the signup password contract to 8–20 characters on the backend.
+- Wired the mobile create-account flow to `POST /auth/signup` and persisted its server session response.
+- Added backend signup validation coverage for the 20-character password maximum.
+- Verified the focused frontend signup, session, and auth screen coverage.
+
 ## Done
 
 - Created a standalone `server/` package for the backend.
@@ -120,6 +134,8 @@ Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
 - Added app-side auth API wrappers under `src/features/auth/api.ts`.
 - Added SecureStore-backed auth token storage under `src/features/auth`.
 - Added a shared app API client wrapper under `src/lib`.
+- Wired the mobile create-account flow to the backend signup endpoint and persisted its server session response.
+- Aligned backend signup password validation with the frontend 8–20 character contract.
 - Added automatic `server/.env` loading for backend dev and test scripts.
 - Added root scripts:
   - `npm run server:dev`
@@ -143,6 +159,9 @@ Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
 - Passed focused auth API wrapper test with `./server/node_modules/.bin/tsx --test src/features/auth/api.test.ts`.
 - Passed focused auth token storage test with `./server/node_modules/.bin/tsx --test src/features/auth/tokenStorage.test.ts`.
 - Passed focused API client test with `./server/node_modules/.bin/tsx --test src/lib/apiClient.test.ts`.
+- Passed focused frontend signup, session, and auth screen coverage (34 tests).
+- Passed direct backend signup validation coverage with the Node TypeScript loader.
+- Passed backend type-check after the signup contract update.
 
 ## Local Database
 

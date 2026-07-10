@@ -22,7 +22,7 @@ const getErrorMessage = (error: unknown) =>
 
 export function CreateAccountScreen() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { establishSession } = useAuth();
   const { createAccount, isCreating } = useCreateAccount();
   const form = useForm<CreateAccountFormValues>({
     resolver: zodResolver(createAccountSchema),
@@ -39,8 +39,8 @@ export function CreateAccountScreen() {
   const handleSubmit = form.handleSubmit(
     async (values) => {
       try {
-        await createAccount(toSignUpInput(values));
-        await login({ email: values.email, password: values.password });
+        const response = await createAccount(toSignUpInput(values));
+        await establishSession(response);
         toast.success("Account created.");
         router.replace("/private/(tabs)");
       } catch (error) {

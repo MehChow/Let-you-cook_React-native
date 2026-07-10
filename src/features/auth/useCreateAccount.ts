@@ -1,13 +1,9 @@
 import { useMutation } from "@tanstack/react-query";
 
-import type { SignUpInput } from "./api";
-
-const createLocalAccount = async (_input: SignUpInput): Promise<void> => {
-  await Promise.resolve();
-};
+import { authApi, type SignUpInput } from "./api";
 
 export function useCreateAccount() {
-  const mutation = useMutation({ mutationFn: createLocalAccount });
+  const mutation = useMutation({ mutationFn: (input: SignUpInput) => authApi.signUp(input) });
 
   return {
     createAccount: mutation.mutateAsync,
