@@ -19,6 +19,6 @@ export const images = {
   authForgotPassword2: require("@/assets/images/auth/forget-password2.webp"),
   authEmailOtp: require("@/assets/images/auth/email-otp.webp"),
   authCreateNewPassword: require("@/assets/images/auth/create-new-password.webp"),
-  authCreateAccount: require("@/assets/images/auth/notebook_transparent.png"),
+  authCreateAccount: require("@/assets/images/auth/notebook_transparent.webp"),
   authGoogleLogin: require("@/assets/images/auth/google-icon.svg"),
 } as const;
