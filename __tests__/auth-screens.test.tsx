@@ -1,7 +1,20 @@
 import { LoginScreen } from "@/features/auth/LoginScreen";
 import { CreateNewPasswordScreen } from "@/features/auth/CreateNewPasswordScreen";
 import { EmailOtpScreen } from "@/features/auth/EmailOtpScreen";
-import { render, screen } from "@testing-library/react-native";
+import { ForgotPasswordScreen } from "@/features/auth/ForgotPasswordScreen";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react-native";
+import { toast } from "sonner-native";
+
+const mockLogin = jest.fn();
+const mockSendPasswordResetCode = jest.fn();
+const mockVerifyOtp = jest.fn();
+const mockResetPassword = jest.fn();
+
+jest.mock("sonner-native", () => ({
+  toast: { error: jest.fn(), info: jest.fn() },
+}));
+
+const mockToastError = jest.mocked(toast.error);
 
 jest.mock("expo-image", () => ({
   Image: () => null,
@@ -48,6 +61,9 @@ jest.mock("@/components/Icon", () => ({
 
 jest.mock("@/util/twColor", () => ({
   colors: {
+    neutral: {
+      400: "#a3a3a3",
+    },
     sage: {
       300: "#97afa9",
       400: "#75948c",
@@ -78,14 +94,22 @@ jest.mock("expo-router", () => ({
 
 jest.mock("@/features/auth/useAuth", () => ({
   useAuth: () => ({
-    login: jest.fn(),
-    sendPasswordResetCode: jest.fn(),
-    verifyOtp: jest.fn(),
-    resetPassword: jest.fn(),
+    login: mockLogin,
+    sendPasswordResetCode: mockSendPasswordResetCode,
+    verifyOtp: mockVerifyOtp,
+    resetPassword: mockResetPassword,
   }),
 }));
 
 describe("auth screens", () => {
+  beforeEach(() => {
+    mockLogin.mockReset();
+    mockSendPasswordResetCode.mockReset();
+    mockVerifyOtp.mockReset();
+    mockResetPassword.mockReset();
+    mockToastError.mockReset();
+  });
+
   it("renders the login screen copy and actions from the approved mockup", () => {
     render(<LoginScreen />);
 
@@ -95,6 +119,54 @@ describe("auth screens", () => {
     expect(screen.getByText("Password")).toBeTruthy();
     expect(screen.getByText("Continue with Google")).toBeTruthy();
     expect(screen.getByText("Create account")).toBeTruthy();
+  });
+
+  it("shows login failures as a toast instead of inline text", async () => {
+    mockLogin.mockRejectedValueOnce(new Error("Enter your email and password."));
+
+    render(<LoginScreen />);
+    fireEvent.press(screen.getByText("Log in"));
+
+    await waitFor(() =>
+      expect(mockToastError).toHaveBeenCalledWith("Enter your email and password."),
+    );
+    expect(screen.queryByText("Enter your email and password.")).toBeNull();
+  });
+
+  it("shows password-reset failures as a toast instead of inline text", async () => {
+    mockSendPasswordResetCode.mockRejectedValueOnce(new Error("Enter your email address."));
+
+    render(<ForgotPasswordScreen />);
+    fireEvent.press(screen.getByText("Send code"));
+
+    await waitFor(() =>
+      expect(mockToastError).toHaveBeenCalledWith("Enter your email address."),
+    );
+    expect(screen.queryByText("Enter your email address.")).toBeNull();
+  });
+
+  it("shows verification failures as a toast instead of inline text", async () => {
+    mockVerifyOtp.mockRejectedValueOnce(new Error("Enter the 6-digit code."));
+
+    render(<EmailOtpScreen />);
+    fireEvent.press(screen.getByText("Verify"));
+
+    await waitFor(() =>
+      expect(mockToastError).toHaveBeenCalledWith("Enter the 6-digit code."),
+    );
+    expect(screen.queryByText("Enter the 6-digit code.")).toBeNull();
+  });
+
+  it("shows new-password failures as a toast instead of inline text", async () => {
+    mockResetPassword.mockRejectedValueOnce(new Error("Enter a new password."));
+
+    render(<CreateNewPasswordScreen />);
+    fireEvent.press(screen.getByText("Update password"));
+
+    await waitFor(() =>
+      expect(mockToastError).toHaveBeenCalledWith("Enter a new password."),
+    );
+    expect(screen.queryByText("Enter a new password.")).toBeNull();
   });
 
   it("shows the masked destination email on the OTP screen", () => {

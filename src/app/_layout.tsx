@@ -49,7 +49,7 @@ export default function RootLayout() {
       <AuthProvider>
         <StatusBar style="dark" />
         <RootStack />
-        <Toaster />
+        <Toaster position="top-center" />
         <PortalHost />
       </AuthProvider>
     </GestureHandlerRootView>

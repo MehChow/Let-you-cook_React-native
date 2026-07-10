@@ -5,6 +5,7 @@ import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { View } from "react-native";
+import { toast } from "sonner-native";
 
 import { AuthBackButton } from "./components/AuthBackButton";
 import { AuthFooterLink } from "./components/AuthFooterLink";
@@ -14,27 +15,27 @@ import { AuthShell } from "./components/AuthShell";
 import { maskEmailAddress } from "./presentation";
 
 const getErrorMessage = (error: unknown) =>
-  error instanceof Error ? error.message : "Unable to verify the code right now.";
+  error instanceof Error
+    ? error.message
+    : "Unable to verify the code right now.";
 
 export function EmailOtpScreen() {
   const router = useRouter();
   const { email } = useLocalSearchParams<{ email?: string }>();
   const { verifyOtp } = useAuth();
   const [code, setCode] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleContinue = async () => {
     try {
       setIsSubmitting(true);
-      setErrorMessage("");
       await verifyOtp(code);
       router.push({
         pathname: "/auth/create-new-password",
         params: email ? { email } : undefined,
       });
     } catch (error) {
-      setErrorMessage(getErrorMessage(error));
+      toast.error(getErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -46,7 +47,7 @@ export function EmailOtpScreen() {
         <AuthBackButton onPress={() => router.back()} />
         <View className="items-center gap-4">
           <View className="items-center gap-2">
-            <Text className="text-center text-4xl font-bold text-sage-900">
+            <Text className="text-center text-3xl font-bold text-sage-900">
               Verify your email
             </Text>
             <Text className="text-center text-base leading-7 text-sage-700">
@@ -66,9 +67,6 @@ export function EmailOtpScreen() {
           />
         </View>
         <AuthOtpField value={code} onChangeText={setCode} />
-        {errorMessage ? (
-          <Text className="text-sm text-danger-600">{errorMessage}</Text>
-        ) : null}
         <Text className="text-center text-sm text-sage-700">
           Didn&apos;t receive the code?{" "}
           <Text className="font-semibold text-accent-500">Resend in 00:45</Text>

@@ -8,6 +8,7 @@ import { useRouter } from "expo-router";
 import { LockIcon } from "lucide-react-native";
 import { useState } from "react";
 import { View } from "react-native";
+import { toast } from "sonner-native";
 
 import { AuthBackButton } from "./components/AuthBackButton";
 import { AuthFooterLink } from "./components/AuthFooterLink";
@@ -17,25 +18,25 @@ import { AuthTextField } from "./components/AuthTextField";
 import { getPasswordStrength } from "./presentation";
 
 const getErrorMessage = (error: unknown) =>
-  error instanceof Error ? error.message : "Unable to update your password right now.";
+  error instanceof Error
+    ? error.message
+    : "Unable to update your password right now.";
 
 export function CreateNewPasswordScreen() {
   const router = useRouter();
   const { resetPassword } = useAuth();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const passwordStrength = getPasswordStrength(password);
 
   const handleResetPassword = async () => {
     try {
       setIsSubmitting(true);
-      setErrorMessage("");
       await resetPassword({ password, confirmPassword });
       router.replace("/auth/login");
     } catch (error) {
-      setErrorMessage(getErrorMessage(error));
+      toast.error(getErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -61,10 +62,10 @@ export function CreateNewPasswordScreen() {
       <View className="gap-8 pt-2">
         <AuthBackButton onPress={() => router.back()} />
         <View className="items-center gap-2">
-          <Text className="text-center text-4xl font-bold text-sage-900">
+          <Text className="text-center text-3xl font-bold text-sage-900">
             Create new password
           </Text>
-          <Text className="text-center text-base leading-7 text-sage-700">
+          <Text className="text-center text-base leading-5 text-sage-700">
             Choose a strong password to keep your account safe.
           </Text>
         </View>
@@ -118,9 +119,6 @@ export function CreateNewPasswordScreen() {
             </View>
           </View>
         </View>
-        {errorMessage ? (
-          <Text className="text-sm text-danger-600">{errorMessage}</Text>
-        ) : null}
         <AuthPrimaryButton
           label={isSubmitting ? "Updating..." : "Update password"}
           onPress={() => void handleResetPassword()}

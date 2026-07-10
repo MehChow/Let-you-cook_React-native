@@ -6,6 +6,7 @@ import { useRouter } from "expo-router";
 import { LockIcon, MailIcon } from "lucide-react-native";
 import { useState } from "react";
 import { Pressable, View } from "react-native";
+import { toast } from "sonner-native";
 
 import { AuthFooterLink } from "./components/AuthFooterLink";
 import { AuthPrimaryButton } from "./components/AuthPrimaryButton";
@@ -20,17 +21,15 @@ export function LoginScreen() {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleLogin = async () => {
     try {
       setIsSubmitting(true);
-      setErrorMessage("");
       await login({ email, password });
       router.replace("/private/(tabs)");
     } catch (error) {
-      setErrorMessage(getErrorMessage(error));
+      toast.error(getErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -108,10 +107,6 @@ export function LoginScreen() {
               Forgot password?
             </Text>
           </Pressable>
-          {errorMessage ? (
-            <Text className="text-sm text-danger-600">{errorMessage}</Text>
-          ) : null}
-
           {/* Login button */}
           <AuthPrimaryButton
             label={isSubmitting ? "Signing in..." : "Log in"}
@@ -129,9 +124,7 @@ export function LoginScreen() {
 
         {/* Google login button */}
         <Pressable
-          onPress={() =>
-            setErrorMessage("Google sign-in is not part of this demo yet.")
-          }
+          onPress={() => toast.info("Google sign-in is not part of this demo yet.")}
           className="h-14 flex-row items-center justify-center gap-3 rounded-full border border-sage-200 bg-white active:opacity-80"
         >
           <Image
@@ -152,9 +145,7 @@ export function LoginScreen() {
           <AuthFooterLink
             label="New here?"
             actionLabel="Create account"
-            onPress={() =>
-              setErrorMessage("Account creation is not part of this demo yet.")
-            }
+            onPress={() => toast.info("Account creation is not part of this demo yet.")}
           />
         </View>
       </View>

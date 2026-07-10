@@ -6,6 +6,7 @@ import { useRouter } from "expo-router";
 import { MailIcon } from "lucide-react-native";
 import { useState } from "react";
 import { View } from "react-native";
+import { toast } from "sonner-native";
 
 import { AuthBackButton } from "./components/AuthBackButton";
 import { AuthFooterLink } from "./components/AuthFooterLink";
@@ -20,18 +21,19 @@ export function ForgotPasswordScreen() {
   const router = useRouter();
   const { sendPasswordResetCode } = useAuth();
   const [email, setEmail] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleContinue = async () => {
     try {
       setIsSubmitting(true);
-      setErrorMessage("");
       const nextEmail = email.trim();
       await sendPasswordResetCode(nextEmail);
-      router.push({ pathname: "/auth/email-otp", params: { email: nextEmail } });
+      router.push({
+        pathname: "/auth/email-otp",
+        params: { email: nextEmail },
+      });
     } catch (error) {
-      setErrorMessage(getErrorMessage(error));
+      toast.error(getErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -58,10 +60,10 @@ export function ForgotPasswordScreen() {
         <AuthBackButton onPress={() => router.back()} />
         <View className="items-center gap-4">
           <View className="items-center gap-2">
-            <Text className="text-center text-4xl font-bold text-sage-900">
+            <Text className="text-center text-3xl font-bold text-sage-900">
               Forgot password?
             </Text>
-            <Text className="text-center text-base leading-7 text-sage-700">
+            <Text className="text-center text-base leading-5 text-sage-700">
               No worries! Enter your email and we&apos;ll send you a code to
               reset your password.
             </Text>
@@ -86,9 +88,6 @@ export function ForgotPasswordScreen() {
             textContentType="emailAddress"
             keyboardType="email-address"
           />
-          {errorMessage ? (
-            <Text className="text-sm text-danger-600">{errorMessage}</Text>
-          ) : null}
           <AuthPrimaryButton
             label={isSubmitting ? "Sending..." : "Send code"}
             onPress={() => void handleContinue()}
