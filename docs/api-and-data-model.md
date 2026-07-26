@@ -17,6 +17,7 @@ Keep one deployable Node 20 service:
 - Zod request/response boundary schemas;
 - Drizzle over PostgreSQL;
 - Cloudflare R2 for media bytes;
+- SMTP through an application-owned email interface, with Mailpit locally;
 - TanStack Query in the app for remote state.
 
 Hono RPC is a type-sharing mechanism here, not permission to design
@@ -118,20 +119,26 @@ contract and consumed by Hono validators.
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| POST | `/v1/auth/signup` | Create account/profile and issue token pair |
+| POST | `/v1/auth/signup` | Create unverified account/profile and send verification OTP |
 | POST | `/v1/auth/login` | Authenticate and issue token pair |
 | POST | `/v1/auth/refresh` | Rotate opaque refresh token |
 | POST | `/v1/auth/logout` | Revoke the presented refresh token |
 | POST | `/v1/auth/email-verification/requests` | Send/resend generic verification challenge |
-| POST | `/v1/auth/email-verification/confirmations` | Verify challenge |
+| POST | `/v1/auth/email-verification/confirmations` | Verify challenge and issue first token pair |
 | POST | `/v1/auth/password-reset/requests` | Start non-enumerating reset challenge |
 | POST | `/v1/auth/password-reset/verifications` | Verify OTP and issue short-lived reset grant |
 | POST | `/v1/auth/password-reset/completions` | Set password and revoke sessions |
 | DELETE | `/v1/users/me` | Request/perform account deletion |
 
 Refresh accepts the opaque token in the JSON body for the native app. Never put
-tokens in query strings. Password reset uses a random `challengeId` plus OTP; an
-OTP by itself is not a global credential.
+tokens in query strings. Sign-up and unverified login do not issue a full
+session; only email confirmation does. Password reset uses a random
+`challengeId` plus OTP; an OTP by itself is not a global credential.
+
+The auth service owns OTP generation, keyed hashing, expiry, attempt limits,
+resend cooldown, and consumption. An injected `EmailSender` owns delivery.
+Development SMTP points to Mailpit in Docker and tests inject an in-memory fake.
+A verified sender domain/provider is required before public beta.
 
 ### Profiles
 
@@ -478,7 +485,8 @@ using a process-memory map.
 
 ## Important Transactions and Derived Values
 
-- Sign-up: user + profile + refresh token.
+- Sign-up: unverified user + profile + verification challenge.
+- Email confirmation: consume challenge + verify user + issue refresh token.
 - Refresh: consume/rotate token and revoke a family on reuse.
 - Recipe aggregate save: replace/update ordered children and increment version.
 - Publish: validate aggregate/media, transition state, set publish time.

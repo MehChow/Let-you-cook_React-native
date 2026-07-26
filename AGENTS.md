@@ -32,7 +32,7 @@ development platform.
 
 The repository is a monorepo:
 
-- `/app`, `/src`: Expo mobile app.
+- `/src/app`: Expo Router routes; `/src`: mobile app source.
 - `/server`: Node/Hono/PostgreSQL backend.
 - `/assets/screenshot`: visual reference for the intended screens.
 - `/docs`: product, architecture, styling, integration, and progress docs.
@@ -65,6 +65,20 @@ mention the discrepancy in the handoff.
   plugins/app config where appropriate.
 - Never commit secrets or put server credentials in `EXPO_PUBLIC_*` variables.
 - Preserve unrelated user changes in a dirty worktree.
+
+## Git Workflow
+
+- Before implementing a feature track, create a dedicated branch from `dev`
+  named `codex/mvp-<feature>`.
+- Keep all subtasks for that feature on its branch; do not mix unrelated
+  business tracks.
+- When independent agents work concurrently, use a separate worktree for each
+  feature branch.
+- Commit each completed subtask separately with the stable task ID prefix:
+  `AUTH-03: Wire mobile login to the real API`.
+- Include the subtask's tests and documentation in the same commit.
+- Merge a feature branch into `dev` only after its documented exit gate and
+  verification pass.
 
 ## Product Decisions
 
@@ -103,7 +117,7 @@ Record any change to these decisions in `docs/brief.md`,
 
 Keep this structure:
 
-- Route files in `app/` stay thin and composition-focused.
+- Route files in `src/app/` stay thin and composition-focused.
 - Shared application UI goes in `src/components`.
 - RNR primitives stay in `src/components/ui`.
 - Feature-only UI, hooks, schemas, and logic go in
@@ -129,6 +143,16 @@ Keep this structure:
   forms may copy data into a deliberate editing draft.
 - Map API DTOs at the feature boundary. UI components should not depend on
   Drizzle row shapes or raw response envelopes.
+
+## Function and API Comments
+
+- Add a short purpose comment, roughly ten words, directly above every named
+  function, assigned arrow function, React component, custom hook, backend
+  service, middleware, validator, utility, and Hono endpoint/handler.
+- Describe intent instead of restating syntax, and update the comment whenever
+  behavior changes.
+- Tiny anonymous inline callbacks, event forwarding, and test-only callbacks do
+  not require comments.
 
 ## UI and Accessibility Rules
 
@@ -184,7 +208,13 @@ The local database container is `letyoucook-postgres`; the development default i
 - Database changes must update `server/src/db/schema.ts`, generate a Drizzle
   migration, and pass `npm run server:check`.
 - Never edit an already-applied migration. Add a forward migration.
-- Do not drop/reset local data unless the user explicitly authorizes it.
+- Local development data is disposable. Clear/reset the documented local
+  PostgreSQL database, emulator/device app storage, MMKV, SecureStore, query
+  cache, fixtures, or Mailpit messages whenever it materially speeds
+  development.
+- Before destructive cleanup, verify the exact target is development-only and
+  is not a broad filesystem path, external database, production resource, or
+  unrelated user data. Record material resets in the handoff.
 - Add foreign keys, uniqueness/check constraints, and indexes that enforce the
   domain rules described in `docs/api-and-data-model.md`.
 - Use UTC timestamps. Public DTOs use ISO 8601 strings.
@@ -195,6 +225,8 @@ The local database container is `letyoucook-postgres`; the development default i
 
 ## Authentication and Privacy Rules
 
+- Only email-verified users may receive a full session or enter
+  `src/app/private`; successful verification lands on Home.
 - Keep access tokens short-lived.
 - Keep refresh tokens opaque, hashed at rest, rotated on use, and revocable
   server-side.
@@ -205,6 +237,11 @@ The local database container is `letyoucook-postgres`; the development default i
   even if the network call fails.
 - Email verification and password-reset responses must not reveal whether an
   account exists. Persist only challenge identifiers/cooldowns needed to resume.
+- Generate and verify OTPs in the backend. Store only keyed hashes, enforce
+  expiry/attempt/cooldown limits, and invalidate replaced challenges.
+- Use an application-owned email interface. Local development sends SMTP to
+  Mailpit in Docker; tests use an in-memory fake. A verified sender domain and
+  real provider are required before public beta.
 - Rate-limit auth, upload, search, recipe creation, review, report, and AI
   endpoints before public beta.
 - Redact passwords, tokens, signed URLs, API keys, and personal data from logs
@@ -260,6 +297,11 @@ Run the smallest relevant checks, then broaden for cross-cutting changes:
 For Android UI/native changes, also verify the affected flow on an Android
 emulator/device. Do not substitute Expo web. Mock native-heavy leaves locally in
 screen tests.
+
+If adequate verification genuinely requires a physical Android device, tell the
+user exactly what to test and pause that task. Record the requested check in
+`docs/progress.md`; resume and complete it only after useful user feedback.
+Independent work may continue while that task remains incomplete.
 
 High-value tests cover:
 

@@ -67,6 +67,16 @@ Users can create an email/password account, sign in, remain signed in through
 access/refresh tokens, recover a forgotten password, and sign out. Email
 verification and password reset must use non-enumerating responses.
 
+Email verification is mandatory. Sign-up creates the account and sends a
+six-digit OTP but does not issue a full session. Successful OTP confirmation
+issues the first access/refresh token pair and enters Home. Login cannot enter
+the private app while the account remains unverified.
+
+Local development delivers verification/reset messages to Mailpit over SMTP.
+Automated tests use an in-memory email fake. A verified sender domain and real
+transactional provider are required before a public beta, but are not required
+for the local MVP.
+
 Google sign-in is not part of the first backend milestone. If third-party login
 is added later, Apple sign-in must be considered before an iOS release.
 
@@ -292,6 +302,9 @@ The owner confirmed these decisions on 2026-07-26:
    supporting evidence.
 8. Prepare for a small public Android beta, so deletion, moderation, rate
    limiting, privacy, and terms are launch requirements.
+9. Require email verification before entering the private app. Use Mailpit SMTP
+   for local development and keep real email delivery as a pre-beta external
+   prerequisite.
 
 If the owner changes any item later, update the dependent contracts and roadmap
 rather than leaving the decision only in chat history.

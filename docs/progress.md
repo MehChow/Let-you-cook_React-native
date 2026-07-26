@@ -33,6 +33,9 @@ Overall state: polished mocked Expo prototype plus an early local backend.
 - [x] Owner confirmed the backend/runtime, recipe lifecycle, category/tag,
   profile-heart, review, MVP social, AI nutrition, and beta-readiness product
   decisions in `docs/brief.md`.
+- [x] Owner confirmed mandatory email verification, local Mailpit SMTP, disposable
+  development data, short function/API comments, physical-device pause rules,
+  and per-feature branch/subtask commit conventions.
 
 ### Partially complete
 
@@ -116,8 +119,8 @@ required states, proportional tests, and documentation are complete.
   - `npm test -- --runInBand`
   - `npm run server:check`
   - `npm run server:test`
-- [ ] Start local PostgreSQL and apply the existing migration from a clean
-  database.
+- [ ] Start local PostgreSQL and Mailpit through Docker Compose, then apply the
+  existing migration from a clean database.
 - [ ] Run the Android dev client and smoke-test every current route.
 - [ ] Add a short environment setup section/script if a fresh clone reveals
   undocumented steps.
@@ -131,7 +134,8 @@ documented commands, and all existing automated checks pass.
 
 - [ ] Introduce/alias `/v1` auth/profile routes and update the client in the same
   change.
-- [ ] Add email delivery abstraction with a safe local development provider.
+- [ ] Add `EmailSender`, an SMTP adapter, Mailpit Docker service, and an
+  in-memory test fake.
 - [ ] Add hashed email-verification challenges, resend cooldown, attempt/expiry
   limits, and non-enumerating responses.
 - [ ] Add hashed password-reset challenges, reset grants, password update, and
@@ -151,6 +155,8 @@ documented commands, and all existing automated checks pass.
 - [ ] Wire forgot-password request, OTP verification, new password, cooldown,
   and resume behavior to real challenges.
 - [ ] Add email-verification UI/resend states as required.
+- [ ] Prevent sign-up/unverified login from entering private routes; issue the
+  first full session only after OTP confirmation.
 - [ ] Wire current profile read/update and avatar placeholder state.
 - [ ] Add offline/retry/session-expired states and integration tests.
 
@@ -271,6 +277,8 @@ cannot be bypassed by direct requests.
   favourite, create/publish.
 - [ ] Create staging/production environments and document secret/config
   ownership.
+- [ ] Configure a verified sender domain and transactional provider before
+  public beta; Mailpit remains development-only.
 - [ ] Complete Android accessibility, small/large screen, slow network, offline,
   and release-build QA.
 - [ ] Prepare store listing, support contact, screenshots, and review/demo

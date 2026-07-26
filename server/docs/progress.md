@@ -44,7 +44,9 @@ the schema/contracts before implementing recipe content routes.
 - [x] Install and wire `expo-secure-store` for access and refresh token storage.
 - [x] Add a shared API client wrapper that retries once after token refresh.
 - [ ] Wire real mobile login, refresh-on-hydration, and server logout.
-- [ ] Implement email verification, password reset, and account deletion.
+- [ ] Add `EmailSender`, SMTP/Mailpit development delivery, and a test fake.
+- [ ] Implement mandatory email verification, password reset, and account
+  deletion.
 - [ ] Add `/v1` routing in a coordinated server/mobile change.
 - [ ] Apply the recipe/category/tag/review/media schema direction from
   `docs/api-and-data-model.md`.
