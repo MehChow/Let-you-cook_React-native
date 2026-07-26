@@ -9,8 +9,9 @@ Current branch at audit: `codex/mvp-foundation`
 Overall state: polished mocked Expo prototype plus an early local backend.
 
 - Planning milestone: `PLAN-03` — Goal-mode MVP handoff ready.
-- Active foundation task: `BASE-02` verified on `codex/mvp-foundation`.
-- Next implementation task: `BASE-03` on `codex/mvp-foundation`.
+- Active foundation task: `BASE-03` blocked pending an Android target.
+- Next implementation task: resume `BASE-03` on `codex/mvp-foundation` after
+  connecting an authorized physical device or creating and starting an AVD.
 - Detailed task index: `docs/mvp-roadmap.md`.
 - Goal-mode execution brief: `docs/mvp-goal-prompt.md`.
 - Ready execution plan:
@@ -49,6 +50,18 @@ Overall state: polished mocked Expo prototype plus an early local backend.
 - `BASE-02` corrected the obsolete `axllent/mailpit:v1` plan reference to the
   verified pinned `axllent/mailpit:v1.30.0` release after the former returned
   a Docker registry `not found` error.
+- `BASE-03` native bootstrap installed `agent-device` `0.20.0`, verified the
+  backend health endpoint at `200`, and ran `npm.cmd run android`; Expo prebuild
+  completed but no native build/install could start because neither
+  `agent-device`, `adb`, nor the SDK emulator found a connected device or
+  configured AVD.
+- Required Android verification: connect and authorize a physical Android
+  device with USB debugging enabled, or create and start an Android Virtual
+  Device; confirm `agent-device devices --platform android` lists it, rerun
+  `npm.cmd run android`, then verify every auth/protected route, keyboard
+  dismissal, back behavior, tab transition, demo login, and logout listed in
+  `docs/verification/foundation-android-smoke.md`. `BASE-03` remains incomplete
+  until those native observations are recorded.
 
 ## Snapshot
 
