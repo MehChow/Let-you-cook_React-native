@@ -19,6 +19,7 @@
     "server:test": "npm --prefix server test",
     "server:db:generate": "npm --prefix server run db:generate",
     "server:db:migrate": "npm --prefix server run db:migrate",
+    "server:db:dev:reset": "npm --prefix server run db:dev:reset",
     "dev:services:up": "docker compose -f compose.dev.yaml up -d",
     "dev:services:down": "docker compose -f compose.dev.yaml down",
     "dev:services:logs": "docker compose -f compose.dev.yaml logs --tail=100",

@@ -1,0 +1,118 @@
+import { sql } from "drizzle-orm";
+
+import { hashPassword } from "../auth/password";
+import { db } from "./client";
+import { profiles, users } from "./schema";
+
+const DEVELOPMENT_DATABASE_NAME = "letyoucook";
+const LOCAL_DATABASE_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
+
+export const DEVELOPMENT_SEED_PASSWORD = "coffee123";
+
+// Describes the deterministic accounts created for local development.
+export interface DevelopmentSeedResult {
+  password: string;
+  unverifiedEmail: string;
+  verifiedEmail: string;
+}
+
+// Prevents destructive reset commands from targeting non-development databases.
+export const assertSafeDevelopmentDatabase = (databaseUrl: string): void => {
+  if (!databaseUrl) {
+    throw new Error("DATABASE_URL is required for development reset");
+  }
+
+  const parsed = new URL(databaseUrl);
+  const databaseName = parsed.pathname.replace(/^\//, "");
+  const databaseHost = parsed.hostname.replace(/^\[|\]$/g, "");
+
+  if (!LOCAL_DATABASE_HOSTS.has(databaseHost)) {
+    throw new Error("Refusing to reset a non-local database");
+  }
+
+  if (databaseName !== DEVELOPMENT_DATABASE_NAME) {
+    throw new Error("Refusing to reset a non-development database");
+  }
+};
+
+// Clears every current application table in the local database.
+export const resetDevelopmentData = async (): Promise<void> => {
+  const databaseUrl = process.env.DATABASE_URL ?? "";
+  assertSafeDevelopmentDatabase(databaseUrl);
+  await db.execute(sql`
+    TRUNCATE TABLE
+      blocks,
+      reports,
+      favourites,
+      nutrition,
+      steps,
+      ingredients,
+      recipe_images,
+      recipes,
+      refresh_tokens,
+      profiles,
+      users
+    RESTART IDENTITY CASCADE
+  `);
+};
+
+// Seeds verified and unverified accounts for repeatable local testing.
+export const seedDevelopmentData = async (): Promise<DevelopmentSeedResult> => {
+  assertSafeDevelopmentDatabase(process.env.DATABASE_URL ?? "");
+  const passwordHash = await hashPassword(DEVELOPMENT_SEED_PASSWORD);
+  const seeds = [
+    {
+      displayName: "Verified Cook",
+      email: "verified@letyoucook.local",
+      emailVerifiedAt: new Date(),
+    },
+    {
+      displayName: "Unverified Cook",
+      email: "unverified@letyoucook.local",
+      emailVerifiedAt: null,
+    },
+  ];
+
+  for (const seed of seeds) {
+    const [user] = await db
+      .insert(users)
+      .values({
+        email: seed.email,
+        emailVerifiedAt: seed.emailVerifiedAt,
+        passwordHash,
+      })
+      .onConflictDoUpdate({
+        target: users.email,
+        set: {
+          emailVerifiedAt: seed.emailVerifiedAt,
+          passwordHash,
+          updatedAt: new Date(),
+        },
+      })
+      .returning({ id: users.id });
+
+    await db
+      .insert(profiles)
+      .values({ displayName: seed.displayName, userId: user.id })
+      .onConflictDoUpdate({
+        target: profiles.userId,
+        set: {
+          displayName: seed.displayName,
+          updatedAt: new Date(),
+        },
+      });
+  }
+
+  return {
+    password: DEVELOPMENT_SEED_PASSWORD,
+    unverifiedEmail: seeds[1].email,
+    verifiedEmail: seeds[0].email,
+  };
+};
+
+// Resets and seeds local data as one development operation.
+export const resetAndSeedDevelopmentData =
+  async (): Promise<DevelopmentSeedResult> => {
+    await resetDevelopmentData();
+    return seedDevelopmentData();
+  };

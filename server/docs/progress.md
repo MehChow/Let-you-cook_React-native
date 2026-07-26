@@ -57,6 +57,26 @@ the schema/contracts before implementing recipe content routes.
 
 Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
 
+### 2026-07-27 02:17:54 HKT
+
+- Completed `BASE-06` guarded development reset and deterministic seed tooling
+  on `codex/mvp-foundation`.
+- TDD RED reached `devData.test.ts` and failed with `ERR_MODULE_NOT_FOUND` for
+  `devData`; GREEN passed all 4 required local-database guard tests. A separate
+  IPv6-loopback regression failed before URL-hostname bracket normalization and
+  then passed, bringing the focused suite to 5 tests.
+- Verified ignored `server/.env`, repository Compose configuration, running
+  container labels, and the live database all targeted only
+  `localhost:5432/letyoucook` in `letyoucook-postgres`.
+- `npm.cmd run server:db:dev:reset` exited `0` and destroyed current app-table
+  data in that authorized local development database before creating the
+  deterministic verified and unverified accounts.
+- The direct PostgreSQL query returned exactly 2 users:
+  `verified@letyoucook.local` with verification present and
+  `unverified@letyoucook.local` without it.
+- Verification passed: server type-check; 10 server tests with 0 failures and
+  0 skips; root lint/type-check; and 16 mobile suites with 67 tests.
+
 ### 2026-07-27 00:38:00 HKT
 
 - Completed `BASE-02` local-service provisioning on `codex/mvp-foundation`.
@@ -181,15 +201,32 @@ Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
 - Wired the mobile create-account flow to the backend signup endpoint and persisted its server session response.
 - Aligned backend signup password validation with the frontend 8–20 character contract.
 - Added automatic `server/.env` loading for backend dev and test scripts.
+- Added a destructive local app-data reset guarded to localhost hosts and the
+  exact `letyoucook` database name.
+- Added deterministic verified and unverified development accounts with the
+  shared documented password `coffee123`.
 - Added root scripts:
   - `npm run server:dev`
   - `npm run server:check`
   - `npm run server:test`
   - `npm run server:db:generate`
   - `npm run server:db:migrate`
+  - `npm run server:db:dev:reset`
 - Moved backend planning docs into `server/docs/`.
 
 ## Verified
+
+Current `BASE-06` evidence:
+
+- Passed all 4 required development-database guard tests after observing the
+  missing-module RED, plus the IPv6-loopback regression after its own RED.
+- Confirmed the reset target was the ignored local URL
+  `localhost:5432/letyoucook` and the running `letyoucook-dev` Compose
+  PostgreSQL container.
+- Executed the destructive reset successfully and directly verified exactly the
+  2 documented seed rows.
+- Passed server type-check and all 10 server tests with 0 failures and 0 skips.
+- Passed root lint/type-check and all 16 mobile suites with 67 tests.
 
 The entries below are historical successful runs. At the 2026-07-26 audit,
 `node_modules` executables were absent, so rerun the standard checks after
@@ -236,6 +273,11 @@ postgres://postgres:postgres@localhost:5432/letyoucook
 Override it with `DATABASE_URL` when using Neon, production, or another local database.
 
 `npm run server:dev` and `npm run server:test` load `server/.env` automatically.
+
+`npm run server:db:dev:reset` destroys all local app-table data and recreates
+the two documented development accounts. It refuses any host other than
+`localhost`, `127.0.0.1`, or `::1`, and any database name other than
+`letyoucook`.
 
 ## What's Next
 

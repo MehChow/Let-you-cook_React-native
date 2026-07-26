@@ -56,6 +56,29 @@ Apply migrations:
 npm run server:db:migrate
 ```
 
+### Reset and seed development app data
+
+> **Warning:** `server:db:dev:reset` destroys all local app data in the current
+> application tables before reseeding them.
+
+The reset refuses to run unless `server/.env` supplies a `DATABASE_URL` whose
+host is exactly `localhost`, `127.0.0.1`, or `::1` and whose database name is
+exactly `letyoucook`. Run it from the repository root:
+
+```powershell
+npm.cmd run server:db:dev:reset
+```
+
+The deterministic account credentials are:
+
+| State | Email | Password |
+| --- | --- | --- |
+| Verified | `verified@letyoucook.local` | `coffee123` |
+| Unverified | `unverified@letyoucook.local` | `coffee123` |
+
+Later schema tracks must update `src/db/devData.ts` so its reset table list and
+deterministic seed rows stay aligned with the current schema.
+
 ## Local Postgres
 
 Current local connection:

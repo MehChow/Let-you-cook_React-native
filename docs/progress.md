@@ -9,10 +9,10 @@ Current branch at audit: `codex/mvp-foundation`
 Overall state: polished mocked Expo prototype plus an early local backend.
 
 - Planning milestone: `PLAN-03` — Goal-mode MVP handoff ready.
-- Completed foundation task: `BASE-05` corrected stale Expo Router repository
-  paths to the authoritative `src/app/` source root.
-- Next implementation task: `BASE-06` on `codex/mvp-foundation` to add guarded
-  development reset and seed tooling.
+- Completed foundation task: `BASE-06` added a guarded local development reset
+  and deterministic verified/unverified account seeds.
+- Next delivery step: complete the Foundation exit review, then create the
+  `API-01` implementation plan.
 - Detailed task index: `docs/mvp-roadmap.md`.
 - Goal-mode execution brief: `docs/mvp-goal-prompt.md`.
 - Ready execution plan:
@@ -71,6 +71,28 @@ Overall state: polished mocked Expo prototype plus an early local backend.
 - Current mobile verification: focused BASE-04 API/environment tests exited
   `0` with 3 suites and 13 tests; `npm.cmd run check` exited `0`; and
   `npm.cmd test -- --runInBand` exited `0` with 16 suites and 67 tests passed.
+- `BASE-06` guard TDD: the corrected rooted focused command first exited `1`
+  with `ERR_MODULE_NOT_FOUND` for `server/src/db/devData`, then exited `0` with
+  all 4 required guard tests passing. The plan's original
+  `npm --prefix server exec` paths were relative to the repository root on
+  PowerShell and could not find the test file, so the test and environment
+  paths were rooted at `server/`.
+- Self-review found Node serializes the IPv6 loopback hostname as `[::1]`; a
+  focused regression test failed before bracket normalization and then passed.
+  The focused guard suite now has 5 passing tests.
+- Before the destructive reset, ignored `server/.env` resolved to
+  `localhost:5432/letyoucook`; Compose and the running container both resolved
+  to project `letyoucook-dev`, service `postgres`, container
+  `letyoucook-postgres`, and PostgreSQL database `letyoucook`.
+- `npm.cmd run server:db:dev:reset`: exit `0`; destroyed current local app data
+  in the authorized development database and seeded
+  `verified@letyoucook.local` and `unverified@letyoucook.local`.
+- The post-reset PostgreSQL query returned exactly 2 users: the verified seed
+  with `email_verified_at` present and the unverified seed without it.
+- Current `BASE-06` verification: `npm.cmd run server:check` exited `0`;
+  `npm.cmd run server:test` exited `0` with 10 passed, 0 failed, 0 skipped;
+  `npm.cmd run check` exited `0`; and `npm.cmd test -- --runInBand` exited `0`
+  with 16 suites and 67 tests passed.
 
 ## Snapshot
 
@@ -92,6 +114,8 @@ Overall state: polished mocked Expo prototype plus an early local backend.
 - [x] Mobile Create Account wired to the real server sign-up endpoint.
 - [x] Lightweight Jest/Node tests around auth helpers, API/session behavior,
   reset cooldown behavior, and backend auth/profile paths.
+- [x] Guarded local app-data reset plus deterministic verified and unverified
+  development accounts, documented with destructive-data warnings.
 - [x] Repository agent/product/API/AI/roadmap documentation refreshed from a
   full source and screenshot audit.
 - [x] Owner confirmed the backend/runtime, recipe lifecycle, category/tag,
@@ -166,10 +190,13 @@ native verification.
 Current foundation evidence:
 
 - `npm.cmd run check`: exit `0`.
-- `npm.cmd test -- --runInBand`: exit `0`; 15 suites and 61 tests passed.
+- `npm.cmd test -- --runInBand`: exit `0`; 16 suites and 67 tests passed.
 - `npm.cmd run server:check`: exit `0`.
-- `npm.cmd run server:test`: exit `0`; 5 tests passed.
+- `npm.cmd run server:test`: exit `0`; 10 tests passed, including the
+  PostgreSQL smoke test and 5 development-database guard tests.
 - Local PostgreSQL and Mailpit started healthy, and migrations applied.
+- The guarded local reset completed and a direct PostgreSQL query found exactly
+  the 2 documented deterministic account rows.
 - `npm.cmd run android`: native build/install passed on Android API 36, and the
   complete route matrix passed on application source tree `1aededb`.
 
