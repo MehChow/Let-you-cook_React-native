@@ -150,13 +150,23 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   `expo-image` layout class); treat these as scoped debt, not a reason for an
   unrelated rewrite.
 
-### Verification at this audit
+### Verification history
 
-The check commands were discovered and invoked, but could not start because
-workspace dependencies were not installed (`expo`, `jest`, `tsc`, and `tsx`
-executables were absent). This is not a test failure and not a passing build.
-After `npm install` and `npm --prefix server install`, rerun all four standard
-checks before relying on the baseline.
+At the initial repository audit, the check commands could not start because
+workspace dependencies were absent. That historical observation was superseded
+by `BASE-01`, which installed root/server dependencies and established the
+automated baseline, and by `BASE-02`/`BASE-03`, which completed services and
+native verification.
+
+Current foundation evidence:
+
+- `npm.cmd run check`: exit `0`.
+- `npm.cmd test -- --runInBand`: exit `0`; 15 suites and 61 tests passed.
+- `npm.cmd run server:check`: exit `0`.
+- `npm.cmd run server:test`: exit `0`; 5 tests passed.
+- Local PostgreSQL and Mailpit started healthy, and migrations applied.
+- `npm.cmd run android`: native build/install passed on Android API 36, and the
+  complete route matrix passed on application source tree `1aededb`.
 
 ---
 
@@ -172,15 +182,15 @@ required states, proportional tests, and documentation are complete.
   history, and all UI screenshots.
 - [x] Document product behavior, confirmed decisions, API/data direction, AI
   nutrition constraints, and current progress.
-- [ ] Install root and server dependencies from the lockfiles.
-- [ ] Run and fix the baseline:
+- [x] Install root and server dependencies from the lockfiles.
+- [x] Run and fix the baseline:
   - `npm run check`
   - `npm test -- --runInBand`
   - `npm run server:check`
   - `npm run server:test`
-- [ ] Start local PostgreSQL and Mailpit through Docker Compose, then apply the
+- [x] Start local PostgreSQL and Mailpit through Docker Compose, then apply the
   existing migration from a clean database.
-- [ ] Run the Android dev client and smoke-test every current route.
+- [x] Run the Android dev client and smoke-test every current route.
 - [ ] Add a short environment setup section/script if a fresh clone reveals
   undocumented steps.
 

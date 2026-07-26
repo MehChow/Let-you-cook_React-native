@@ -14,7 +14,8 @@ login, and logout were exercised through the native UI.
 
 | Item | Observed result |
 | --- | --- |
-| Tested Git state | Baseline commit `4ca8a91`; final native reruns used the completion worktree containing the two route fixes and regression tests committed with this report |
+| Tested application source tree | `1aededb` (`BASE-03: Complete Android route smoke baseline`); the complete native matrix and post-fix checks ran on this exact app/source content before it was committed |
+| Earlier blocked checkpoint | `4ca8a91` recorded the initial no-AVD blocker only; it is not the passing application baseline |
 | Native controller | `agent-device.cmd` `0.20.0`; `agent-device.cmd help workflow` read before device control |
 | Android SDK | `ANDROID_HOME=F:\Android`; API 36 platform/build tools and `system-images;android-36;google_apis;x86_64` revision 7 |
 | Emulator | Additive AVD `Codex_API_36`; model `sdk_gphone64_x86_64`; Android API 36; `sys.boot_completed=1` |
@@ -22,6 +23,9 @@ login, and logout were exercised through the native UI.
 | Backend | `npm.cmd run server:dev`; `GET http://127.0.0.1:8787/health` returned `200 {"ok":true}` |
 | Android build | `npm.cmd run android`; `BUILD SUCCESSFUL in 3m 39s`, 545 tasks, APK installed, Metro bundled 4,306 modules, and the development client opened |
 | Package / session | `com.meh_chow.LetYouCook`; agent-device session `base03` |
+
+This documentation-only follow-up records the already-tested commit identity; it
+does not change the application source tree tested as `1aededb`.
 
 The API 36 image install exited `0` without presenting or accepting an SDK
 license prompt. The AVD was created only after confirming that neither the name
