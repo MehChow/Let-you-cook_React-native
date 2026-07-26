@@ -49,6 +49,7 @@ settings.
 `EXPO_PUBLIC_API_URL=http://10.0.2.2:8787` lets an Android emulator reach the
 API running on the development machine. For a physical device, replace it with
 the development machine's reachable LAN URL, such as `http://192.168.1.10:8787`.
+Production and staging builds must provide an HTTPS API URL.
 
 ## Run
 

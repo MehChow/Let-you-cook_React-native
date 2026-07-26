@@ -1,3 +1,5 @@
+import { appEnv } from "@/config/env";
+
 export interface AuthUser {
   id: string;
   email: string;
@@ -39,6 +41,7 @@ interface AuthApiOptions {
   fetch?: typeof fetch;
 }
 
+// Represents a safe authentication failure returned to mobile screens.
 export class AuthApiError extends Error {
   constructor(
     message: string,
@@ -49,13 +52,13 @@ export class AuthApiError extends Error {
   }
 }
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000";
-
+// Extracts a safe user-facing message from failed responses.
 const readErrorMessage = async (response: Response) => {
   const body = (await response.json().catch(() => null)) as { message?: unknown } | null;
   return typeof body?.message === "string" ? body.message : "Request failed";
 };
 
+// Sends JSON and converts failed responses into authentication errors.
 const postJson = async <Result>(
   fetchImpl: typeof fetch,
   baseUrl: string,
@@ -75,8 +78,9 @@ const postJson = async <Result>(
   return (await response.json()) as Result;
 };
 
+// Creates authentication operations against the configured backend URL.
 export const createAuthApi = (options: AuthApiOptions = {}) => {
-  const baseUrl = (options.baseUrl ?? API_BASE_URL).replace(/\/$/, "");
+  const baseUrl = (options.baseUrl ?? appEnv.apiBaseUrl).replace(/\/$/, "");
   const fetchImpl = options.fetch ?? fetch;
 
   return {

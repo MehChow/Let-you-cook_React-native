@@ -9,9 +9,10 @@ Current branch at audit: `codex/mvp-foundation`
 Overall state: polished mocked Expo prototype plus an early local backend.
 
 - Planning milestone: `PLAN-03` — Goal-mode MVP handoff ready.
-- Completed foundation task: `BASE-03` Android route smoke baseline.
-- Next implementation task: `BASE-04` on `codex/mvp-foundation` to centralize
-  Android API-host configuration.
+- Completed foundation task: `BASE-04` centralized Android API-host
+  configuration.
+- Next implementation task: `BASE-05` on `codex/mvp-foundation` to correct
+  stale repository paths.
 - Detailed task index: `docs/mvp-roadmap.md`.
 - Goal-mode execution brief: `docs/mvp-goal-prompt.md`.
 - Ready execution plan:
@@ -64,8 +65,12 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   omitted `/private` and opened Expo Router's sitemap. Both were reproduced,
   fixed with focused RED/GREEN regression tests, and replayed successfully on
   the emulator.
-- Current mobile verification: `npm.cmd run check` exited `0`;
-  `npm.cmd test -- --runInBand` exited `0` with 15 suites and 61 tests passed.
+- `BASE-04` adds validated `EXPO_PUBLIC_API_URL` configuration with the Android
+  emulator default (`http://10.0.2.2:8787`), shared by the auth and general API
+  clients. It trims trailing slashes and rejects malformed or non-HTTP URLs.
+- Current mobile verification: focused BASE-04 API/environment tests exited
+  `0` with 3 suites and 11 tests; `npm.cmd run check` exited `0`; and
+  `npm.cmd test -- --runInBand` exited `0` with 16 suites and 65 tests passed.
 
 ## Snapshot
 

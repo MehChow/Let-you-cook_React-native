@@ -1,4 +1,5 @@
 import type { AuthTokens } from "@/features/auth/api";
+import { appEnv } from "@/config/env";
 
 interface ApiTokenStorage {
   getTokens(): Promise<AuthTokens | null>;
@@ -12,11 +13,12 @@ interface ApiClientOptions {
   tokenStorage: ApiTokenStorage;
 }
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:3000";
 const AUTH_PATHS = new Set(["/auth/signup", "/auth/login", "/auth/refresh", "/auth/logout"]);
 
+// Builds an absolute pathname for authentication route classification.
 const getPathname = (baseUrl: string, path: string) => new URL(path, `${baseUrl}/`).pathname;
 
+// Adds the current access token to outgoing request headers.
 const withBearerToken = (init: RequestInit | undefined, accessToken: string): RequestInit => {
   const headers = new Headers(init?.headers);
   headers.set("Authorization", `Bearer ${accessToken}`);
@@ -24,11 +26,13 @@ const withBearerToken = (init: RequestInit | undefined, accessToken: string): Re
   return { ...init, headers };
 };
 
+// Creates an authenticated client with single-flight token refresh.
 export const createApiClient = (options: ApiClientOptions) => {
-  const baseUrl = (options.baseUrl ?? API_BASE_URL).replace(/\/$/, "");
+  const baseUrl = (options.baseUrl ?? appEnv.apiBaseUrl).replace(/\/$/, "");
   const fetchImpl = options.fetch ?? fetch;
   let refreshPromise: Promise<AuthTokens | null> | null = null;
 
+  // Rotates expired credentials while deduplicating concurrent refresh attempts.
   const refreshTokens = async (refreshToken: string) => {
     refreshPromise ??= fetchImpl(`${baseUrl}/auth/refresh`, {
       method: "POST",
@@ -56,6 +60,7 @@ export const createApiClient = (options: ApiClientOptions) => {
     return refreshPromise;
   };
 
+  // Sends a request and retries once after successful refresh.
   const request = async (path: string, init?: RequestInit): Promise<Response> => {
     const url = path.startsWith("http://") || path.startsWith("https://")
       ? path
