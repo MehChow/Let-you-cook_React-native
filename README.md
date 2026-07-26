@@ -6,7 +6,7 @@ recipes, and publish through a six-step wizard.
 
 The repository is a monorepo:
 
-- Expo/React Native app in `app/` and `src/`;
+- Expo Router routes in `src/app/` and mobile features/components in `src/`;
 - Node/Hono/PostgreSQL API in `server/`;
 - product and architecture guidance in `docs/`.
 

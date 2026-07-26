@@ -9,10 +9,10 @@ Current branch at audit: `codex/mvp-foundation`
 Overall state: polished mocked Expo prototype plus an early local backend.
 
 - Planning milestone: `PLAN-03` — Goal-mode MVP handoff ready.
-- Completed foundation task: `BASE-04` centralized Android API-host
-  configuration.
-- Next implementation task: `BASE-05` on `codex/mvp-foundation` to correct
-  stale repository paths.
+- Completed foundation task: `BASE-05` corrected stale Expo Router repository
+  paths to the authoritative `src/app/` source root.
+- Next implementation task: `BASE-06` on `codex/mvp-foundation` to add guarded
+  development reset and seed tooling.
 - Detailed task index: `docs/mvp-roadmap.md`.
 - Goal-mode execution brief: `docs/mvp-goal-prompt.md`.
 - Ready execution plan:
