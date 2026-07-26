@@ -87,6 +87,7 @@ starting.
 - [Product brief](docs/brief.md)
 - [Current progress and roadmap](docs/progress.md)
 - [Dependency-ordered MVP task index](docs/mvp-roadmap.md)
+- [Goal-mode MVP execution brief](docs/mvp-goal-prompt.md)
 - [Approved MVP delivery design](docs/superpowers/specs/2026-07-26-mvp-delivery-design.md)
 - [API and data model](docs/api-and-data-model.md)
 - [AI nutrition feasibility and architecture](docs/ai-nutrition.md)
