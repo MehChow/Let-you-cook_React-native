@@ -107,9 +107,12 @@
       "/node_modules/react-native-reanimated/plugin/",
       "/node_modules/@react-native/babel-preset/"
     ],
+    "roots": [
+      "<rootDir>/__tests__"
+    ],
     "testMatch": [
-      "**/__tests__/**/*.test.ts",
-      "**/__tests__/**/*.test.tsx"
+      "**/*.test.ts",
+      "**/*.test.tsx"
     ]
   }
 }

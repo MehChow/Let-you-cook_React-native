@@ -16,9 +16,14 @@ Overall state: polished mocked Expo prototype plus an early local backend.
 - Ready execution plan:
   `docs/superpowers/plans/2026-07-26-foundation.md`.
 - Last verified design commit: `af34464`.
-- Baseline runtime: Node `v24.14.0`; npm `11.9.0`.
-- `npm.cmd ci`: exit `0`; root dependencies installed and the tracked
-  `react-native-draggable-flatlist@4.0.3` patch applied cleanly.
+- `git status --short --branch`: exit `0`; started on clean
+  `codex/mvp-foundation` worktree.
+- `git branch --show-current`: exit `0`; reported `codex/mvp-foundation`.
+- `node --version`: exit `0`; reported `v24.14.0`.
+- `npm.cmd --version`: exit `0`; reported `11.9.0`.
+- `npm.cmd ci`: initial sandbox attempt exited `124` after 60 seconds while
+  installing, with no npm error; the approved rerun exited `0`, installed root
+  dependencies, and applied `react-native-draggable-flatlist@4.0.3` cleanly.
 - `npm.cmd --prefix server ci`: exit `0`.
 - `npm.cmd run check`: exit `0` after adding the missing CSS side-effect
   declaration required by TypeScript 6.
