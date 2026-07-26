@@ -89,8 +89,16 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   `verified@letyoucook.local` and `unverified@letyoucook.local`.
 - The post-reset PostgreSQL query returned exactly 2 users: the verified seed
   with `email_verified_at` present and the unverified seed without it.
+- `BASE-06` review hardening added RED/GREEN regressions for query-string host
+  redirection, sanitized malformed URLs, password-free success output, and
+  fixed sanitized CLI errors. The reset now refuses query-string `host` or
+  `port` overrides, and runtime output contains only the two seed emails.
+- The hardened wrapper was rerun only after revalidating the ignored URL,
+  absence of addressing overrides, Compose/container identity, and live
+  database. Captured output contained both emails and no `coffee123` or
+  password field; the direct query again returned exactly 2 seed rows.
 - Current `BASE-06` verification: `npm.cmd run server:check` exited `0`;
-  `npm.cmd run server:test` exited `0` with 10 passed, 0 failed, 0 skipped;
+  `npm.cmd run server:test` exited `0` with 14 passed, 0 failed, 0 skipped;
   `npm.cmd run check` exited `0`; and `npm.cmd test -- --runInBand` exited `0`
   with 16 suites and 67 tests passed.
 
@@ -192,8 +200,9 @@ Current foundation evidence:
 - `npm.cmd run check`: exit `0`.
 - `npm.cmd test -- --runInBand`: exit `0`; 16 suites and 67 tests passed.
 - `npm.cmd run server:check`: exit `0`.
-- `npm.cmd run server:test`: exit `0`; 10 tests passed, including the
-  PostgreSQL smoke test and 5 development-database guard tests.
+- `npm.cmd run server:test`: exit `0`; 14 tests passed, including the
+  PostgreSQL smoke test, 7 development-database guard tests, password-free
+  success formatting, and sanitized CLI failure coverage.
 - Local PostgreSQL and Mailpit started healthy, and migrations applied.
 - The guarded local reset completed and a direct PostgreSQL query found exactly
   the 2 documented deterministic account rows.

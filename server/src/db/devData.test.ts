@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { assertSafeDevelopmentDatabase } from "./devData";
+import {
+  assertSafeDevelopmentDatabase,
+  formatDevelopmentResetSuccess,
+} from "./devData";
 
 test("accepts the documented local development database", () => {
   assert.doesNotThrow(() =>
@@ -29,6 +32,16 @@ test("rejects a remote database host", () => {
   );
 });
 
+test("rejects a query-string host override", () => {
+  assert.throws(
+    () =>
+      assertSafeDevelopmentDatabase(
+        "postgres://user:secret@localhost:5432/letyoucook?host=db.example.com",
+      ),
+    /Refusing to reset a database with connection-addressing overrides/,
+  );
+});
+
 test("rejects a different local database name", () => {
   assert.throws(
     () =>
@@ -44,4 +57,30 @@ test("rejects a missing database URL", () => {
     () => assertSafeDevelopmentDatabase(""),
     /DATABASE_URL is required for development reset/,
   );
+});
+
+test("rejects a malformed database URL with a sanitized message", () => {
+  assert.throws(
+    () =>
+      assertSafeDevelopmentDatabase(
+        "postgres://postgres:top-secret@[invalid-host/letyoucook",
+      ),
+    {
+      message: "DATABASE_URL is invalid for development reset",
+    },
+  );
+});
+
+test("formats reset success without the development password", () => {
+  const resultWithUnexpectedCredential = {
+    password: "coffee123",
+    unverifiedEmail: "unverified@letyoucook.local",
+    verifiedEmail: "verified@letyoucook.local",
+  };
+  const output = formatDevelopmentResetSuccess(resultWithUnexpectedCredential);
+
+  assert.match(output, /unverified@letyoucook\.local/);
+  assert.match(output, /verified@letyoucook\.local/);
+  assert.doesNotMatch(output, /coffee123/);
+  assert.doesNotMatch(output, /password/i);
 });

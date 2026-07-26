@@ -11,10 +11,18 @@ export const DEVELOPMENT_SEED_PASSWORD = "coffee123";
 
 // Describes the deterministic accounts created for local development.
 export interface DevelopmentSeedResult {
-  password: string;
   unverifiedEmail: string;
   verifiedEmail: string;
 }
+
+// Formats reset success output without exposing development credentials.
+export const formatDevelopmentResetSuccess = (
+  result: DevelopmentSeedResult,
+): string =>
+  `Development database reset complete. ${JSON.stringify({
+    unverifiedEmail: result.unverifiedEmail,
+    verifiedEmail: result.verifiedEmail,
+  })}`;
 
 // Prevents destructive reset commands from targeting non-development databases.
 export const assertSafeDevelopmentDatabase = (databaseUrl: string): void => {
@@ -22,9 +30,21 @@ export const assertSafeDevelopmentDatabase = (databaseUrl: string): void => {
     throw new Error("DATABASE_URL is required for development reset");
   }
 
-  const parsed = new URL(databaseUrl);
+  let parsed: URL;
+  try {
+    parsed = new URL(databaseUrl);
+  } catch {
+    throw new Error("DATABASE_URL is invalid for development reset");
+  }
+
   const databaseName = parsed.pathname.replace(/^\//, "");
   const databaseHost = parsed.hostname.replace(/^\[|\]$/g, "");
+
+  if (parsed.searchParams.has("host") || parsed.searchParams.has("port")) {
+    throw new Error(
+      "Refusing to reset a database with connection-addressing overrides",
+    );
+  }
 
   if (!LOCAL_DATABASE_HOSTS.has(databaseHost)) {
     throw new Error("Refusing to reset a non-local database");
@@ -104,7 +124,6 @@ export const seedDevelopmentData = async (): Promise<DevelopmentSeedResult> => {
   }
 
   return {
-    password: DEVELOPMENT_SEED_PASSWORD,
     unverifiedEmail: seeds[1].email,
     verifiedEmail: seeds[0].email,
   };

@@ -76,7 +76,8 @@ npm.cmd run server:db:migrate
 
 The reset refuses to run unless `server/.env` supplies a `DATABASE_URL` whose
 host is exactly `localhost`, `127.0.0.1`, or `::1` and whose database name is
-exactly `letyoucook`. Run the guarded reset from the repository root:
+exactly `letyoucook`. Query-string `host` and `port` overrides are also refused.
+Run the guarded reset from the repository root:
 
 ```powershell
 npm.cmd run server:db:dev:reset

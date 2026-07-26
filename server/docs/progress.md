@@ -57,6 +57,25 @@ the schema/contracts before implementing recipe content routes.
 
 Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
 
+### 2026-07-27 02:36:44 HKT
+
+- Hardened `BASE-06` after security review with separate RED/GREEN regressions
+  for query-string host redirection, malformed URL sanitization, password-free
+  success output, and fixed sanitized CLI failure output.
+- The database guard now refuses query-string `host` and `port` overrides
+  before validating the exact local host and `letyoucook` database name.
+- `DevelopmentSeedResult` and reset success output now contain only the two
+  seed emails. CLI failures print only `Development database reset failed.`
+  without a raw error, stack, URL, or credential.
+- Revalidated ignored `server/.env` with no query override, Compose/container
+  identity, and the live `letyoucook|postgres` target before rerunning the
+  destructive local reset.
+- Captured wrapper output contained both seed emails and no `coffee123` or
+  password field; the direct query returned exactly the expected 2 rows.
+- Verification passed: 9 focused tests, server type-check, 14 server tests with
+  0 failures and 0 skips, root lint/type-check, and 16 mobile suites with 67
+  tests.
+
 ### 2026-07-27 02:17:54 HKT
 
 - Completed `BASE-06` guarded development reset and deterministic seed tooling
@@ -225,7 +244,9 @@ Current `BASE-06` evidence:
   PostgreSQL container.
 - Executed the destructive reset successfully and directly verified exactly the
   2 documented seed rows.
-- Passed server type-check and all 10 server tests with 0 failures and 0 skips.
+- Passed security regressions for addressing overrides, sanitized malformed
+  URLs, password-free success output, and sanitized CLI errors.
+- Passed server type-check and all 14 server tests with 0 failures and 0 skips.
 - Passed root lint/type-check and all 16 mobile suites with 67 tests.
 
 The entries below are historical successful runs. At the 2026-07-26 audit,
