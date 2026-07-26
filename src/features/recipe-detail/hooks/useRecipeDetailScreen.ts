@@ -8,6 +8,7 @@ interface UseRecipeDetailScreenParams {
   recipeId: string;
 }
 
+/** Coordinates recipe detail state and user-triggered screen actions. */
 export const useRecipeDetailScreen = ({
   recipeId,
 }: UseRecipeDetailScreenParams) => {
@@ -16,15 +17,18 @@ export const useRecipeDetailScreen = ({
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const favourite = recipe ? isFavourite(recipe.id) : false;
 
+  /** Returns the user to the immediately preceding native route. */
   const handleBack = () => {
     router.back();
   };
 
+  /** Toggles the current recipe within the local favourites store. */
   const handleToggleFavourite = () => {
     if (!recipe) return;
     setFavourite(recipe.id, !isFavourite(recipe.id));
   };
 
+  /** Tracks the gallery page nearest the current horizontal offset. */
   const handleImageScroll = (
     event: NativeSyntheticEvent<NativeScrollEvent>,
   ) => {
@@ -34,9 +38,12 @@ export const useRecipeDetailScreen = ({
     setActiveImageIndex(nextIndex);
   };
 
+  /** Opens reviews for the current recipe inside protected routes. */
   const handleOpenReviews = () => {
     if (!recipe) return;
-    router.push(`/recipe/${encodeURIComponent(recipe.id)}/reviews` as Href);
+    router.push(
+      `/private/recipe/${encodeURIComponent(recipe.id)}/reviews` as Href,
+    );
   };
 
   return {
