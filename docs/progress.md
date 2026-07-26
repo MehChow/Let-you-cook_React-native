@@ -69,8 +69,8 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   emulator default (`http://10.0.2.2:8787`), shared by the auth and general API
   clients. It trims trailing slashes and rejects malformed or non-HTTP URLs.
 - Current mobile verification: focused BASE-04 API/environment tests exited
-  `0` with 3 suites and 11 tests; `npm.cmd run check` exited `0`; and
-  `npm.cmd test -- --runInBand` exited `0` with 16 suites and 65 tests passed.
+  `0` with 3 suites and 13 tests; `npm.cmd run check` exited `0`; and
+  `npm.cmd test -- --runInBand` exited `0` with 16 suites and 67 tests passed.
 
 ## Snapshot
 

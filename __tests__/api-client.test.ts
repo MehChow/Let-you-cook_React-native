@@ -35,6 +35,22 @@ const createMemoryTokenStorage = (initialTokens: AuthTokens | null) => {
 };
 
 describe("createApiClient", () => {
+  it("uses the shared Android default for requests without a base URL", async () => {
+    const calls: FetchCall[] = [];
+    const apiClient = createApiClient({
+      tokenStorage: createMemoryTokenStorage(null),
+      fetch: async (url, init) => {
+        calls.push({ url: String(url), init });
+        return jsonResponse({ ok: true });
+      },
+    });
+
+    await apiClient.request("/profiles/me");
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0]?.url).toBe("http://10.0.2.2:8787/profiles/me");
+  });
+
   it("retries one protected request after refreshing tokens", async () => {
     const calls: FetchCall[] = [];
     const tokenStorage = createMemoryTokenStorage({

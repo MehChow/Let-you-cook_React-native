@@ -12,6 +12,24 @@ const jsonResponse = (body: unknown, status = 200): Response =>
   });
 
 describe("createAuthApi", () => {
+  it("uses the shared Android default for login requests without a base URL", async () => {
+    const calls: FetchCall[] = [];
+    const api = createAuthApi({
+      fetch: async (url, init) => {
+        calls.push({ url: String(url), init });
+        return jsonResponse({
+          user: { id: "user-1", email: "cook@example.com" },
+          tokens: { accessToken: "access", refreshToken: "refresh" },
+        });
+      },
+    });
+
+    await api.login({ email: "cook@example.com", password: "password123" });
+
+    expect(calls).toHaveLength(1);
+    expect(calls[0]?.url).toBe("http://10.0.2.2:8787/auth/login");
+  });
+
   it("accepts a password reset email through the placeholder API", async () => {
     const api = createAuthApi();
 
