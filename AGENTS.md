@@ -1,82 +1,292 @@
-# Repo Routing
+# Let You Cook Agent Guide
 
-If you are handling backend-related work, skip to [Backend Rules](#backend-rules) at line 64. Do not read Expo docs unless the backend change touches the mobile app.
+This file contains durable repository rules. Product behavior belongs in
+`docs/brief.md`, the target API and data model in `docs/api-and-data-model.md`,
+AI nutrition behavior in `docs/ai-nutrition.md`, and the delivery roadmap in
+`docs/progress.md`.
 
-If you are handling frontend/mobile work, follow the Expo section first.
+## Read First
 
-# Expo HAS CHANGED
+Route the task before loading extra context:
 
-Read the exact versioned docs at https://docs.expo.dev/versions/v56.0.0/ before writing any code.
+- Any task: read the relevant parts of `docs/brief.md` and the top `Current
+progress` section of `docs/progress.md`.
+- Mobile/UI task: also read `docs/styling.md` and the exact Expo SDK 56 docs at
+  <https://docs.expo.dev/versions/v56.0.0/>.
+- Backend task: also read `server/docs/progress.md`, the relevant file in
+  `server/docs/`, and `docs/api-and-data-model.md`.
+- Auth integration task: also read `docs/backend-integration/`.
+- AI nutrition task: read `docs/ai-nutrition.md` in full.
+- Native runtime or styling failure: check `docs/notes.md` before inventing a
+  workaround.
 
-## App Brief
+Do not load Expo documentation for a backend-only change that cannot affect the
+mobile app.
 
-Let You Cook is a recipe-focused mobile app prototype: think Instagram for recipes. Users can discover recipe cards, search and filter recipes, favourite them, view profile/author context, read recipe details with ingredients/steps/nutrition/reviews, and create recipes through a multi-step wizard. The app has been revamped into a feature-oriented Expo Router structure: route files stay thin, shared app UI lives in `src/components`, RNR primitives stay under `src/components/ui`, feature logic/components live under `src/features/*`, and mock image imports are centralized in `src/data/images.ts`. Most data is still mocked and save flows are local-only, so treat it as a polished frontend/demo moving toward backend integration.
+## Product and Current-State Truth
 
-## Stack
+Let You Cook is an Android-first recipe social app: users discover, search,
+favourite, review, and create visual recipes. iOS is a future target, so avoid
+unnecessary Android-only business logic even though Android is the only active
+development platform.
 
-- Expo 56 with Expo Router and React Compiler enabled
-- React Native Reusables (RNR) and RN primitives
-- Tailwind CSS v4 (Uniwind)
-- Zustand, react-hook-form, zod, TanStack Query, react-native-mmkv
-- Use LegendList v2 only after reproducing a real list performance issue
+The repository is a monorepo:
 
-## Code Rules
+- `/app`, `/src`: Expo mobile app.
+- `/server`: Node/Hono/PostgreSQL backend.
+- `/assets/screenshot`: visual reference for the intended screens.
+- `/docs`: product, architecture, styling, integration, and progress docs.
 
-- Write concise, modular, type-safe TypeScript
-- Use interfaces for props and shared state shapes; avoid `any`
-- Do not use `useMemo`, `useCallback`, or `React.memo` outside `src/components/ui`
-- Extract business logic into hooks or stores when it keeps UI files small and clear
-- Keep files under 150 lines when practical; split by responsibility, not abstraction
+Do not mistake polished screens for completed features:
 
-## Structure
+- Most recipe, discovery, favourite, review, and profile content is mocked or
+  kept only in memory.
+- Sign-up is connected to the backend.
+- Login is still a local demo flow even though the server login endpoint exists.
+- Server auth, refresh-token rotation, and protected profile routes exist.
+- Recipe, image, favourite, report, and block server routes are mostly empty or
+  return `501`.
+- The recipe wizard validates locally but its final save does not persist.
+- AI nutrition is a UI simulation, not a real AI or nutrition calculation.
 
-- Keep route files thin and composition-focused
-- Keep shared app UI in `src/components`
-- Keep RNR primitives in `src/components/ui`
-- Keep feature logic and feature-only UI in `src/features/<feature>`
-- Keep direct mock asset imports in `src/data/images.ts` only
+When the docs and code disagree, verify the code, correct `docs/progress.md`, and
+mention the discrepancy in the handoff.
 
-## UI Rules
+## Non-Negotiable Environment Rules
 
-- Before modifying UI, read `docs/styling.md` and follow its styling and JSX comment conventions.
-- Use `expo-image` for images
-- When styling `expo-image`'s `Image`, do not use Tailwind classes in `className`; use native `style` props instead
-- Use RNR base components from `src/components/ui` where applicable
-- Use `AppScreen` for shared screen background and safe-area handling
-- Reuse shared app components before adding one-off markup
-- Prefer semantic color tokens from `src/global.css` over raw hex values
-- Keep the current sage, rounded-card visual style unless a task explicitly asks for a redesign
-- Maintain consistent padding and responsive layouts
+- Do not run, build, or test the app in a web browser. Native modules in this
+  Expo 56 project make web an invalid test target.
+- Use an Android emulator/device or native-focused Jest tests for mobile
+  verification.
+- Use Node 20.19 or newer. Expo SDK 56 uses React Native 0.85 and React 19.2.
+- Use `npm.cmd` instead of `npm` in PowerShell environments where script
+  execution policy blocks `npm.ps1`.
+- Do not edit generated native folders as the source of truth; use Expo config
+  plugins/app config where appropriate.
+- Never commit secrets or put server credentials in `EXPO_PUBLIC_*` variables.
+- Preserve unrelated user changes in a dirty worktree.
 
-## Naming
+## Product Decisions
 
-- camelCase for variables and functions: `isFetchingData`
-- PascalCase for components: `UserProfile`
-- lowercase, hyphenated directories: `user-profile`
+The owner confirmed these decisions in `docs/brief.md`:
 
-## Testing
+- One monolithic Node/Hono API and PostgreSQL database; no microservices.
+- REST-shaped endpoints with Hono RPC for a private typed client, not an
+  RPC-shaped public API.
+- Cloudflare R2 stores user media; the mobile client uploads through short-lived
+  signed URLs created by the backend.
+- Recipes have `draft`, `published`, `archived`, and `removed` lifecycle states.
+  Only published recipes are publicly discoverable.
+- A recipe has one required category and up to five tags.
+- One review per user per recipe; it is editable/deletable, and authors cannot
+  review their own recipe.
+- A profile's heart count means favourites received on that author's recipes,
+  not recipes the profile owner has saved.
+- MVP social scope is public profiles, favourites, ratings/reviews, reports, and
+  blocks. Follows, comments, direct messages, and notifications are later work.
+- AI nutrition is optional, advisory, editable/removable, and built last.
 
-- Keep tests lightweight and high-value
-- Prefer coverage for state transitions, persistence restore/save behavior, native failure branches, and critical error or fallback UI states
-- Use `npm test` for the Expo/Jest suite in root `__tests__/`; keep screen tests focused and mock native-heavy leaves locally
+Record any change to these decisions in `docs/brief.md`,
+`docs/api-and-data-model.md`, and `docs/progress.md` in the same change.
 
-## Notes
+## Mobile Stack and Structure
 
-- If anything goes wrong while debugging/implementing, try to checkout `docs/notes.md` for solutions
+- Expo 56, Expo Router, React Compiler, React Native 0.85, React 19.2.
+- React Native Reusables and React Native primitives.
+- Tailwind CSS v4 through Uniwind.
+- Zustand for small client UI state.
+- TanStack Query for server state.
+- React Hook Form + Zod for forms and boundary validation.
+- SecureStore for auth secrets; MMKV for non-secret local persistence.
+- `expo-image` for images.
+- Use LegendList v2 only after reproducing a real list performance problem.
+
+Keep this structure:
+
+- Route files in `app/` stay thin and composition-focused.
+- Shared application UI goes in `src/components`.
+- RNR primitives stay in `src/components/ui`.
+- Feature-only UI, hooks, schemas, and logic go in
+  `src/features/<feature-name>`.
+- Cross-feature stores go in `src/stores`; server API utilities in `src/lib`.
+- Direct mock asset imports stay centralized in `src/data/images.ts`.
+- Use lowercase hyphenated directories, PascalCase components, and camelCase
+  variables/functions.
+
+## TypeScript and React Rules
+
+- Write concise, modular, strict TypeScript. Use interfaces for props and shared
+  state shapes; do not introduce `any`.
+- Do not add `useMemo`, `useCallback`, or `React.memo` outside
+  `src/components/ui`; React Compiler owns normal memoization.
+- Extract business logic into a hook, store, or service when that keeps UI files
+  focused.
+- Keep files under roughly 150 lines when practical. Split by responsibility,
+  not by arbitrary line count or speculative abstraction.
+- Prefer explicit state machines/unions for multi-step, async, and lifecycle
+  states over clusters of unrelated booleans.
+- Do not duplicate server data into Zustand. TanStack Query owns remote cache;
+  forms may copy data into a deliberate editing draft.
+- Map API DTOs at the feature boundary. UI components should not depend on
+  Drizzle row shapes or raw response envelopes.
+
+## UI and Accessibility Rules
+
+- Preserve the current sage palette, rounded-card style, Outfit typography, and
+  established spacing unless the task explicitly requests a redesign.
+- Treat `/assets/screenshot` as intent/reference, not as proof of implemented
+  behavior.
+- Use `AppScreen` for shared screen background and safe-area handling.
+- Keep native `style={{ flex: 1 }}` on the outer safe-area container; putting the
+  flex class only through Uniwind has caused blank native screens.
+- Reuse shared components and RNR primitives before creating one-off markup.
+- Prefer semantic tokens from `src/global.css`; register new tokens in
+  `@theme` before using them.
+- With `expo-image`, use the native `style` prop for layout instead of Tailwind
+  layout classes on `Image`.
+- Add loading, empty, error, offline/retry, and permission-denied states when
+  wiring a mocked screen to real data.
+- Preserve minimum touch targets, labels for icon-only controls, readable
+  contrast, dynamic text tolerance, and keyboard avoidance.
+- Follow the JSX comment and error-presentation conventions in
+  `docs/styling.md`; keep established feature-specific inline validation where
+  it is part of a form flow.
 
 ## Backend Rules
 
-- Backend code lives in `server/`; backend docs live in `server/docs/`.
-- When designing backend APIs for frontend integration, read the relevant guidance in `docs/backend-integration/` first.
-- Use Hono for HTTP routing, Drizzle for PostgreSQL schema/migrations, Zod for boundary validation, and Node 20+.
-- Keep `server/src/app.ts` responsible for app creation and route mounting; keep `server/src/index.ts` limited to starting the server.
-- Keep route files small and REST-shaped under `server/src/routes`.
-- Validate params, query strings, and JSON bodies with Zod at the route boundary.
-- Do not import mobile app code into `server/`.
-- Do not add Redis, queues, GraphQL, tRPC, NestJS, or extra services until a real backend bottleneck requires it.
-- Prefer plain Node/Web APIs and existing dependencies before adding backend packages.
-- Current backend development uses Docker with a local Postgres container named `letyoucook-postgres`; default DB URL is `postgres://postgres:postgres@localhost:5432/letyoucook`.
-- Database changes must update `server/src/db/schema.ts`, generate a Drizzle migration, and pass `npm run server:check`.
-- For auth, keep access tokens short-lived, refresh tokens opaque and hashed, and refresh rotation server-side.
-- Use `npm run server:dev`, `npm run server:check`, `npm run server:test`, `npm run server:db:generate`, and `npm run server:db:migrate`.
-- Before backend work, skim `server/docs/progress.md` and the relevant doc in `server/docs/`.
+- Use Hono for HTTP routing, Drizzle for PostgreSQL schema/migrations, Zod for
+  every external boundary, and Node 20+.
+- Keep `server/src/app.ts` responsible for app creation and route mounting.
+  Keep `server/src/index.ts` limited to starting the server.
+- Keep route files small and REST-shaped under `server/src/routes`; move
+  transactions/business rules to feature services.
+- Validate path params, query strings, headers, and JSON bodies before use.
+- Return stable DTOs and a consistent error envelope; never return database rows
+  accidentally.
+- Export Hono `AppType` as a type-only contract for the mobile client. Do not
+  import mobile code into `server/` or server runtime code into the app bundle.
+- New public endpoints target `/v1`; keep `/health` unversioned. Move/alias the
+  existing unversioned auth/profile routes as one coordinated integration change.
+- Use cursor pagination for feeds/reviews. Apply deterministic tie-breakers.
+- Enforce ownership, recipe visibility, blocks, and moderation status on the
+  server, regardless of what the client hides.
+- Use transactions for aggregate recipe writes, publish transitions, token
+  rotation, and other multi-table invariants.
+- Use idempotency for retryable create/finalize operations.
+- Do not add Redis, queues, GraphQL, tRPC, NestJS, a search service, or another
+  database until measured behavior requires it.
+
+The local database container is `letyoucook-postgres`; the development default is
+`postgres://postgres:postgres@localhost:5432/letyoucook`.
+
+## Database and Migration Rules
+
+- Database changes must update `server/src/db/schema.ts`, generate a Drizzle
+  migration, and pass `npm run server:check`.
+- Never edit an already-applied migration. Add a forward migration.
+- Do not drop/reset local data unless the user explicitly authorizes it.
+- Add foreign keys, uniqueness/check constraints, and indexes that enforce the
+  domain rules described in `docs/api-and-data-model.md`.
+- Use UTC timestamps. Public DTOs use ISO 8601 strings.
+- Prefer soft removal for public/user-generated content that may be involved in
+  moderation; account erasure still needs a deliberate privacy policy.
+- Keep recipe drafts in the normal recipe tables with lifecycle status, not in a
+  second draft schema.
+
+## Authentication and Privacy Rules
+
+- Keep access tokens short-lived.
+- Keep refresh tokens opaque, hashed at rest, rotated on use, and revocable
+  server-side.
+- Store tokens in SecureStore, never MMKV or logs.
+- On app hydration, attempt one refresh for an expired access token before
+  clearing a still-valid refresh session.
+- Logout should revoke the refresh token when reachable, then clear local state
+  even if the network call fails.
+- Email verification and password-reset responses must not reveal whether an
+  account exists. Persist only challenge identifiers/cooldowns needed to resume.
+- Rate-limit auth, upload, search, recipe creation, review, report, and AI
+  endpoints before public beta.
+- Redact passwords, tokens, signed URLs, API keys, and personal data from logs
+  and test fixtures.
+
+## Media Rules
+
+- R2 credentials live only on the server.
+- Create an authenticated upload intent, validate MIME type/declared size/count,
+  issue a short-lived signed `PUT`, upload directly from the device, then call a
+  completion endpoint that verifies the object before attachment.
+- Treat signed URLs as bearer credentials. Do not persist or log them.
+- Store object metadata and ownership in PostgreSQL; store bytes in R2.
+- Use server-generated opaque object keys, never user-provided file paths.
+- Track `pending`, `ready`, `rejected`, and `deleted` media states. Clean up
+  abandoned pending objects.
+- Enforce the wizard limits: at most nine recipe gallery images and one optional
+  image per cooking step. The first ordered gallery image is the cover.
+- Do not proxy normal image bytes through Hono.
+
+## Recipe Wizard and AI Nutrition
+
+- The six wizard sections are basics, gallery, ingredients, cooking steps, chef
+  notes/reminder, and optional nutrition. Preview allows returning to any
+  section.
+- Preserve a server draft during the future integrated wizard so uploads and
+  autosave can recover after app termination.
+- Category is required and tags are optional even though the current wizard has
+  not added those controls yet.
+- Ingredient quantities/units and servings are core structured data; do not
+  reduce them to one unparseable string in the API/database.
+- Manual nutrition updates the chart locally in real time.
+- AI nutrition must follow `docs/ai-nutrition.md`: the model may normalize
+  ingredient text, but server code and a food-composition source perform the
+  arithmetic.
+- Never market or display an AI result as measured fact or medical advice.
+- Fingerprint every field that affects an estimate and mark the estimate stale
+  when those fields change. Users can rerun, switch to manual, or remove it.
+- Do not implement real AI nutrition before the launch gate in
+  `docs/progress.md` is satisfied.
+
+## Verification
+
+Run the smallest relevant checks, then broaden for cross-cutting changes:
+
+- Mobile lint/typecheck: `npm run check`
+- Mobile Jest suite: `npm test -- --runInBand`
+- Backend typecheck: `npm run server:check`
+- Backend tests: `npm run server:test`
+- Generate migration: `npm run server:db:generate`
+- Apply migration: `npm run server:db:migrate`
+
+For Android UI/native changes, also verify the affected flow on an Android
+emulator/device. Do not substitute Expo web. Mock native-heavy leaves locally in
+screen tests.
+
+High-value tests cover:
+
+- auth refresh/revocation/failure paths;
+- state transitions and persistence restore/save;
+- recipe ownership/visibility and aggregate transactions;
+- media validation/completion/cleanup;
+- favourites/reviews uniqueness and count changes;
+- offline, empty, permission, and critical error UI;
+- AI schema validation, deterministic arithmetic, staleness, and fallbacks.
+
+If dependencies are absent, report that checks could not start; do not describe
+that as a passing build.
+
+## Documentation and Handoff
+
+- `docs/progress.md` is the canonical project status and roadmap.
+- Keep its top `Current progress` section in place and update it after meaningful
+  implementation.
+- Also update `server/docs/progress.md` for backend-specific changes.
+- Update `docs/brief.md` when product behavior or scope changes.
+- Update `docs/api-and-data-model.md` when contracts, invariants, or schema
+  direction changes.
+- Update `docs/ai-nutrition.md` when its product promise, provider, data source,
+  or evaluation gate changes.
+- `docs/upcomoing-task.md` is historical input and is superseded; do not use its
+  unchecked boxes as current truth.
+- A feature is not complete because a screen exists. Completion requires real
+  persistence/integration, required states, tests proportionate to risk, and
+  current documentation.

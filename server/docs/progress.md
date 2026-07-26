@@ -1,5 +1,8 @@
 # Backend Progress
 
+Backend-specific handoff. The project-wide source of truth and phased roadmap is
+`docs/progress.md`; the target contract/schema is `docs/api-and-data-model.md`.
+
 ## Start Here
 
 This file is the backend handoff. When asked to continue backend work:
@@ -13,7 +16,8 @@ This file is the backend handoff. When asked to continue backend work:
    - any new verification under [Verified](#verified)
    - the next unchecked task
 
-Current task to begin: move one frontend feature off mocks, starting with profile or auth.
+Current task to begin: finish auth integration/account lifecycle, then migrate
+the schema/contracts before implementing recipe content routes.
 
 ## Current State
 
@@ -39,15 +43,28 @@ Current task to begin: move one frontend feature off mocks, starting with profil
 - [x] Add app-side auth API wrappers under `src/features/auth/api.ts`.
 - [x] Install and wire `expo-secure-store` for access and refresh token storage.
 - [x] Add a shared API client wrapper that retries once after token refresh.
-- [ ] Move one frontend feature off mocks, starting with profile or auth.
-- [ ] Implement recipe read endpoints:
-  - `GET /recipes`
-  - `GET /recipes/:id`
-- [ ] Add image upload URL support after Cloudflare R2 and Cloudflare Images credentials are ready.
+- [ ] Wire real mobile login, refresh-on-hydration, and server logout.
+- [ ] Implement email verification, password reset, and account deletion.
+- [ ] Add `/v1` routing in a coordinated server/mobile change.
+- [ ] Apply the recipe/category/tag/review/media schema direction from
+  `docs/api-and-data-model.md`.
+- [ ] Add R2 upload-intent/completion support before recipe CRUD.
+- [ ] Implement recipe draft/save/publish, then recipe feed/detail reads.
 
 ## Progress Log
 
 Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
+
+### 2026-07-26 00:00:00 HKT
+
+- Audited the full server/mobile integration and corrected the project-wide
+  roadmap.
+- Confirmed server auth/token rotation and current-profile endpoints exist, while
+  only mobile sign-up is integrated.
+- Documented the target REST/Hono RPC contract, revised data model, R2 direct
+  upload flow, and final-phase AI nutrition architecture.
+- Dependency executables were absent at this audit, so checks could not start;
+  historical verification below remains evidence of earlier runs only.
 
 ### 2026-07-10 00:00:00 HKT
 
@@ -146,6 +163,10 @@ Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
 - Moved backend planning docs into `server/docs/`.
 
 ## Verified
+
+The entries below are historical successful runs. At the 2026-07-26 audit,
+`node_modules` executables were absent, so rerun the standard checks after
+installing dependencies before treating this as the current baseline.
 
 - Installed server dependencies with `npm install --prefix server`.
 - Generated the initial migration with `npm --prefix server run db:generate`.

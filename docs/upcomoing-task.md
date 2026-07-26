@@ -1,5 +1,10 @@
 # Upcoming Backend Tasks
 
+> Historical planning input. This checklist predates the implemented Hono,
+> Drizzle, PostgreSQL, auth, profile, and mobile sign-up work, so its unchecked
+> boxes are not current truth. Use `docs/progress.md` for current status and the
+> active roadmap.
+
 This app is ready to move from mocked frontend data toward a custom backend. The target path is one Node.js TypeScript API, PostgreSQL, Cloudflare in front, R2 for image storage, and Cloudflare Images for delivery/transforms. Keep it as one backend service for now; no BaaS and no microservices until real usage proves they are needed.
 
 ## Road To Backend Integration

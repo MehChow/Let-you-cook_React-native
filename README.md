@@ -1,56 +1,97 @@
-# Welcome to your Expo app 👋
+# Let You Cook
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Let You Cook is an Android-first Expo 56 recipe community: discover and search
+visual recipes, save favourites, read structured cooking instructions, review
+recipes, and publish through a six-step wizard.
 
-## Get started
+The repository is a monorepo:
 
-1. Install dependencies
+- Expo/React Native app in `app/` and `src/`;
+- Node/Hono/PostgreSQL API in `server/`;
+- product and architecture guidance in `docs/`.
 
-   ```bash
-   npm install
-   ```
+Most mobile content is currently mocked. The server has working auth/token
+rotation and current-profile endpoints, but only sign-up is wired into the app.
+Start with [the current progress](docs/progress.md), not the screenshots or old
+task list.
 
-2. Start the app
+## Requirements
 
-   ```bash
-   npx expo start
-   ```
+- Node 20.19 or newer
+- npm
+- Android Studio/emulator or an Android device
+- Expo development client toolchain
+- Docker with the local PostgreSQL container `letyoucook-postgres`
 
-In the output, you'll find options to open the app in a
+This project has native modules. Do not use Expo web as a development or test
+target.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Install
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```powershell
+npm.cmd install
+npm.cmd --prefix server install
+Copy-Item .env.example .env
+Copy-Item server\.env.example server\.env
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Replace `JWT_SECRET` in `server/.env` with a long local secret. The documented
+development database URL is:
 
-### Other setup steps
+```text
+postgres://postgres:postgres@localhost:5432/letyoucook
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+The root example enables wizard debug shortcuts and disables some wizard Zod
+validation. Treat those flags as local UI-development aids, not release
+settings.
 
-## Learn more
+## Run
 
-To learn more about developing your project with Expo, look at the following resources:
+Apply the current database migration:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```powershell
+npm.cmd run server:db:migrate
+```
 
-## Join the community
+Start the API:
 
-Join our community of developers creating universal apps.
+```powershell
+npm.cmd run server:dev
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Start/build the Android app in another terminal:
+
+```powershell
+npm.cmd run android
+```
+
+After the development client is installed, `npm.cmd start` can start Metro for
+normal iterations.
+
+## Verify
+
+```powershell
+npm.cmd run check
+npm.cmd test -- --runInBand
+npm.cmd run server:check
+npm.cmd run server:test
+```
+
+Backend database smoke tests need the local PostgreSQL service. Do not claim a
+passing baseline when dependencies or the database prevented the checks from
+starting.
+
+## Documentation
+
+- [Product brief](docs/brief.md)
+- [Current progress and roadmap](docs/progress.md)
+- [API and data model](docs/api-and-data-model.md)
+- [AI nutrition feasibility and architecture](docs/ai-nutrition.md)
+- [Mobile styling rules](docs/styling.md)
+- [Known implementation notes](docs/notes.md)
+- [Backend documentation](server/docs/progress.md)
+- [Repository agent rules](AGENTS.md)
+
+`docs/upcomoing-task.md` is retained as historical planning input and is
+superseded by `docs/progress.md`.

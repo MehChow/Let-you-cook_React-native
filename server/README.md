@@ -91,6 +91,9 @@ server/
 
 ## Docs
 
+- `../docs/progress.md`: canonical project progress and phased roadmap.
+- `../docs/api-and-data-model.md`: target REST/Hono RPC contract and schema.
+- `../docs/ai-nutrition.md`: final-phase nutrition analysis design.
 - `server/docs/progress.md`: current backend status and next steps.
 - `server/docs/backend-from-scratch.md`: original build plan.
 - `server/docs/backend-guidance.md`: backend architecture notes.
