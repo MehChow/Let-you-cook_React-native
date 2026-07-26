@@ -8,6 +8,16 @@ Last audited: 2026-07-26
 Current branch at audit: `dev`  
 Overall state: polished mocked Expo prototype plus an early local backend.
 
+- Planning milestone: `PLAN-02` — ordered MVP roadmap and Foundation plan ready.
+- Planning branch: `codex/mvp-roadmap`.
+- Next implementation task: `BASE-01` on `codex/mvp-foundation`.
+- Detailed task index: `docs/mvp-roadmap.md`.
+- Ready execution plan:
+  `docs/superpowers/plans/2026-07-26-foundation.md`.
+- Last verified design commit: `af34464`.
+- Automated baseline: not rerun yet; Foundation begins by installing
+  dependencies.
+
 ## Snapshot
 
 ### Completed foundation

@@ -2,8 +2,8 @@
 
 This file contains durable repository rules. Product behavior belongs in
 `docs/brief.md`, the target API and data model in `docs/api-and-data-model.md`,
-AI nutrition behavior in `docs/ai-nutrition.md`, and the delivery roadmap in
-`docs/progress.md`.
+AI nutrition behavior in `docs/ai-nutrition.md`, the static task index in
+`docs/mvp-roadmap.md`, and live delivery state in `docs/progress.md`.
 
 ## Read First
 
@@ -11,6 +11,8 @@ Route the task before loading extra context:
 
 - Any task: read the relevant parts of `docs/brief.md` and the top `Current
 progress` section of `docs/progress.md`.
+- Feature implementation: also read its task IDs in `docs/mvp-roadmap.md` and
+  the linked active plan under `docs/superpowers/plans/`.
 - Mobile/UI task: also read `docs/styling.md` and the exact Expo SDK 56 docs at
   <https://docs.expo.dev/versions/v56.0.0/>.
 - Backend task: also read `server/docs/progress.md`, the relevant file in
