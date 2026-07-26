@@ -9,8 +9,8 @@ Current branch at audit: `codex/mvp-foundation`
 Overall state: polished mocked Expo prototype plus an early local backend.
 
 - Planning milestone: `PLAN-03` — Goal-mode MVP handoff ready.
-- Active foundation task: `BASE-01` verified on `codex/mvp-foundation`.
-- Next implementation task: `BASE-02` on `codex/mvp-foundation`.
+- Active foundation task: `BASE-02` verified on `codex/mvp-foundation`.
+- Next implementation task: `BASE-03` on `codex/mvp-foundation`.
 - Detailed task index: `docs/mvp-roadmap.md`.
 - Goal-mode execution brief: `docs/mvp-goal-prompt.md`.
 - Ready execution plan:
@@ -31,8 +31,24 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   correcting the Windows-incompatible Jest discovery glob and one portable path
   assertion.
 - `npm.cmd run server:check`: exit `0`.
-- `npm.cmd run server:test`: exit `0`; 4 of 5 tests passed and 1 PostgreSQL
-  auth/profile smoke test skipped because local PostgreSQL was unavailable.
+- `docker manifest inspect axllent/mailpit:v1.30.0 --verbose`: exit `0`; the
+  pinned official Mailpit image resolves for `amd64`.
+- `docker compose -f compose.dev.yaml config`: exit `0`; resolved
+  `letyoucook-postgres`, `letyoucook-mailpit`, and the
+  `letyoucook-dev_letyoucook-postgres-data` named volume.
+- `npm.cmd run dev:services:reset` then `npm.cmd run dev:services:up`: exit
+  `0`; reset only the documented `letyoucook-dev` local containers and volume,
+  then started healthy PostgreSQL and Mailpit containers.
+- `docker exec letyoucook-postgres pg_isready -U postgres -d letyoucook`:
+  exit `0`; PostgreSQL reported accepting connections. `Test-NetConnection
+  localhost -Port 1025` reported `TcpTestSucceeded: True`, and
+  `Invoke-WebRequest http://localhost:8025 -UseBasicParsing` returned `200 OK`.
+- `npm.cmd run server:db:migrate`: exit `0`; migrations applied successfully.
+- `npm.cmd run server:test`: exit `0`; all 5 tests passed with 0 failures and
+  0 skips, including the PostgreSQL auth/profile smoke test.
+- `BASE-02` corrected the obsolete `axllent/mailpit:v1` plan reference to the
+  verified pinned `axllent/mailpit:v1.30.0` release after the former returned
+  a Docker registry `not found` error.
 
 ## Snapshot
 

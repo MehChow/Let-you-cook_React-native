@@ -19,9 +19,9 @@ task list.
 
 - Node 20.19 or newer
 - npm
-- Android Studio/emulator or an Android device
+- Docker Desktop or Docker Engine with Docker Compose
+- Android Studio with an Android emulator, or an Android device
 - Expo development client toolchain
-- Docker with the local PostgreSQL container `letyoucook-postgres`
 
 This project has native modules. Do not use Expo web as a development or test
 target.
@@ -29,8 +29,8 @@ target.
 ## Install
 
 ```powershell
-npm.cmd install
-npm.cmd --prefix server install
+npm.cmd ci
+npm.cmd --prefix server ci
 Copy-Item .env.example .env
 Copy-Item server\.env.example server\.env
 ```
@@ -46,7 +46,21 @@ The root example enables wizard debug shortcuts and disables some wizard Zod
 validation. Treat those flags as local UI-development aids, not release
 settings.
 
+`EXPO_PUBLIC_API_URL=http://10.0.2.2:8787` lets an Android emulator reach the
+API running on the development machine. For a physical device, replace it with
+the development machine's reachable LAN URL, such as `http://192.168.1.10:8787`.
+
 ## Run
+
+Start the local PostgreSQL and Mailpit services:
+
+```powershell
+npm.cmd run dev:services:up
+```
+
+PostgreSQL is available at `localhost:5432`. Mailpit is development-only:
+SMTP listens at `localhost:1025`, and its inspection UI/API is at
+`http://localhost:8025`.
 
 Apply the current database migration:
 
@@ -68,6 +82,14 @@ npm.cmd run android
 
 After the development client is installed, `npm.cmd start` can start Metro for
 normal iterations.
+
+Local development data is disposable. The owner-authorized reset command stops
+the services and deletes only the `compose.dev.yaml` service containers and
+their named volume:
+
+```powershell
+npm.cmd run dev:services:reset
+```
 
 ## Verify
 

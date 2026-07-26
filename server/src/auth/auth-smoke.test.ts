@@ -65,7 +65,7 @@ test("auth and profile endpoints work against local Postgres", async (t) => {
   }
 
   const email = `smoke-${Date.now()}@example.com`;
-  const password = "correct-horse-battery";
+  const password = "correct-horse-batter";
 
   await db.delete(users).where(eq(users.email, email));
 

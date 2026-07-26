@@ -6,14 +6,14 @@ Hono + PostgreSQL backend for the Let You Cook Expo app.
 
 Install server dependencies:
 
-```bash
-npm install --prefix server
+```powershell
+npm.cmd --prefix server ci
 ```
 
 Create `server/.env` from the example:
 
-```bash
-cp server/.env.example server/.env
+```powershell
+Copy-Item server\.env.example server\.env
 ```
 
 Default local database:
@@ -72,6 +72,31 @@ List tables:
 
 ```bash
 docker exec letyoucook-postgres psql -U postgres -d letyoucook -c "\dt"
+```
+
+## Local services
+
+Start PostgreSQL and development-only Mailpit from the repository root:
+
+```powershell
+npm.cmd run dev:services:up
+```
+
+Mailpit accepts SMTP at `localhost:1025` and exposes its message inspection
+UI/API at `http://localhost:8025`; it requires no development credentials.
+
+Useful service commands from the repository root:
+
+```powershell
+npm.cmd run dev:services:logs
+npm.cmd run dev:services:down
+```
+
+The owner-authorized local reset below removes only the Compose development
+containers and named volume, so it deletes disposable PostgreSQL data:
+
+```powershell
+npm.cmd run dev:services:reset
 ```
 
 ## Structure

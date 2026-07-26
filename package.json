@@ -18,7 +18,11 @@
     "server:check": "npm --prefix server run check",
     "server:test": "npm --prefix server test",
     "server:db:generate": "npm --prefix server run db:generate",
-    "server:db:migrate": "npm --prefix server run db:migrate"
+    "server:db:migrate": "npm --prefix server run db:migrate",
+    "dev:services:up": "docker compose -f compose.dev.yaml up -d",
+    "dev:services:down": "docker compose -f compose.dev.yaml down",
+    "dev:services:logs": "docker compose -f compose.dev.yaml logs --tail=100",
+    "dev:services:reset": "docker compose -f compose.dev.yaml down -v"
   },
   "dependencies": {
     "@expo-google-fonts/outfit": "^0.4.3",

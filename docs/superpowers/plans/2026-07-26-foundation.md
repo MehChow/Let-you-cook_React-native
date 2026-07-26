@@ -191,7 +191,7 @@ services:
       - letyoucook-postgres-data:/var/lib/postgresql/data
 
   mailpit:
-    image: axllent/mailpit:v1
+    image: axllent/mailpit:v1.30.0
     container_name: letyoucook-mailpit
     ports:
       - "1025:1025"

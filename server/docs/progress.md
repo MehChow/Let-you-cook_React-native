@@ -57,6 +57,22 @@ the schema/contracts before implementing recipe content routes.
 
 Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
 
+### 2026-07-27 00:38:00 HKT
+
+- Completed `BASE-02` local-service provisioning on `codex/mvp-foundation`.
+- Validated `compose.dev.yaml`, then reset only the documented
+  `letyoucook-dev` containers and named volume before starting healthy
+  PostgreSQL 17 and Mailpit `v1.30.0`.
+- `npm.cmd run server:db:migrate` exited `0`; Drizzle applied the existing
+  migrations to the clean local database.
+- `npm.cmd run server:test` exited `0`: 5 passed, 0 failed, 0 skipped. The
+  PostgreSQL auth/profile smoke test ran successfully after correcting its
+  invalid 21-character fixture password to the established 20-character
+  maximum.
+- The original `axllent/mailpit:v1` reference was not resolvable from Docker
+  Hub, so the Compose definition and active Foundation plan now pin the
+  manifest-verified `axllent/mailpit:v1.30.0` release.
+
 ### 2026-07-27 00:20:03 HKT
 
 - Completed `BASE-01` dependency and automated-test baseline on
@@ -194,6 +210,10 @@ installing dependencies before treating this as the current baseline.
 - Passed focused frontend signup, session, and auth screen coverage (34 tests).
 - Passed direct backend signup validation coverage with the Node TypeScript loader.
 - Passed backend type-check after the signup contract update.
+- Validated Compose and started healthy local PostgreSQL and Mailpit services.
+- Applied migrations to the reset local PostgreSQL volume.
+- Passed the backend suite with the PostgreSQL auth/profile smoke test running:
+  5 passed, 0 failed, 0 skipped.
 
 ## Local Database
 
