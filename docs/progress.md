@@ -11,6 +11,13 @@ Overall state: polished mocked Expo prototype plus an early local backend.
 - Planning milestone: `PLAN-03` — Goal-mode MVP handoff ready.
 - Completed delivery track: `BASE-01` through `BASE-06` passed the Foundation
   exit gate and are checked in `docs/mvp-roadmap.md`.
+- `04:00 HKT` stop checkpoint: implementation is paused at the owner's required
+  cutoff. The standalone continuation record is
+  `docs/mvp-handoff-2026-07-27-0400.md`. `dev` and
+  `codex/mvp-foundation` are at `9695294`; `codex/mvp-api-contract` was at
+  planning commit `803a619` before the handoff commit. No API implementation,
+  merge, push, or pull request occurred. The Goal remains active because pause
+  is user-controlled.
 - Next delivery step: execute Task 1 in
   `docs/superpowers/plans/2026-07-27-api-contract-versioning.md` using
   subagent-driven development. The plan preserves current unversioned callers
@@ -23,7 +30,7 @@ Overall state: polished mocked Expo prototype plus an early local backend.
 - Active API-01 implementation plan:
   `docs/superpowers/plans/2026-07-27-api-contract-versioning.md`.
 - Last verified design commit: `af34464`.
-- Active branch at exit: `codex/mvp-foundation`. The final application checkout
+- Foundation branch at exit: `codex/mvp-foundation`. The final application checkout
   tested before the evidence-only documentation commit was
   `34695fcd92ee2fec6587b6945de5a52c658ecee8`.
 - Fresh Foundation history/status gate: the worktree started clean, `dev`
