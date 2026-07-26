@@ -58,6 +58,35 @@ Current task to begin: create the `API-01` implementation plan for coordinated
 
 Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
 
+### 2026-07-27 03:31:00 HKT
+
+- Resolved all three Important findings from the broad Foundation review in one
+  fix wave. The development reset guard now accepts only `postgres:` and
+  `postgresql:` URLs and rejects query-string host, port, `db`, and `database`
+  addressing overrides.
+- TDD RED passed 15/17 tests and failed specifically because
+  `socket://localhost/letyoucook?db=production` and PostgreSQL database query
+  overrides were still accepted. GREEN passed 17/17 backend tests with no
+  failures or skips.
+- Postgres `5432` and Mailpit `1025`/`8025` are published only on
+  `127.0.0.1`. Every root Compose script explicitly selects project
+  `letyoucook-dev`.
+- Rendered Compose configuration under hostile
+  `COMPOSE_PROJECT_NAME=hostile-project` still named `letyoucook-dev` and
+  rendered every published port with host IP `127.0.0.1`. The authorized
+  clean-volume wrapper reset under the same hostile environment removed and
+  recreated only `letyoucook-dev` resources; runtime inspection confirmed both
+  services healthy and their actual bindings loopback-only.
+- Migrations and deterministic reset/seed succeeded on the clean volume.
+  Direct queries returned exactly 2 users and 2 profiles with the intended
+  verified/unverified states.
+- Fresh verification passed server type-check, 17 backend tests, root
+  lint/type-check, and 16 mobile suites / 67 tests.
+- Four Minor findings remain deferred: reset/seed is not atomic; rejected
+  `pool.end()` cleanup is not separately handled; the API base URL accepts
+  query/hash components; and the long-running server has no signal-driven
+  shared-pool shutdown.
+
 ### 2026-07-27 03:02:00 HKT
 
 - Completed the fresh Foundation backend exit gate from application checkout

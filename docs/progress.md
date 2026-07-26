@@ -46,9 +46,18 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   Step 2 Images, Profile, and logout back to Login. The exact boundary between
   the complete `1aededb` matrix and final `34695fc` subset is recorded in
   `docs/verification/foundation-android-smoke.md`.
-- Deferred code-review minors remain unchanged for the broad branch review:
-  reset plus seed is not one transaction, and the server entry point has no
-  explicit graceful shared-pool shutdown. Neither affected this exit result.
+- Broad Foundation review hardening now restricts destructive reset URLs to
+  `postgres:`/`postgresql:`, rejects query-string host, port, database, and
+  `db` addressing overrides, binds all local Postgres/Mailpit host ports to
+  `127.0.0.1`, and pins every Compose wrapper to project `letyoucook-dev`.
+  Under hostile `COMPOSE_PROJECT_NAME=hostile-project`, the reset removed and
+  recreated only the verified `letyoucook-dev` resources. Fresh verification
+  passed server type-check, 17/17 backend tests with no skips, root
+  lint/type-check, and 16/16 mobile suites with 67/67 tests.
+- Four broad-review minors remain deferred: reset plus seed is not atomic;
+  rejected `pool.end()` cleanup is not separately handled; the API base URL
+  accepts query/hash components; and the long-running server lacks explicit
+  signal-driven shared-pool shutdown. None affected the Foundation exit gate.
 - Full command-level exit evidence is in the ignored local report
   `.superpowers/sdd/2026-07-26-foundation/foundation-exit-report.md`.
 - `git status --short --branch`: exit `0`; started on clean

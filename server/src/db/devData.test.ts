@@ -22,6 +22,26 @@ test("accepts the IPv6 loopback development database", () => {
   );
 });
 
+test("accepts the documented PostgreSQL protocol alias", () => {
+  assert.doesNotThrow(() =>
+    assertSafeDevelopmentDatabase(
+      "postgresql://postgres:postgres@localhost:5432/letyoucook",
+    ),
+  );
+});
+
+test("rejects a socket URL that redirects the parsed database", () => {
+  assert.throws(
+    () =>
+      assertSafeDevelopmentDatabase(
+        "socket://localhost/letyoucook?db=production",
+      ),
+    {
+      message: "DATABASE_URL must use a PostgreSQL protocol",
+    },
+  );
+});
+
 test("rejects a remote database host", () => {
   assert.throws(
     () =>
@@ -40,6 +60,18 @@ test("rejects a query-string host override", () => {
       ),
     /Refusing to reset a database with connection-addressing overrides/,
   );
+});
+
+test("rejects query-string database addressing overrides", () => {
+  for (const parameter of ["db", "database"]) {
+    assert.throws(
+      () =>
+        assertSafeDevelopmentDatabase(
+          `postgres://user:secret@localhost:5432/letyoucook?${parameter}=production`,
+        ),
+      /Refusing to reset a database with connection-addressing overrides/,
+    );
+  }
 });
 
 test("rejects a different local database name", () => {

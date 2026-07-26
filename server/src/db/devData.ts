@@ -6,6 +6,8 @@ import { profiles, users } from "./schema";
 
 const DEVELOPMENT_DATABASE_NAME = "letyoucook";
 const LOCAL_DATABASE_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
+const POSTGRESQL_PROTOCOLS = new Set(["postgres:", "postgresql:"]);
+const CONNECTION_ADDRESSING_PARAMETERS = ["database", "db", "host", "port"];
 
 export const DEVELOPMENT_SEED_PASSWORD = "coffee123";
 
@@ -37,10 +39,18 @@ export const assertSafeDevelopmentDatabase = (databaseUrl: string): void => {
     throw new Error("DATABASE_URL is invalid for development reset");
   }
 
+  if (!POSTGRESQL_PROTOCOLS.has(parsed.protocol)) {
+    throw new Error("DATABASE_URL must use a PostgreSQL protocol");
+  }
+
   const databaseName = parsed.pathname.replace(/^\//, "");
   const databaseHost = parsed.hostname.replace(/^\[|\]$/g, "");
 
-  if (parsed.searchParams.has("host") || parsed.searchParams.has("port")) {
+  if (
+    CONNECTION_ADDRESSING_PARAMETERS.some((parameter) =>
+      parsed.searchParams.has(parameter),
+    )
+  ) {
     throw new Error(
       "Refusing to reset a database with connection-addressing overrides",
     );
