@@ -5,18 +5,23 @@
 > old task lists or screenshots.
 
 Last audited: 2026-07-27
-Current branch at audit: `codex/mvp-foundation`
+Current branch at audit: `codex/mvp-api-contract`
 Overall state: polished mocked Expo prototype plus an early local backend.
 
 - Planning milestone: `PLAN-03` — Goal-mode MVP handoff ready.
 - Completed delivery track: `BASE-01` through `BASE-06` passed the Foundation
   exit gate and are checked in `docs/mvp-roadmap.md`.
-- Next delivery step: create the `API-01` implementation plan on the API
-  contracts track; do not begin implementation without that fresh plan.
+- Next delivery step: execute Task 1 in
+  `docs/superpowers/plans/2026-07-27-api-contract-versioning.md` using
+  subagent-driven development. The plan preserves current unversioned callers
+  while adding the canonical `/v1` route tree; do not mark `API-01` complete
+  until its TDD, review, and verification gates pass.
 - Detailed task index: `docs/mvp-roadmap.md`.
 - Goal-mode execution brief: `docs/mvp-goal-prompt.md`.
 - Completed Foundation execution plan:
   `docs/superpowers/plans/2026-07-26-foundation.md`.
+- Active API-01 implementation plan:
+  `docs/superpowers/plans/2026-07-27-api-contract-versioning.md`.
 - Last verified design commit: `af34464`.
 - Active branch at exit: `codex/mvp-foundation`. The final application checkout
   tested before the evidence-only documentation commit was

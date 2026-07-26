@@ -16,8 +16,10 @@ This file is the backend handoff. When asked to continue backend work:
    - any new verification under [Verified](#verified)
    - the next unchecked task
 
-Current task to begin: create the `API-01` implementation plan for coordinated
-`/v1` routing while keeping `/health` unversioned.
+Current task to begin: execute Task 1 in
+`docs/superpowers/plans/2026-07-27-api-contract-versioning.md` to add the
+canonical `/v1` route tree while keeping `/health` unversioned and retaining
+temporary compatibility aliases for current callers.
 
 ## Current State
 
