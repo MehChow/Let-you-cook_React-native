@@ -9,15 +9,48 @@ Current branch at audit: `codex/mvp-foundation`
 Overall state: polished mocked Expo prototype plus an early local backend.
 
 - Planning milestone: `PLAN-03` — Goal-mode MVP handoff ready.
-- Completed foundation task: `BASE-06` added a guarded local development reset
-  and deterministic verified/unverified account seeds.
-- Next delivery step: complete the Foundation exit review, then create the
-  `API-01` implementation plan.
+- Completed delivery track: `BASE-01` through `BASE-06` passed the Foundation
+  exit gate and are checked in `docs/mvp-roadmap.md`.
+- Next delivery step: create the `API-01` implementation plan on the API
+  contracts track; do not begin implementation without that fresh plan.
 - Detailed task index: `docs/mvp-roadmap.md`.
 - Goal-mode execution brief: `docs/mvp-goal-prompt.md`.
-- Ready execution plan:
+- Completed Foundation execution plan:
   `docs/superpowers/plans/2026-07-26-foundation.md`.
 - Last verified design commit: `af34464`.
+- Active branch at exit: `codex/mvp-foundation`. The final application checkout
+  tested before the evidence-only documentation commit was
+  `34695fcd92ee2fec6587b6945de5a52c658ecee8`.
+- Fresh Foundation history/status gate: the worktree started clean, `dev`
+  resolved to `2dd839cff374b79794a27706e013db99e2841528`, and
+  `git log --oneline dev..HEAD` contained task-prefixed commits for every
+  `BASE-01` through `BASE-06` item.
+- Fresh Foundation automated exit gates at `34695fc`: `npm.cmd run check`
+  exited `0`; `npm.cmd test -- --runInBand` passed 16/16 suites and 67/67
+  tests; `npm.cmd run server:check` exited `0`; and
+  `npm.cmd run server:test` passed 14/14 tests with 0 failures and 0 skips.
+- Clean-volume reproduction removed only the revalidated
+  `letyoucook-dev_letyoucook-postgres-data` development volume plus its
+  `letyoucook-dev` containers/network. The documented up command recreated
+  those resources; runtime inspection reported both PostgreSQL and Mailpit
+  `running|healthy`, PostgreSQL accepted connections, Mailpit HTTP returned
+  `200`, and SMTP port `1025` was reachable.
+- Migrations applied successfully to the empty PostgreSQL volume. The guarded
+  development reset then recreated exactly two users and two profiles:
+  `verified@letyoucook.local` had verification present and
+  `unverified@letyoucook.local` did not. The post-seed backend suite again
+  passed 14/14 with 0 skips.
+- The final native subset passed on the existing additive `Codex_API_36`
+  emulator using `agent-device` `0.20.0`: Login, demo Login to Home, Home to
+  Recipe Detail to Reviews with both reverse routes, Add Recipe Basics through
+  Step 2 Images, Profile, and logout back to Login. The exact boundary between
+  the complete `1aededb` matrix and final `34695fc` subset is recorded in
+  `docs/verification/foundation-android-smoke.md`.
+- Deferred code-review minors remain unchanged for the broad branch review:
+  reset plus seed is not one transaction, and the server entry point has no
+  explicit graceful shared-pool shutdown. Neither affected this exit result.
+- Full command-level exit evidence is in the ignored local report
+  `.superpowers/sdd/2026-07-26-foundation/foundation-exit-report.md`.
 - `git status --short --branch`: exit `0`; started on clean
   `codex/mvp-foundation` worktree.
 - `git branch --show-current`: exit `0`; reported `codex/mvp-foundation`.

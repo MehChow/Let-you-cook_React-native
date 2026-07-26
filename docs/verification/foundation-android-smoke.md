@@ -1,16 +1,43 @@
-# Foundation Android Route Smoke Baseline
+# Foundation Android Route Smoke Verification
 
 Date: 2026-07-27
 
 ## Overall result
 
-**PASS after two tested navigation fixes.** The Expo development client built,
-installed, and opened on an Android 16 / API 36 emulator. Every requested auth
-and protected route rendered without a blank safe-area layout or fatal native
-error. Back navigation, keyboard dismissal, tab switching, the local demo
-login, and logout were exercised through the native UI.
+**PASS.** The original complete route matrix passed at application commit
+`1aededb` after two tested navigation fixes. A final Foundation exit subset then
+passed from the exact `codex/mvp-foundation` checkout at `34695fc`: Login, demo
+Login to Home, Recipe Detail and Reviews with reverse navigation, a meaningful
+Add Recipe wizard step, Profile, and logout back to Login.
 
-## Environment and startup evidence
+The later Foundation exit evidence commit is documentation-only. It does not
+change the application source tested from checkout `34695fc`, and it must not be
+treated as a second application build or a replacement for the complete matrix
+at `1aededb`.
+
+## Final Foundation exit subset
+
+| Item | Fresh exit evidence |
+| --- | --- |
+| Tested checkout | `34695fcd92ee2fec6587b6945de5a52c658ecee8` (`BASE-06: Harden development reset safety`) before the evidence-only documentation commit |
+| Native runtime | Existing additive `Codex_API_36` AVD, Android API 36, `emulator-5554`, `sys.boot_completed=1` |
+| Controller | `agent-device.cmd` `0.20.0`; version-matched workflow, React Native, and manual-QA help read; session `foundation-exit` closed after the run |
+| App and Metro | Existing installed development client `com.meh_chow.LetYouCook`; Metro on port `8081` was owned by the exact Foundation worktree and served the current checkout |
+| Backend | Port `8787` was owned by the exact Foundation worktree; `GET /health` returned `200 {"ok":true}` |
+| Login and Home | Login rendered; `gg@gmail.com` / the documented demo password advanced to Home |
+| Recipe navigation | Home's `Juicy pepper wings` card opened Recipe Detail; `Ratings & Reviews (24)` opened Reviews; app back returned to Detail and the visible Detail Back control returned Home |
+| Add Recipe | Add opened Step 1; entered `Foundation Exit Dish`, cook time `30`, and servings `4`; Continue advanced to Step 2 Images; the disposable in-memory draft was discarded |
+| Profile and logout | Profile rendered its recipe actions and Log out control; Log out returned to a fresh Login form |
+| Result | Pass; no blank screen, fatal native error, route fallback, or application-source change was observed |
+
+The first sandboxed discovery call could not write agent-device's normal user
+profile log and stopped with `EPERM` before reaching Android. Repeating the same
+read with the required host permission found the booted emulator. A text wait
+also timed out while its own current-surface diagnostic already showed Login;
+the required full interactive snapshot confirmed the visible Login state. These
+were controller-environment recoveries, not application failures.
+
+## Original full-matrix environment and startup evidence
 
 | Item | Observed result |
 | --- | --- |
@@ -38,7 +65,7 @@ The native build emitted non-fatal SDK XML version, deprecated API, and CMake
 object-path warnings. No compiler failure, React Native fatal exception, or
 blank native screen was observed.
 
-## Route and interaction matrix
+## Original complete route and interaction matrix
 
 | Surface / behavior | Result | Native evidence |
 | --- | --- | --- |

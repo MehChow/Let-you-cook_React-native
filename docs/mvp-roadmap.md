@@ -41,12 +41,12 @@ subtask receives a separate commit whose subject starts with the task ID.
 
 Dependencies: approved MVP design.
 
-- [ ] `BASE-01` Install root/server dependencies and establish passing checks.
-- [ ] `BASE-02` Add reproducible PostgreSQL and Mailpit Docker Compose services.
-- [ ] `BASE-03` Verify every existing route in the Android development client.
-- [ ] `BASE-04` Standardize environment and Android API-host configuration.
-- [ ] `BASE-05` Correct stale repository paths in documentation.
-- [ ] `BASE-06` Add safe development reset, seed, and test-fixture support.
+- [x] `BASE-01` Install root/server dependencies and establish passing checks.
+- [x] `BASE-02` Add reproducible PostgreSQL and Mailpit Docker Compose services.
+- [x] `BASE-03` Verify every existing route in the Android development client.
+- [x] `BASE-04` Standardize environment and Android API-host configuration.
+- [x] `BASE-05` Correct stale repository paths in documentation.
+- [x] `BASE-06` Add safe development reset, seed, and test-fixture support.
 
 Exit: a fresh clone starts PostgreSQL, Mailpit, backend, and Android app using
 documented commands, and the existing automated baseline passes.

@@ -16,8 +16,8 @@ This file is the backend handoff. When asked to continue backend work:
    - any new verification under [Verified](#verified)
    - the next unchecked task
 
-Current task to begin: finish auth integration/account lifecycle, then migrate
-the schema/contracts before implementing recipe content routes.
+Current task to begin: create the `API-01` implementation plan for coordinated
+`/v1` routing while keeping `/health` unversioned.
 
 ## Current State
 
@@ -40,6 +40,8 @@ the schema/contracts before implementing recipe content routes.
 
 ## Next Task Queue
 
+- [ ] Create the `API-01` implementation plan, then add `/v1` routing in a
+  coordinated server/mobile change while keeping `/health` unversioned.
 - [x] Add app-side auth API wrappers under `src/features/auth/api.ts`.
 - [x] Install and wire `expo-secure-store` for access and refresh token storage.
 - [x] Add a shared API client wrapper that retries once after token refresh.
@@ -47,7 +49,6 @@ the schema/contracts before implementing recipe content routes.
 - [ ] Add `EmailSender`, SMTP/Mailpit development delivery, and a test fake.
 - [ ] Implement mandatory email verification, password reset, and account
   deletion.
-- [ ] Add `/v1` routing in a coordinated server/mobile change.
 - [ ] Apply the recipe/category/tag/review/media schema direction from
   `docs/api-and-data-model.md`.
 - [ ] Add R2 upload-intent/completion support before recipe CRUD.
@@ -56,6 +57,31 @@ the schema/contracts before implementing recipe content routes.
 ## Progress Log
 
 Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
+
+### 2026-07-27 03:02:00 HKT
+
+- Completed the fresh Foundation backend exit gate from application checkout
+  `34695fcd92ee2fec6587b6945de5a52c658ecee8` on
+  `codex/mvp-foundation`.
+- Revalidated ignored `server/.env` as `localhost:5432/letyoucook` with no
+  query-string address overrides, Compose project `letyoucook-dev`, containers
+  `letyoucook-postgres` and `letyoucook-mailpit`, named volume
+  `letyoucook-dev_letyoucook-postgres-data`, and live database identity
+  `letyoucook|postgres`.
+- The owner-authorized clean-volume reset removed only those documented local
+  development resources. The documented up command recreated them, and runtime
+  inspection reported PostgreSQL and Mailpit `running|healthy`; PostgreSQL
+  accepted connections, Mailpit HTTP returned `200`, and SMTP port `1025` was
+  reachable.
+- Applied migrations to the empty volume, ran the guarded reset/seed, and
+  directly verified exactly 2 users and 2 profiles. The verified seed had
+  `email_verified_at` present; the unverified seed did not.
+- Fresh exit verification passed: root check; 16 mobile suites / 67 tests;
+  server type-check; and 14 backend tests with 0 failures and 0 skips both
+  before and after the clean-volume reproduction.
+- Next action is current: create the `API-01` plan before beginning `/v1`
+  implementation. Deferred broad-review minors remain reset/seed atomicity and
+  graceful shared-pool shutdown; no code change was made for either here.
 
 ### 2026-07-27 02:36:44 HKT
 
@@ -235,18 +261,17 @@ Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
 
 ## Verified
 
-Current `BASE-06` evidence:
+Current Foundation exit evidence:
 
-- Passed all 4 required development-database guard tests after observing the
-  missing-module RED, plus the IPv6-loopback regression after its own RED.
-- Confirmed the reset target was the ignored local URL
-  `localhost:5432/letyoucook` and the running `letyoucook-dev` Compose
-  PostgreSQL container.
-- Executed the destructive reset successfully and directly verified exactly the
-  2 documented seed rows.
-- Passed security regressions for addressing overrides, sanitized malformed
-  URLs, password-free success output, and sanitized CLI errors.
-- Passed server type-check and all 14 server tests with 0 failures and 0 skips.
+- Reproduced the documented services from an empty
+  `letyoucook-dev_letyoucook-postgres-data` volume after revalidating the exact
+  local development target.
+- Runtime reported both PostgreSQL and Mailpit healthy; migrations applied to
+  the empty database.
+- The guarded reset/seed produced exactly the two documented users and two
+  profiles with the expected verification states.
+- Passed server type-check; all 14 server tests passed with 0 failures and 0
+  skips both before and after clean-volume reproduction.
 - Passed root lint/type-check and all 16 mobile suites with 67 tests.
 
 The entries below are historical successful runs. At the 2026-07-26 audit,
