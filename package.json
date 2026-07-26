@@ -108,8 +108,8 @@
       "/node_modules/@react-native/babel-preset/"
     ],
     "testMatch": [
-      "<rootDir>/__tests__/**/*.test.ts",
-      "<rootDir>/__tests__/**/*.test.tsx"
+      "**/__tests__/**/*.test.ts",
+      "**/__tests__/**/*.test.tsx"
     ]
   }
 }

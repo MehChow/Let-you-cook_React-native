@@ -2,6 +2,7 @@ const {
   resolveSearchRoot,
   findConvertibleFiles,
 } = require("../scripts/convert-assets.cjs");
+const path = require("node:path");
 
 describe("convert-assets helpers", () => {
   it("prefers npm INIT_CWD over process cwd", () => {
@@ -10,7 +11,7 @@ describe("convert-assets helpers", () => {
         initCwd: "/repo/assets/screenshot",
         cwd: "/repo",
       }),
-    ).toBe("/repo/assets/screenshot");
+    ).toBe(path.resolve("/repo/assets/screenshot"));
   });
 
   it("only returns source image formats", async () => {

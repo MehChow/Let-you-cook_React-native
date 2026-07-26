@@ -57,6 +57,15 @@ the schema/contracts before implementing recipe content routes.
 
 Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
 
+### 2026-07-27 00:20:03 HKT
+
+- Completed `BASE-01` dependency and automated-test baseline on
+  `codex/mvp-foundation` with Node `v24.14.0` and npm `11.9.0`.
+- `npm.cmd --prefix server ci` and `npm.cmd run server:check` both exited `0`.
+- `npm.cmd run server:test` exited `0`: 4 passed, 0 failed, 1 skipped of 5
+  tests. The PostgreSQL auth/profile smoke test skipped because local PostgreSQL
+  was unavailable; this is not database-success evidence.
+
 ### 2026-07-26 00:00:00 HKT
 
 - Audited the full server/mobile integration and corrected the project-wide

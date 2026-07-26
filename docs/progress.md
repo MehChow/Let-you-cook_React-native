@@ -4,20 +4,30 @@
 > feature handoff so a new agent can establish the real state without trusting
 > old task lists or screenshots.
 
-Last audited: 2026-07-26  
-Current branch at audit: `dev`  
+Last audited: 2026-07-27
+Current branch at audit: `codex/mvp-foundation`
 Overall state: polished mocked Expo prototype plus an early local backend.
 
 - Planning milestone: `PLAN-03` — Goal-mode MVP handoff ready.
-- Planning branch: `codex/mvp-roadmap`.
-- Next implementation task: `BASE-01` on `codex/mvp-foundation`.
+- Active foundation task: `BASE-01` verified on `codex/mvp-foundation`.
+- Next implementation task: `BASE-02` on `codex/mvp-foundation`.
 - Detailed task index: `docs/mvp-roadmap.md`.
 - Goal-mode execution brief: `docs/mvp-goal-prompt.md`.
 - Ready execution plan:
   `docs/superpowers/plans/2026-07-26-foundation.md`.
 - Last verified design commit: `af34464`.
-- Automated baseline: not rerun yet; Foundation begins by installing
-  dependencies.
+- Baseline runtime: Node `v24.14.0`; npm `11.9.0`.
+- `npm.cmd ci`: exit `0`; root dependencies installed and the tracked
+  `react-native-draggable-flatlist@4.0.3` patch applied cleanly.
+- `npm.cmd --prefix server ci`: exit `0`.
+- `npm.cmd run check`: exit `0` after adding the missing CSS side-effect
+  declaration required by TypeScript 6.
+- `npm.cmd test -- --runInBand`: exit `0`; 13 suites and 59 tests passed after
+  correcting the Windows-incompatible Jest discovery glob and one portable path
+  assertion.
+- `npm.cmd run server:check`: exit `0`.
+- `npm.cmd run server:test`: exit `0`; 4 of 5 tests passed and 1 PostgreSQL
+  auth/profile smoke test skipped because local PostgreSQL was unavailable.
 
 ## Snapshot
 
