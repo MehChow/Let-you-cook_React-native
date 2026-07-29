@@ -4,7 +4,7 @@ Plan: `docs/superpowers/plans/2026-07-30-zod-dto-contracts.md`
 Design: `docs/superpowers/specs/2026-07-30-zod-dto-contracts-design.md`
 Branch: `codex/mvp-dto-contracts`
 Base: `dev` at `5f6450e42b60a460e2c4c81032d967a3a73f9818`
-Status: Task 1 complete; Task 2 implemented and awaiting review
+Status: Task 1 complete; Task 2 review fix pending verification
 
 ## Decisions
 
@@ -19,7 +19,7 @@ Status: Task 1 complete; Task 2 implemented and awaiting review
 ## Task Status
 
 - API-04A: complete after clean fix-wave re-review
-- API-04B: implementation complete; review pending
+- API-04B: implementation and review fix complete; verification pending
 - API-04C: pending
 - Whole-branch review: pending
 - Exit verification: pending
@@ -56,3 +56,7 @@ Status: Task 1 complete; Task 2 implemented and awaiting review
   internal `refreshTokenId`; access/refresh tokens, statuses, aliases, and auth
   semantics are unchanged. Backend verification passed 71/71 with zero skips,
   server type-check, and `git diff --check`.
+- 2026-07-30: Task 2 review found no Critical issues, one Important explicit
+  projection gap in login's database select, and one Minor route-parse mutation
+  coverage gap. Login now selects only `id`, `email`, and the password hash
+  needed for verification; the response still projects only `id` and `email`.

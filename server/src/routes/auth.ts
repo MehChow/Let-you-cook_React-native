@@ -113,7 +113,11 @@ export const authRoutes = new Hono<RequestIdEnv>()
     async (c) => {
       const body = c.req.valid("json");
       const [user] = await db
-        .select()
+        .select({
+          id: users.id,
+          email: users.email,
+          passwordHash: users.passwordHash,
+        })
         .from(users)
         .where(eq(users.email, body.email))
         .limit(1);
