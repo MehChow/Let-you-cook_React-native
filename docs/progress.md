@@ -5,7 +5,7 @@
 > old task lists or screenshots.
 
 Last audited: 2026-07-30
-Current branch at audit: `codex/mvp-api-contract`
+Current branch at audit: `codex/mvp-error-contract`
 Overall state: polished mocked Expo prototype plus an early local backend.
 
 - Planning milestone: `PLAN-03` — Goal-mode MVP handoff ready.
@@ -37,16 +37,23 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   `npm.cmd run check` passed; and `npm.cmd test -- --runInBand` passed 16/16
   suites and 67/67 tests. Only documented `letyoucook-dev` PostgreSQL and
   Mailpit services were started; no Expo web, Metro, or backend listener ran.
-- The closure-documentation re-review is pending. `API-01` is complete and
-  checked; begin `API-02` only after that re-review confirms this closure wave.
-- Next delivery step: `API-02`, Define the shared error envelope and request
-  IDs. Do not start it until the API-01 closure re-review passes.
+- `API-01` passed its closure re-review and fresh merged-result verification,
+  then fast-forwarded into `dev` at `7d21b95`; its feature branch and worktree
+  were removed after the merged tree passed focused 3/3, backend 19/19 with
+  zero skips, root check, and 16/16 Jest suites with 67/67 tests.
+- Active delivery step: `API-02`, Define the shared error envelope and request
+  IDs. Its approved design is
+  `docs/superpowers/specs/2026-07-30-api-error-contract-design.md`; implementation
+  is ready to begin from `docs/superpowers/plans/2026-07-30-api-error-contract.md`
+  on `codex/mvp-error-contract`.
 - Detailed task index: `docs/mvp-roadmap.md`.
 - Goal-mode execution brief: `docs/mvp-goal-prompt.md`.
 - Completed Foundation execution plan:
   `docs/superpowers/plans/2026-07-26-foundation.md`.
-- Active API-01 implementation plan:
+- Completed API-01 implementation plan:
   `docs/superpowers/plans/2026-07-27-api-contract-versioning.md`.
+- Active API-02 implementation plan:
+  `docs/superpowers/plans/2026-07-30-api-error-contract.md`.
 - Last verified design commit: `af34464`.
 - Foundation branch at exit: `codex/mvp-foundation`. The final application checkout
   tested before the evidence-only documentation commit was

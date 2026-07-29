@@ -16,11 +16,12 @@ This file is the backend handoff. When asked to continue backend work:
    - any new verification under [Verified](#verified)
    - the next unchecked task
 
-Current task: begin `API-02`, Define the shared error envelope and request IDs,
-only after the API-01 closure-documentation re-review passes. `API-01` task and
-broad reviews passed with no Critical or Important findings. Its canonical
-`/v1` route tree keeps `/health` unversioned and temporary compatibility aliases
-protect current callers until `AUTH-01`.
+Current task: execute `API-02`, Define the shared error envelope and request
+IDs, from `docs/superpowers/plans/2026-07-30-api-error-contract.md` on
+`codex/mvp-error-contract`. `API-01` passed closure re-review and merged-result
+verification before its branch was fast-forwarded into `dev` at `7d21b95`.
+Its canonical `/v1` route tree keeps `/health` unversioned and temporary
+compatibility aliases protect current callers until `AUTH-01`.
 
 ## Current State
 
@@ -45,8 +46,8 @@ protect current callers until `AUTH-01`.
 
 - [x] `API-01` Introduce `/v1` while keeping `/health` unversioned; legacy
   aliases remain until `AUTH-01`.
-- [ ] `API-02` Define the shared error envelope and request IDs after the
-  API-01 closure-documentation re-review passes.
+- [ ] `API-02` Define the shared error envelope and server-generated request
+  IDs; design approved and implementation planned.
 - [x] Add app-side auth API wrappers under `src/features/auth/api.ts`.
 - [x] Install and wire `expo-secure-store` for access and refresh token storage.
 - [x] Add a shared API client wrapper that retries once after token refresh.
