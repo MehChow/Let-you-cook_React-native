@@ -137,11 +137,11 @@ select a code; they do not duplicate status/message pairs.
 | `invalid_access_token` | 401 | `Authentication is invalid or expired.` | Invalid bearer token |
 | `invalid_credentials` | 401 | `Email or password is incorrect.` | Failed login |
 | `invalid_refresh_token` | 401 | `Refresh token is invalid.` | Unknown refresh token |
-| `refresh_token_expired` | 401 | `Refresh token has expired.` | Expired refresh token |
-| `refresh_token_reuse_detected` | 403 | `This session is no longer valid.` | Reused refresh token |
+| `refresh_token_expired` | 401 | `Refresh token has expired.` | Unrevoked expired refresh token |
+| `refresh_token_reuse_detected` | 403 | `This session is no longer valid.` | Already-revoked refresh token |
 | `resource_not_found` | 404 | `The requested resource was not found.` | Missing profile |
 | `route_not_found` | 404 | `The requested endpoint was not found.` | Unmatched route |
-| `email_already_registered` | 409 | `Email is already registered.` | Signup uniqueness conflict |
+| `email_already_registered` | 409 | `Email is already registered.` | `users_email_unique` conflict |
 | `not_implemented` | 501 | `This operation is not available yet.` | Current route placeholders |
 | `internal_server_error` | 500 | `The server could not complete the request.` | Unexpected exception |
 
@@ -188,6 +188,13 @@ objects, stack traces, database errors, and thrown error messages are omitted.
 Malformed JSON remains `400` but uses `malformed_request` without
 `fieldErrors`.
 
+An unrevoked token whose expiry has passed returns `401
+refresh_token_expired`. Presenting any token already marked revoked—whether it
+was replaced during rotation or explicitly revoked by logout—returns `403
+refresh_token_reuse_detected` and revokes the user's remaining active refresh
+tokens. This records the existing auth behavior; API-02 does not change those
+session semantics.
+
 ## Root Error Boundaries
 
 The root app is typed with `RequestIdEnv` and registers middleware before every
@@ -212,9 +219,11 @@ explicit returns rather than thrown exceptions.
 The implementation converts all current error-producing branches:
 
 - auth validator failures;
-- signup duplicate email;
+- signup `users_email_unique` conflicts, without classifying later
+  profile/token uniqueness failures as duplicate email;
 - login invalid credentials;
-- invalid, expired, and reused refresh tokens;
+- invalid refresh tokens, unrevoked expired tokens, and already-revoked tokens
+  from rotation or logout;
 - auth middleware missing/invalid bearer tokens;
 - profile validator failures and missing current profile;
 - recipe, image, report, and block `501` placeholders;

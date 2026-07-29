@@ -400,6 +400,8 @@ Update `server/src/auth/signup-validation.test.ts` to assert the exact validatio
 - unknown refresh token: `401 invalid_refresh_token`;
 - expired refresh token: `401 refresh_token_expired`;
 - reused refresh token: `403 refresh_token_reuse_detected`;
+- logout-revoked refresh token: `403 refresh_token_reuse_detected`, with the
+  existing revoke-all-active-sessions behavior;
 - valid-token lookup for a deleted profile: `404 resource_not_found`.
 
 Each test must compare body request ID to `X-Request-Id` and must clean up only its own fixture rows.
@@ -444,11 +446,11 @@ Replace only the current failure branches with these exact mappings:
 
 | Source | Code |
 | --- | --- |
-| Signup unique violation | `email_already_registered` |
+| User insert violates `users_email_unique` | `email_already_registered` |
 | Login failed credentials | `invalid_credentials` |
 | Unknown refresh token | `invalid_refresh_token` |
-| Reused refresh token | `refresh_token_reuse_detected` |
-| Expired/revoked refresh token | `refresh_token_expired` |
+| Any already-revoked refresh token, including rotation replay or logout | `refresh_token_reuse_detected` |
+| Unrevoked expired refresh token | `refresh_token_expired` |
 | Missing profile | `resource_not_found` |
 | Recipe detail/create placeholder | `not_implemented` |
 | Image upload placeholder | `not_implemented` |
@@ -487,6 +489,13 @@ Submit the exact task range for task review, then run the mandatory whole-branch
 Only after task and broad reviews have no open Critical/Important findings:
 
 - fix the complete final-review finding set in one wave;
+- preserve the current revoked-token behavior: any already-revoked token
+  returns `403 refresh_token_reuse_detected` and revokes remaining active
+  sessions, while only an unrevoked expired token returns
+  `401 refresh_token_expired`;
+- map only the user insert's exact `users_email_unique` constraint to
+  `email_already_registered`; rethrow later or unrelated uniqueness failures;
+- copy the server-owned request-ID guarantees into the durable API contract;
 - check only `API-02` in `docs/mvp-roadmap.md`;
 - advance `docs/progress.md` and `server/docs/progress.md` to `API-03`;
 - retain `AUTH-01`, `API-03`, and later tasks unchecked;
@@ -496,7 +505,7 @@ Only after task and broad reviews have no open Critical/Important findings:
 Commit:
 
 ```powershell
-git add docs/progress.md server/docs/progress.md docs/mvp-roadmap.md
+git add server/src/routes/auth.ts server/src/auth/auth-smoke.test.ts docs/api-and-data-model.md docs/superpowers/specs/2026-07-30-api-error-contract-design.md docs/superpowers/plans/2026-07-30-api-error-contract.md docs/progress.md server/docs/progress.md docs/mvp-roadmap.md
 git commit -m "API-02: Close error contract review"
 ```
 

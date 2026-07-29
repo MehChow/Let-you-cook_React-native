@@ -41,8 +41,8 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   then fast-forwarded into `dev` at `7d21b95`; its feature branch and worktree
   were removed after the merged tree passed focused 3/3, backend 19/19 with
   zero skips, root check, and 16/16 Jest suites with 67/67 tests.
-- Active delivery step: review `API-02`, Define the shared error envelope and
-  request IDs, on `codex/mvp-error-contract`. Tasks 1-3 now assign a
+- Completed delivery item: `API-02`, Define the shared error envelope and
+  request IDs, is checked in `docs/mvp-roadmap.md`. Its three tasks assign a
   server-owned request ID, provide the typed shared error helpers/root
   boundaries, and convert every current validator, auth/profile failure, and
   recipe/image/report/block placeholder without changing success bodies or
@@ -62,9 +62,26 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   `npm.cmd run check` passed; `npm.cmd test -- --runInBand` passed 16/16 suites
   and 67/67 tests; and `git diff --check` passed. No backend listener, Metro,
   Expo web, schema, migration, DTO, mobile, or logging work occurred.
-- Review state: exact Task 3 review and the mandatory whole-branch review are
-  pending. `API-02` remains unchecked, and work must not advance to `API-03`
-  until the reviewed closure wave and fresh exit verification pass.
+- Final review found one Important contract mismatch for logout-revoked refresh
+  tokens and two Minors for broad signup `23505` classification and missing
+  durable request-ID guarantees. The single authorized fix wave preserves the
+  existing `403` plus revoke-all behavior for every already-revoked token,
+  narrows duplicate email to the user insert's exact `users_email_unique`
+  constraint, and updates the durable API contract.
+- Closure-wave TDD evidence: the new real-Postgres logout/replay
+  characterization passed 8/8 immediately, proving runtime semantics already
+  matched the required behavior. The wished-for constraint classifier was RED
+  because its export did not exist; after the minimal strict implementation,
+  auth smoke passed 9/9 with zero skips against real `users_email_unique` and
+  `profiles_pkey` violations.
+- Fresh closure-wave gates: the focused contract suite passed 36/36; server
+  type-check passed; the backend suite passed 50/50 with zero skips; root
+  lint/type-check passed; all 16 native-focused Jest suites and 67 tests passed;
+  and `git diff --check` passed.
+- Next queued delivery item: `API-03`, Define cursor pagination and
+  deterministic sorting, remains unchecked and has not started. The scoped
+  closure re-review and fresh verification on the exact committed closure head
+  remain pending before merge or API-03 implementation.
 - Detailed task index: `docs/mvp-roadmap.md`.
 - Goal-mode execution brief: `docs/mvp-goal-prompt.md`.
 - Completed Foundation execution plan:

@@ -12,6 +12,7 @@ import {
   type NonValidationErrorCode,
 } from "../http/errors";
 import { REQUEST_ID_HEADER } from "../http/requestId";
+import { isUsersEmailUniqueViolation } from "../routes/auth";
 
 process.env.JWT_SECRET ??= "test-secret";
 
@@ -172,6 +173,45 @@ test("duplicate signup returns the registered-email error envelope", async () =>
   }
 });
 
+test("database classifier accepts only the users email constraint", async () => {
+  const email = `api02-constraint-${Date.now()}@example.com`;
+  const password = "correct-horse-batter";
+
+  try {
+    const signup = await postJson<AuthResponse>(
+      "/v1/auth/signup",
+      { email, password, displayName: "Constraint Tester" },
+      201,
+    );
+
+    let emailConflict: unknown;
+    try {
+      await db.insert(users).values({
+        email,
+        passwordHash: "constraint-test-only",
+      });
+    } catch (error) {
+      emailConflict = error;
+    }
+    assert.ok(emailConflict);
+    assert.equal(isUsersEmailUniqueViolation(emailConflict), true);
+
+    let profileConflict: unknown;
+    try {
+      await db.insert(profiles).values({
+        userId: signup.user.id,
+        displayName: "Duplicate Profile",
+      });
+    } catch (error) {
+      profileConflict = error;
+    }
+    assert.ok(profileConflict);
+    assert.equal(isUsersEmailUniqueViolation(profileConflict), false);
+  } finally {
+    await db.delete(users).where(eq(users.email, email));
+  }
+});
+
 test("wrong-password login returns the invalid-credentials envelope", async () => {
   const email = `api02-password-${Date.now()}@example.com`;
   const password = "correct-horse-batter";
@@ -266,6 +306,62 @@ test("reused refresh token returns the reuse-detected envelope", async () => {
     });
 
     await assertErrorResponse(response, {
+      status: 403,
+      code: "refresh_token_reuse_detected",
+      message: "This session is no longer valid.",
+    });
+  } finally {
+    await db.delete(users).where(eq(users.email, email));
+  }
+});
+
+test("logout-revoked refresh detects reuse and invalidates active sessions", async () => {
+  const email = `api02-logout-reuse-${Date.now()}@example.com`;
+  const password = "correct-horse-batter";
+
+  try {
+    const signup = await postJson<AuthResponse>(
+      "/v1/auth/signup",
+      { email, password, displayName: "Logout Reuse Tester" },
+      201,
+    );
+    const activeSession = await postJson<AuthResponse>(
+      "/v1/auth/login",
+      { email, password },
+      200,
+    );
+
+    await postJson<{ ok: boolean }>(
+      "/v1/auth/logout",
+      { refreshToken: signup.tokens.refreshToken },
+      200,
+    );
+    const replayResponse = await postJsonResponse("/v1/auth/refresh", {
+      refreshToken: signup.tokens.refreshToken,
+    });
+
+    await assertErrorResponse(replayResponse, {
+      status: 403,
+      code: "refresh_token_reuse_detected",
+      message: "This session is no longer valid.",
+    });
+
+    const [invalidatedSession] = await db
+      .select({ revokedAt: refreshTokens.revokedAt })
+      .from(refreshTokens)
+      .where(
+        eq(
+          refreshTokens.tokenHash,
+          hashRefreshToken(activeSession.tokens.refreshToken),
+        ),
+      )
+      .limit(1);
+    assert.ok(invalidatedSession?.revokedAt);
+
+    const invalidatedResponse = await postJsonResponse("/v1/auth/refresh", {
+      refreshToken: activeSession.tokens.refreshToken,
+    });
+    await assertErrorResponse(invalidatedResponse, {
       status: 403,
       code: "refresh_token_reuse_detected",
       message: "This session is no longer valid.",

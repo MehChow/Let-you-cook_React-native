@@ -60,6 +60,12 @@ routes in one coordinated server/client change.
 
 ### Errors
 
+Every response carries a server-generated `X-Request-Id`. The server ignores
+and overwrites any client-provided value. Every JSON error copies that same
+identifier into `error.requestId`, so the response header and body always
+match. Only `validation_failed` errors include `fieldErrors`; all other errors
+omit it.
+
 Use one envelope:
 
 ```json

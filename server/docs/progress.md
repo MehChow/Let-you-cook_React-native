@@ -16,13 +16,13 @@ This file is the backend handoff. When asked to continue backend work:
    - any new verification under [Verified](#verified)
    - the next unchecked task
 
-Current task: review `API-02`, Define the shared error envelope and request IDs,
-from `docs/superpowers/plans/2026-07-30-api-error-contract.md` on
-`codex/mvp-error-contract`. Tasks 1-3 are implemented and their automated gates
-pass, but exact Task 3 review, whole-branch review, closure re-review, and fresh
-exit verification remain pending. Keep `API-02` unchecked and do not begin
-`API-03`. `API-01` was fast-forwarded into `dev` at `7d21b95`; its canonical
-`/v1` tree and temporary compatibility aliases remain unchanged.
+Current task: finish the scoped closure re-review and fresh exact-head
+verification for completed `API-02` on `codex/mvp-error-contract`, then prepare
+the still-unchecked `API-03`. The final review's one Important and two Minor
+findings were handled in the single authorized fix wave; do not merge or begin
+API-03 implementation until closure re-review and exit verification pass.
+`API-01` was fast-forwarded into `dev` at `7d21b95`; its canonical `/v1` tree
+and temporary compatibility aliases remain unchanged.
 
 ## Current State
 
@@ -47,8 +47,9 @@ exit verification remain pending. Keep `API-02` unchecked and do not begin
 
 - [x] `API-01` Introduce `/v1` while keeping `/health` unversioned; legacy
   aliases remain until `AUTH-01`.
-- [ ] `API-02` Define the shared error envelope and server-generated request
-  IDs; design approved and implementation planned.
+- [x] `API-02` Define the shared error envelope and server-generated request
+  IDs.
+- [ ] `API-03` Define cursor pagination and deterministic sorting.
 - [x] Add app-side auth API wrappers under `src/features/auth/api.ts`.
 - [x] Install and wire `expo-secure-store` for access and refresh token storage.
 - [x] Add a shared API client wrapper that retries once after token refresh.
@@ -64,6 +65,33 @@ exit verification remain pending. Keep `API-02` unchecked and do not begin
 ## Progress Log
 
 Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
+
+### 2026-07-30 02:40:57 +08:00
+
+- Addressed the complete final API-02 review set in one wave. Existing auth
+  semantics are now explicit: only an unrevoked expired token returns
+  `401 refresh_token_expired`; every already-revoked token, whether replaced
+  during rotation or revoked by logout, returns
+  `403 refresh_token_reuse_detected` and revokes remaining active sessions.
+- Added a real-Postgres logout/replay characterization. It passed 8/8
+  immediately, asserting the exact 403 envelope/header request ID, the
+  database revocation of another active session, and that session's subsequent
+  403 response.
+- Added a real-Postgres constraint-classifier regression. RED failed because
+  the wished-for export did not exist; GREEN passed 9/9 after the strict
+  no-cast/no-`any` implementation accepted only `users_email_unique` and
+  rejected `profiles_pkey`. The signup catch now surrounds only the user
+  insert, so later profile/token uniqueness failures rethrow.
+- Copied the server-owned `X-Request-Id`, client-overwrite, header/body equality,
+  and validation-only `fieldErrors` guarantees into
+  `docs/api-and-data-model.md`; aligned the approved design/plan; and checked
+  only `API-02`.
+- Fresh pre-commit closure gates passed: focused 36/36; server type-check;
+  backend 50/50 with zero skips; root lint/type-check; 16/16 native-focused
+  Jest suites with 67/67 tests; and `git diff --check`.
+- Scoped closure re-review and fresh verification on the exact committed
+  closure head are pending. `API-03`, `AUTH-01`, and later work remain
+  unchecked and unstarted.
 
 ### 2026-07-30 02:12:17 +08:00
 
@@ -344,16 +372,17 @@ Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
 
 ## Verified
 
-Current API-02 Task 3 evidence:
+Current API-02 closure evidence:
 
-- Focused contract suite: 34/34 passed with zero failures/skips.
-- Server type-check passed; backend suite passed 48/48 with zero
-  failures/skips.
+- Logout/replay real-Postgres characterization: 8/8 passed with zero skips.
+- Constraint-classifier RED failed on the missing export; focused GREEN passed
+  9/9 with zero skips.
+- Focused contract suite passed 36/36; server type-check passed; backend suite
+  passed 50/50 with zero skips.
 - Root lint/type-check passed; all 16 native-focused Jest suites and 67 tests
-  passed.
-- `git diff --check` passed. No browser, Metro, backend listener, schema,
-  migration, DTO, mobile, or logging change was used.
-- Review remains pending, so this evidence does not close `API-02`.
+  passed; `git diff --check` passed.
+- Scoped closure re-review and exact committed-head verification remain
+  pending.
 
 Current Foundation exit evidence:
 

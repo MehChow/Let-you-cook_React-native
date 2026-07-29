@@ -28,6 +28,26 @@ const refreshBodySchema = z.object({
   refreshToken: z.string().min(1),
 });
 
+// Identifies duplicate emails from only the users email index.
+export const isUsersEmailUniqueViolation = (error: unknown): boolean => {
+  const databaseError =
+    typeof error === "object" &&
+    error !== null &&
+    "cause" in error &&
+    error.cause !== undefined
+      ? error.cause
+      : error;
+
+  return (
+    typeof databaseError === "object" &&
+    databaseError !== null &&
+    "code" in databaseError &&
+    databaseError.code === "23505" &&
+    "constraint" in databaseError &&
+    databaseError.constraint === "users_email_unique"
+  );
+};
+
 const createTokenPair = async (userId: string) => {
   const refreshToken = createRefreshToken();
   const [row] = await db
@@ -53,37 +73,29 @@ export const authRoutes = new Hono<RequestIdEnv>()
     async (c) => {
       const body = c.req.valid("json");
       const passwordHash = await hashPassword(body.password);
+      let user: { id: string; email: string };
 
       try {
-        const [user] = await db
+        [user] = await db
           .insert(users)
           .values({ email: body.email, passwordHash })
           .returning({ id: users.id, email: users.email });
-
-        await db.insert(profiles).values({
-          userId: user.id,
-          displayName: body.displayName ?? body.email.split("@")[0],
-        });
-
-        const tokens = await createTokenPair(user.id);
-
-        return c.json({ user, tokens }, 201);
       } catch (error) {
-        const databaseError =
-          typeof error === "object" && error !== null && "cause" in error
-            ? error.cause
-            : error;
-        if (
-          typeof databaseError === "object" &&
-          databaseError !== null &&
-          "code" in databaseError &&
-          databaseError.code === "23505"
-        ) {
+        if (isUsersEmailUniqueViolation(error)) {
           return errorResponse(c, "email_already_registered");
         }
 
         throw error;
       }
+
+      await db.insert(profiles).values({
+        userId: user.id,
+        displayName: body.displayName ?? body.email.split("@")[0],
+      });
+
+      const tokens = await createTokenPair(user.id);
+
+      return c.json({ user, tokens }, 201);
     },
   )
   .post(
