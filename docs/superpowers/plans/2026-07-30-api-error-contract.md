@@ -271,6 +271,28 @@ Define `NonValidationErrorCode = keyof typeof errorDefinitions`. Import
 status rather than `number`. Define the discriminated error interfaces from the
 approved design.
 
+Make the response helpers generic so protected routers with extra Hono
+variables remain type-safe:
+
+```ts
+export const errorResponse = <E extends RequestIdEnv>(
+  c: Context<E>,
+  code: NonValidationErrorCode,
+) => {
+  const definition = errorDefinitions[code];
+  return c.json(
+    {
+      error: {
+        code,
+        message: definition.message,
+        requestId: c.get("requestId"),
+      },
+    },
+    definition.status,
+  );
+};
+```
+
 Implement:
 
 ```ts
@@ -288,7 +310,15 @@ export const fieldErrorsFromIssues = (
 };
 ```
 
-`errorResponse(c, code)` selects both status and message from `errorDefinitions`. `validationErrorResponse(c, fieldErrors)` returns status `400`, code `validation_failed`, message `Some fields need attention.`, and the context request ID. `validationErrorHook(result, c)` returns nothing on success and calls the validation helper on failure.
+`errorResponse(c, code)` selects both status and message from
+`errorDefinitions`. Make `validationErrorResponse` generic with
+`<E extends RequestIdEnv>` as well; it returns status `400`, code
+`validation_failed`, message `Some fields need attention.`, and the context
+request ID. Define `validationErrorHook` as a generic function over
+`E extends RequestIdEnv`; it returns nothing on success and calls the
+validation helper with `result.error.issues` on failure. This lets the same
+hook type-check for both `RequestIdEnv` and the protected `AuthVariables`
+environment without casts.
 
 `handleNotFound(c)` returns `route_not_found`. `handleAppError(error, c)` maps `HTTPException` status `400` to `malformed_request` and all other thrown failures to `internal_server_error`; it never serializes the thrown value.
 
