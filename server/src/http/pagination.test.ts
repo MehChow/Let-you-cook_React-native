@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import {
+  type CursorContext,
   MAX_CURSOR_LENGTH,
   buildCursorPage,
   decodeCursor,
@@ -12,6 +13,25 @@ import {
 // Encodes deliberately invalid payloads without using the production codec.
 const encodeRawPayload = (payload: string) =>
   Buffer.from(payload, "utf8").toString("base64url");
+
+// Finds another base64url spelling that decodes to identical bytes.
+const createNonCanonicalAlias = (token: string) => {
+  const alphabet =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+  const expectedBytes = Buffer.from(token, "base64url");
+
+  for (const character of alphabet) {
+    const candidate = `${token.slice(0, -1)}${character}`;
+    if (
+      candidate !== token &&
+      Buffer.from(candidate, "base64url").equals(expectedBytes)
+    ) {
+      return candidate;
+    }
+  }
+
+  throw new Error("The fixture has no non-canonical base64url alias.");
+};
 
 test("pagination query defaults to 20 and accepts canonical bounds", () => {
   assert.deepEqual(paginationQuerySchema.parse({}), { limit: 20 });
@@ -29,10 +49,17 @@ test("pagination query rejects noncanonical and out-of-range limits", () => {
 });
 
 test("pagination query rejects empty and oversized cursors", () => {
+  assert.equal(MAX_CURSOR_LENGTH, 2048);
   assert.equal(paginationQuerySchema.safeParse({ cursor: "" }).success, false);
   assert.equal(
     paginationQuerySchema.safeParse({
-      cursor: "x".repeat(MAX_CURSOR_LENGTH + 1),
+      cursor: "x".repeat(2048),
+    }).success,
+    true,
+  );
+  assert.equal(
+    paginationQuerySchema.safeParse({
+      cursor: "x".repeat(2049),
     }).success,
     false,
   );
@@ -50,6 +77,17 @@ test("cursor encoding is URL-safe and normalizes context key order", () => {
 
   assert.equal(first, second);
   assert.match(first, /^[A-Za-z0-9_-]+$/);
+
+  const unicodeFirst = encodeCursor(
+    { ä: "precomposed", "a\u0308": "decomposed" },
+    ["recipe-a"],
+  );
+  const unicodeSecond = encodeCursor(
+    { "a\u0308": "decomposed", ä: "precomposed" },
+    ["recipe-a"],
+  );
+
+  assert.equal(unicodeFirst, unicodeSecond);
 });
 
 test("cursor round-trips allowed ordered values", () => {
@@ -91,10 +129,34 @@ test("cursor decoder rejects malformed and incompatible tokens", () => {
   }
 
   const valid = encodeCursor(context, ["date", "id"]);
+  const nonCanonicalAlias = createNonCanonicalAlias(valid);
+  const invalidUtf8Payload = Buffer.from(
+    '{"v":1,"context":{"sort":"newest"},"values":["date","id"]}',
+    "utf8",
+  );
+  const invalidByteIndex = invalidUtf8Payload.indexOf("newest");
+  invalidUtf8Payload[invalidByteIndex] = 0xff;
+  const invalidUtf8Token = invalidUtf8Payload.toString("base64url");
+
+  assert.deepEqual(decodeCursor(nonCanonicalAlias, context, 2), {
+    success: false,
+  });
+  assert.deepEqual(decodeCursor(invalidUtf8Token, { sort: "�ewest" }, 2), {
+    success: false,
+  });
   assert.deepEqual(decodeCursor(valid, { sort: "quickest" }, 2), {
     success: false,
   });
   assert.deepEqual(decodeCursor(valid, context, 1), { success: false });
+
+  const invalidExpectedContext = {
+    sort: undefined,
+  } as unknown as CursorContext;
+  const contextlessToken = encodeCursor({}, ["id"]);
+
+  assert.deepEqual(decodeCursor(contextlessToken, invalidExpectedContext, 1), {
+    success: false,
+  });
 });
 
 test("cursor encoder rejects invalid scalar values", () => {
@@ -140,6 +202,19 @@ test("page builder returns a null cursor when no next page exists", () => {
       items: rows,
       pageInfo: { nextCursor: null, hasNextPage: false },
     },
+  );
+});
+
+test("page builder cursors an undefined item when the generic permits it", () => {
+  const context = { sort: "newest" };
+  const page = buildCursorPage([undefined, undefined], 1, context, () => [
+    "undefined-row",
+  ]);
+
+  assert.equal(page.pageInfo.hasNextPage, true);
+  assert.deepEqual(
+    decodeCursor(page.pageInfo.nextCursor ?? "", context, 1),
+    { success: true, values: ["undefined-row"] },
   );
 });
 

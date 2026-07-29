@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TextDecoder } from "node:util";
 
 export const DEFAULT_PAGE_SIZE = 20;
 export const MAX_PAGE_SIZE = 50;
@@ -38,10 +39,12 @@ const cursorValueSchema = z.union([
   z.null(),
 ]);
 
+const cursorContextSchema = z.record(z.string(), z.string());
+
 const cursorPayloadSchema = z
   .object({
     v: z.literal(1),
-    context: z.record(z.string(), z.string()),
+    context: cursorContextSchema,
     values: z.array(cursorValueSchema),
   })
   .strict();
@@ -49,9 +52,9 @@ const cursorPayloadSchema = z
 // Sorts context keys so equivalent normalized queries encode identically.
 const normalizeContext = (context: CursorContext): Record<string, string> =>
   Object.fromEntries(
-    Object.entries(context).sort(([first], [second]) =>
-      first.localeCompare(second),
-    ),
+    Object.keys(context)
+      .sort()
+      .map((key) => [key, context[key]]),
   );
 
 // Encodes ordered seek values into a versioned URL-safe token.
@@ -81,19 +84,27 @@ export const decodeCursor = (
   expectedContext: CursorContext,
   expectedValueCount: number,
 ): CursorDecodeResult => {
+  const expectedContextResult = cursorContextSchema.safeParse(expectedContext);
+
   if (
     token.length === 0 ||
     token.length > MAX_CURSOR_LENGTH ||
     !/^[A-Za-z0-9_-]+$/.test(token) ||
     !Number.isInteger(expectedValueCount) ||
-    expectedValueCount < 0
+    expectedValueCount < 0 ||
+    !expectedContextResult.success
   ) {
     return { success: false };
   }
 
   try {
+    const payloadBytes = Buffer.from(token, "base64url");
+    if (payloadBytes.toString("base64url") !== token) {
+      return { success: false };
+    }
+
     const rawPayload: unknown = JSON.parse(
-      Buffer.from(token, "base64url").toString("utf8"),
+      new TextDecoder("utf-8", { fatal: true }).decode(payloadBytes),
     );
     const result = cursorPayloadSchema.safeParse(rawPayload);
 
@@ -101,7 +112,7 @@ export const decodeCursor = (
       !result.success ||
       result.data.values.length !== expectedValueCount ||
       JSON.stringify(normalizeContext(result.data.context)) !==
-        JSON.stringify(normalizeContext(expectedContext))
+        JSON.stringify(normalizeContext(expectedContextResult.data))
     ) {
       return { success: false };
     }
@@ -130,15 +141,14 @@ export const buildCursorPage = <T>(
 
   const hasNextPage = rows.length > limit;
   const items = rows.slice(0, limit);
-  const lastItem = hasNextPage ? items.at(-1) : undefined;
+  const nextCursor = hasNextPage
+    ? encodeCursor(context, cursorValues(items[limit - 1] as T))
+    : null;
 
   return {
     items,
     pageInfo: {
-      nextCursor:
-        lastItem === undefined
-          ? null
-          : encodeCursor(context, cursorValues(lastItem)),
+      nextCursor,
       hasNextPage,
     },
   };
