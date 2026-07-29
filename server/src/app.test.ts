@@ -3,6 +3,9 @@ import { test } from "node:test";
 
 import { app } from "./app";
 
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 test("GET /health stays unversioned", async () => {
   const healthResponse = await app.request("/health");
   const versionedHealthResponse = await app.request("/v1/health");
@@ -10,6 +13,28 @@ test("GET /health stays unversioned", async () => {
   assert.equal(healthResponse.status, 200);
   assert.deepEqual(await healthResponse.json(), { ok: true });
   assert.equal(versionedHealthResponse.status, 404);
+});
+
+test("every response receives a unique server request ID", async () => {
+  const first = await app.request("/health");
+  const second = await app.request("/health");
+
+  const firstId = first.headers.get("X-Request-Id");
+  const secondId = second.headers.get("X-Request-Id");
+
+  assert.match(firstId ?? "", UUID_PATTERN);
+  assert.match(secondId ?? "", UUID_PATTERN);
+  assert.notEqual(firstId, secondId);
+  assert.deepEqual(await first.json(), { ok: true });
+});
+
+test("client request IDs are ignored and overwritten", async () => {
+  const response = await app.request("/health", {
+    headers: { "X-Request-Id": "client-controlled" },
+  });
+
+  assert.match(response.headers.get("X-Request-Id") ?? "", UUID_PATTERN);
+  assert.notEqual(response.headers.get("X-Request-Id"), "client-controlled");
 });
 
 test("all existing application route families are mounted under /v1", async () => {
