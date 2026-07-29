@@ -4,7 +4,7 @@ Plan: `docs/superpowers/plans/2026-07-30-zod-dto-contracts.md`
 Design: `docs/superpowers/specs/2026-07-30-zod-dto-contracts-design.md`
 Branch: `codex/mvp-dto-contracts`
 Base: `dev` at `5f6450e42b60a460e2c4c81032d967a3a73f9818`
-Status: Task 1 complete; Task 2 review fix pending verification
+Status: Tasks 1-2 complete; Task 3 implemented and awaiting review
 
 ## Decisions
 
@@ -19,8 +19,8 @@ Status: Task 1 complete; Task 2 review fix pending verification
 ## Task Status
 
 - API-04A: complete after clean fix-wave re-review
-- API-04B: implementation and review fix complete; verification pending
-- API-04C: pending
+- API-04B: complete after clean Important-finding re-review
+- API-04C: implementation complete; review pending
 - Whole-branch review: pending
 - Exit verification: pending
 - Merge to `dev`: pending
@@ -60,3 +60,10 @@ Status: Task 1 complete; Task 2 review fix pending verification
   projection gap in login's database select, and one Minor route-parse mutation
   coverage gap. Login now selects only `id`, `email`, and the password hash
   needed for verification; the response still projects only `id` and `email`.
+- 2026-07-30: Task 2 re-review confirmed the Important finding closed and its
+  one remaining mutation-strength Minor non-blocking.
+- 2026-07-30: Task 3 RED failed with `ERR_MODULE_NOT_FOUND` for the wished-for
+  profile contract module. GREEN passed 13/13 focused tests.
+- 2026-07-30: profile input and both current response shapes now use strict
+  inferred contracts. Server type-check passed, the backend suite passed 75/75
+  with zero skips, and `git diff --check` passed.

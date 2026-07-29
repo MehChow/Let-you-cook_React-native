@@ -1,18 +1,16 @@
 import { zValidator } from "@hono/zod-validator";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { z } from "zod";
 
+import {
+  privateProfileResponseSchema,
+  updateProfileInputSchema,
+  updateProfileResponseSchema,
+} from "../contracts/profiles";
 import { db } from "../db/client";
 import { profiles, users } from "../db/schema";
 import { errorResponse, validationErrorHook } from "../http/errors";
 import { requireAuth, type AuthVariables } from "../middleware/auth";
-
-const updateProfileSchema = z.object({
-  displayName: z.string().min(1).max(80).optional(),
-  bio: z.string().max(500).nullable().optional(),
-  avatarImageUrl: z.url().nullable().optional(),
-});
 
 export const profileRoutes = new Hono<{ Variables: AuthVariables }>()
   .use("*", requireAuth)
@@ -35,11 +33,11 @@ export const profileRoutes = new Hono<{ Variables: AuthVariables }>()
       return errorResponse(c, "resource_not_found");
     }
 
-    return c.json({ profile }, 200);
+    return c.json(privateProfileResponseSchema.parse({ profile }), 200);
   })
   .patch(
     "/me",
-    zValidator("json", updateProfileSchema, validationErrorHook),
+    zValidator("json", updateProfileInputSchema, validationErrorHook),
     async (c) => {
       const [profile] = await db
         .update(profiles)
@@ -51,6 +49,6 @@ export const profileRoutes = new Hono<{ Variables: AuthVariables }>()
           avatarImageUrl: profiles.avatarImageUrl,
         });
 
-      return c.json({ profile }, 200);
+      return c.json(updateProfileResponseSchema.parse({ profile }), 200);
     },
   );
