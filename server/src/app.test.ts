@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { app } from "./app";
+import type { ApiErrorEnvelope } from "./http/errors";
+import { REQUEST_ID_HEADER } from "./http/requestId";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -9,10 +11,19 @@ const UUID_PATTERN =
 test("GET /health stays unversioned", async () => {
   const healthResponse = await app.request("/health");
   const versionedHealthResponse = await app.request("/v1/health");
+  const versionedHealthBody =
+    (await versionedHealthResponse.json()) as ApiErrorEnvelope;
 
   assert.equal(healthResponse.status, 200);
   assert.deepEqual(await healthResponse.json(), { ok: true });
   assert.equal(versionedHealthResponse.status, 404);
+  assert.deepEqual(versionedHealthBody, {
+    error: {
+      code: "route_not_found",
+      message: "The requested endpoint was not found.",
+      requestId: versionedHealthResponse.headers.get(REQUEST_ID_HEADER),
+    },
+  });
 });
 
 test("every response receives a unique server request ID", async () => {

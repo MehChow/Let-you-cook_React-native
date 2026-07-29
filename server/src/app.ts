@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 
+import { handleAppError, handleNotFound } from "./http/errors";
 import { requestIdMiddleware, type RequestIdEnv } from "./http/requestId";
 import { authRoutes } from "./routes/auth";
 import { blockRoutes } from "./routes/blocks";
@@ -21,5 +22,8 @@ export const app = new Hono<RequestIdEnv>()
   .route("/favourites", favouriteRoutes)
   .route("/reports", reportRoutes)
   .route("/blocks", blockRoutes);
+
+app.notFound(handleNotFound);
+app.onError(handleAppError);
 
 export type AppType = typeof app;
