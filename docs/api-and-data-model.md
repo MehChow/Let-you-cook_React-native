@@ -26,6 +26,14 @@ it with `import type` in the client. Keep both TypeScript projects strict. Publi
 DTOs and Zod schemas remain the durable contract; Drizzle row types do not cross
 the API boundary.
 
+Current runtime schemas live under `server/src/contracts/` by feature. Each
+schema is the source of its inferred TypeScript DTO type. Routes consume request
+schemas through Hono validators and parse explicitly projected success objects
+before returning them. Response schemas are strict so database-only fields
+cannot be stripped silently or exposed accidentally. Future feature routes add
+contracts with their implementation instead of predeclaring speculative
+payloads.
+
 Keep `/health` unversioned. New content APIs target `/v1`. Before more auth
 integration, move or temporarily alias the existing unversioned auth/profile
 routes in one coordinated server/client change.
@@ -181,6 +189,11 @@ The auth service owns OTP generation, keyed hashing, expiry, attempt limits,
 resend cooldown, and consumption. An injected `EmailSender` owns delivery.
 Development SMTP points to Mailpit in Docker and tests inject an in-memory fake.
 A verified sender domain/provider is required before public beta.
+
+The current transitional login/signup session DTO contains only public
+`user.id`, `user.email`, `tokens.accessToken`, and `tokens.refreshToken`.
+Internal refresh-token row IDs are never response fields. Mandatory
+verification will replace signup's temporary session response in `AUTH-08`.
 
 ### Profiles
 

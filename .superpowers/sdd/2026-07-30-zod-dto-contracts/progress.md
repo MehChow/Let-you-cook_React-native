@@ -4,7 +4,7 @@ Plan: `docs/superpowers/plans/2026-07-30-zod-dto-contracts.md`
 Design: `docs/superpowers/specs/2026-07-30-zod-dto-contracts-design.md`
 Branch: `codex/mvp-dto-contracts`
 Base: `dev` at `5f6450e42b60a460e2c4c81032d967a3a73f9818`
-Status: all tasks implemented and task-reviewed; branch closure pending
+Status: implementation/reviews complete; exact closure-head verification pending
 
 ## Decisions
 
@@ -21,8 +21,8 @@ Status: all tasks implemented and task-reviewed; branch closure pending
 - API-04A: complete after clean fix-wave re-review
 - API-04B: complete after clean Important-finding re-review
 - API-04C: complete after clean fix-wave re-review
-- Whole-branch review: pending
-- Exit verification: pending
+- Whole-branch review: clean at `34e9b1f`
+- Exit verification: branch gates passed; exact docs head pending
 - Merge to `dev`: pending
 
 ## Evidence
@@ -75,3 +75,8 @@ Status: all tasks implemented and task-reviewed; branch closure pending
   canonical PATCH preserves exact nullable editable fields and uses inferred
   contract types. Re-review found no remaining Critical, Important, or Minor
   issues.
+- 2026-07-30: whole-branch review of `dev..34e9b1f` found no Critical,
+  Important, or Minor issues.
+- 2026-07-30: fresh branch gates passed server type-check, backend 75/75 with
+  zero skips, root lint/type-check, 16/16 native-focused Jest suites with 67/67
+  tests, and `git diff --check`.

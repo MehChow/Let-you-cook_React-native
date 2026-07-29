@@ -115,13 +115,30 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   focused 11/11, server type-check, backend 61/61 with zero skips, root
   lint/type-check, 16/16 native-focused Jest suites with 67/67 tests, and
   `git diff --check`. Its feature branch/worktree were removed.
-- Active delivery item: `API-04`, Create stable Zod request/response DTO
-  contracts, is on `codex/mvp-dto-contracts` from exact verified base
+- Completed delivery item: `API-04`, Create stable Zod request/response DTO
+  contracts, is checked on `codex/mvp-dto-contracts` from exact verified base
   `5f6450e`. Its approved bounded design and executable plan cover only current
   system/auth/profile routes plus shared error/page primitives; speculative
   future feature DTOs and behavior changes are explicitly deferred.
-- Next action: commit the API-04 design/plan, establish its isolated baseline,
-  and begin Task 1 shared/system DTO primitives before the 04:00 HKT handoff.
+- Task 1 added strict Zod sources for health, API-02 errors, and API-03 pages.
+  Review found and closed two Important drift gaps and two Minors: the error
+  registry is constrained/runtime-compared to its code schema, and the generic
+  page type is inferred from the schema factory. Re-review is clean.
+- Task 2 moved current auth requests/successes to strict inferred contracts.
+  It removed the accidentally exposed internal `refreshTokenId`. Review found
+  and closed one Important bare login select with an explicit field projection;
+  one route-parse mutation-strength Minor was non-blocking.
+- Task 3 moved current profile requests and GET/PATCH responses to strict
+  inferred contracts. Review found missing-profile PATCH returned 500; focused
+  RED reproduced it and GREEN now returns the standard 404. Real route coverage
+  proves exact nullable editable fields. Re-review is clean.
+- Whole-branch review of `dev..34e9b1f` found no Critical, Important, or Minor
+  issues and no mobile, schema, migration, or speculative feature scope.
+- Fresh API-04 branch gates: server type-check; backend 75/75 with zero skips;
+  root lint/type-check; 16/16 native-focused Jest suites with 67/67 tests; and
+  `git diff --check`.
+- Next action: commit closure docs, verify the exact head, fast-forward into
+  `dev`, repeat merged-result verification, and stop for the 04:00 HKT handoff.
 - Detailed task index: `docs/mvp-roadmap.md`.
 - Goal-mode execution brief: `docs/mvp-goal-prompt.md`.
 - Completed Foundation execution plan:
@@ -132,7 +149,7 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   `docs/superpowers/plans/2026-07-30-api-error-contract.md`.
 - Completed API-03 implementation plan:
   `docs/superpowers/plans/2026-07-30-cursor-pagination.md`.
-- Active API-04 implementation plan:
+- Completed API-04 implementation plan:
   `docs/superpowers/plans/2026-07-30-zod-dto-contracts.md`.
 - API-03 design baseline commit: `2efdf1c`; its reviewed ordering clarification
   is part of the API-03 closure documentation.

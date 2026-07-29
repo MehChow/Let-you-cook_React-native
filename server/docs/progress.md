@@ -16,12 +16,16 @@ This file is the backend handoff. When asked to continue backend work:
    - any new verification under [Verified](#verified)
    - the next unchecked task
 
-Current task: execute `API-04` stable Zod request/response DTO contracts on
+Current task: close and integrate `API-04` stable Zod DTO contracts from
 `codex/mvp-dto-contracts` from exact verified `dev` head `5f6450e`. API-03 was
 fast-forwarded and its merged result passed focused 11/11, server type-check,
 backend 61/61 with zero skips, root check, and 67/67 native-focused Jest tests
-before branch/worktree cleanup. API-04 design/plan are prepared; begin Task 1
-shared/system DTO primitives.
+before branch/worktree cleanup. All three API-04 tasks are implemented and
+task re-reviews are clean. Finish whole-branch review and full exit gates, then
+fast-forward and repeat merged-result verification before the 04:00 handoff.
+Whole-branch review is now clean, and fresh branch gates passed server
+type-check, backend 75/75 with zero skips, root check, 67/67 native-focused
+Jest tests, and `git diff --check`.
 
 ## Current State
 
@@ -76,6 +80,20 @@ Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
 - API-04's bounded design covers only real current system/auth/profile
   contracts plus shared error/page primitives. It preserves all runtime
   behavior and defers future feature DTOs.
+- Task 1 RED failed on the missing common contract. Focused GREEN passed 43/43;
+  backend passed 67/67. Review found and closed two Important drift gaps and
+  two Minors.
+- Task 2 RED failed on the missing auth contract. Focused GREEN passed 13/13;
+  backend passed 71/71. Strict responses removed the undocumented internal
+  `refreshTokenId`; review closed one Important database projection gap.
+- Task 3 RED failed on the missing profile contract. Focused GREEN passed
+  13/13; backend passed 75/75. Review found missing-profile PATCH returned 500;
+  focused RED reproduced it and GREEN returns the standard 404. Re-review is
+  clean.
+- Whole-branch review found no Critical, Important, or Minor issues. Fresh
+  branch gates passed server type-check, backend 75/75 with zero skips, root
+  lint/type-check, 16/16 native-focused Jest suites with 67/67 tests, and
+  `git diff --check`.
 
 ### 2026-07-30 03:09:19 +08:00
 
