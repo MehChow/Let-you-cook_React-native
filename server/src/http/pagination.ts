@@ -1,7 +1,12 @@
 import { z } from "zod";
 import { TextDecoder } from "node:util";
 
-import type { PageInfo } from "../contracts/common";
+import type {
+  CursorPage as ContractCursorPage,
+  PageInfo,
+} from "../contracts/common";
+
+export type { CursorPage } from "../contracts/common";
 
 export const DEFAULT_PAGE_SIZE = 20;
 export const MAX_PAGE_SIZE = 50;
@@ -15,11 +20,6 @@ export type CursorDecodeResult =
   | { success: false };
 
 export type CursorPageInfo = PageInfo;
-
-export interface CursorPage<T> {
-  items: T[];
-  pageInfo: CursorPageInfo;
-}
 
 const canonicalLimitSchema = z
   .string()
@@ -128,7 +128,7 @@ export const buildCursorPage = <T>(
   limit: number,
   context: CursorContext,
   cursorValues: (item: T) => ReadonlyArray<CursorValue>,
-): CursorPage<T> => {
+): ContractCursorPage<T> => {
   if (
     !Number.isInteger(limit) ||
     limit < 1 ||

@@ -4,13 +4,16 @@ import { test } from "node:test";
 import { z } from "zod";
 
 import {
+  type CursorPage,
   apiErrorEnvelopeSchema,
   cursorPageSchema,
   isoTimestampSchema,
+  nonValidationErrorCodes,
   opaqueIdSchema,
   pageInfoSchema,
 } from "./common";
 import { healthResponseSchema } from "./system";
+import { errorDefinitions } from "../http/errors";
 
 test("common scalar schemas accept only documented values", () => {
   assert.equal(opaqueIdSchema.safeParse("opaque-id").success, true);
@@ -61,13 +64,12 @@ test("cursor page schema validates items and rejects unknown output keys", () =>
     z.strictObject({ id: z.string().min(1) }),
   );
 
-  assert.equal(
-    recipePageSchema.safeParse({
-      items: [{ id: "recipe-a" }],
-      pageInfo: { nextCursor: null, hasNextPage: false },
-    }).success,
-    true,
-  );
+  const typedPage: CursorPage<{ id: string }> = recipePageSchema.parse({
+    items: [{ id: "recipe-a" }],
+    pageInfo: { nextCursor: null, hasNextPage: false },
+  });
+
+  assert.equal(typedPage.items[0]?.id, "recipe-a");
   assert.equal(
     recipePageSchema.safeParse({
       items: [{ id: "recipe-a", passwordHash: "private" }],
@@ -113,6 +115,12 @@ test("validation errors require fieldErrors and reject unknown fields", () => {
     }).success,
     false,
   );
+  assert.equal(
+    apiErrorEnvelopeSchema.safeParse({
+      error: { ...valid.error, stack: "private" },
+    }).success,
+    false,
+  );
 });
 
 test("non-validation errors use closed codes and forbid fieldErrors", () => {
@@ -136,6 +144,10 @@ test("non-validation errors use closed codes and forbid fieldErrors", () => {
       error: { ...valid.error, code: "invented_code" },
     }).success,
     false,
+  );
+  assert.deepEqual(
+    Object.keys(errorDefinitions).sort(),
+    [...nonValidationErrorCodes].sort(),
   );
 });
 

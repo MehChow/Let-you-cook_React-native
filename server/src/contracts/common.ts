@@ -77,3 +77,6 @@ export type NonValidationApiError = z.infer<
 >;
 export type ApiErrorEnvelope = z.infer<typeof apiErrorEnvelopeSchema>;
 export type PageInfo = z.infer<typeof pageInfoSchema>;
+export type CursorPage<Item> = z.infer<
+  ReturnType<typeof cursorPageSchema<z.ZodType<Item>>>
+>;

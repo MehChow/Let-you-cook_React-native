@@ -57,7 +57,7 @@ export const errorDefinitions = {
     message: "The server could not complete the request.",
   },
 } as const satisfies Record<
-  string,
+  NonValidationErrorCode,
   { status: ContentfulStatusCode; message: string }
 >;
 

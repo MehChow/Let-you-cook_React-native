@@ -4,7 +4,7 @@ Plan: `docs/superpowers/plans/2026-07-30-zod-dto-contracts.md`
 Design: `docs/superpowers/specs/2026-07-30-zod-dto-contracts-design.md`
 Branch: `codex/mvp-dto-contracts`
 Base: `dev` at `5f6450e42b60a460e2c4c81032d967a3a73f9818`
-Status: Task 1 implemented; exact task review pending
+Status: Task 1 complete; Task 2 not started
 
 ## Decisions
 
@@ -18,7 +18,7 @@ Status: Task 1 implemented; exact task review pending
 
 ## Task Status
 
-- API-04A: implementation complete; review pending
+- API-04A: complete after clean fix-wave re-review
 - API-04B: pending
 - API-04C: pending
 - Whole-branch review: pending
@@ -38,3 +38,14 @@ Status: Task 1 implemented; exact task review pending
   discriminated page-info construction mismatch; after preserving literal
   true/false branches, server type-check passed, the backend suite passed 67/67
   with zero skips, and `git diff --check` passed.
+- 2026-07-30: exact task review found no Critical issues and two Important
+  contract gaps: the error registry was not constrained to the schema's closed
+  code union, and the generic cursor page type duplicated its Zod schema. Two
+  Minor mutation-coverage gaps accompanied those findings.
+- 2026-07-30: the fix wave constrains and runtime-compares the error registry,
+  infers/re-exports the generic page type from the schema factory, checks nested
+  strictness, and adds a compile-time inferred-item assignment. Focused 43/43
+  and server type-check pass.
+- 2026-07-30: fix-wave re-review found no remaining Critical, Important, or
+  Minor issues. Fresh backend verification passed 67/67 with zero skips,
+  server type-check, and `git diff --check`.
