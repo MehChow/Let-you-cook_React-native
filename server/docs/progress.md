@@ -16,11 +16,11 @@ This file is the backend handoff. When asked to continue backend work:
    - any new verification under [Verified](#verified)
    - the next unchecked task
 
-Current task: review the completed `API-01` Task 1 implementation in
-`docs/superpowers/plans/2026-07-27-api-contract-versioning.md`. The canonical
-`/v1` route tree is implemented while `/health` stays unversioned and temporary
-compatibility aliases protect current callers. Do not check `API-01` or begin
-`API-02` until task and branch reviews pass.
+Current task: begin `API-02`, Define the shared error envelope and request IDs,
+only after the API-01 closure-documentation re-review passes. `API-01` task and
+broad reviews passed with no Critical or Important findings. Its canonical
+`/v1` route tree keeps `/health` unversioned and temporary compatibility aliases
+protect current callers until `AUTH-01`.
 
 ## Current State
 
@@ -43,8 +43,10 @@ compatibility aliases protect current callers. Do not check `API-01` or begin
 
 ## Next Task Queue
 
-- [ ] Review `API-01` Task 1 before marking its `/v1` routing complete; keep
-  `/health` unversioned and retain legacy aliases until `AUTH-01`.
+- [x] `API-01` Introduce `/v1` while keeping `/health` unversioned; legacy
+  aliases remain until `AUTH-01`.
+- [ ] `API-02` Define the shared error envelope and request IDs after the
+  API-01 closure-documentation re-review passes.
 - [x] Add app-side auth API wrappers under `src/features/auth/api.ts`.
 - [x] Install and wire `expo-secure-store` for access and refresh token storage.
 - [x] Add a shared API client wrapper that retries once after token refresh.
@@ -61,7 +63,7 @@ compatibility aliases protect current callers. Do not check `API-01` or begin
 
 Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
 
-### 2026-07-30 HKT
+### 2026-07-30 00:47:52 +08:00
 
 - Implemented the canonical `v1Routes` composition for auth, profiles,
   recipes, images, favourites, reports, and blocks. The root app mounts it at
@@ -79,8 +81,9 @@ Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
   passed; and `npm.cmd test -- --runInBand` passed 16/16 suites and 67/67
   tests. Only the documented `letyoucook-dev` PostgreSQL and Mailpit services
   were started; no listener, Metro, or Expo web process ran.
-- Required task and branch reviews remain pending. Leave `API-01` unchecked
-  and do not begin `API-02`.
+- Task and broad reviews passed with no Critical or Important findings. The
+  closure-documentation re-review remains pending; `API-01` is checked and
+  `API-02` must not begin until that re-review passes.
 
 ### 2026-07-27 03:31:00 HKT
 

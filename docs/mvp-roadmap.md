@@ -55,8 +55,7 @@ documented commands, and the existing automated baseline passes.
 
 Dependencies: Foundation.
 
-- [ ] `API-01` Introduce `/v1` while keeping `/health` unversioned. Task 1 is
-  implemented and awaiting required task and branch review before completion.
+- [x] `API-01` Introduce `/v1` while keeping `/health` unversioned.
 - [ ] `API-02` Define the shared error envelope and request IDs.
 - [ ] `API-03` Define cursor pagination and deterministic sorting.
 - [ ] `API-04` Create stable Zod request/response DTO contracts.

@@ -4,22 +4,23 @@
 > feature handoff so a new agent can establish the real state without trusting
 > old task lists or screenshots.
 
-Last audited: 2026-07-27
+Last audited: 2026-07-30
 Current branch at audit: `codex/mvp-api-contract`
 Overall state: polished mocked Expo prototype plus an early local backend.
 
 - Planning milestone: `PLAN-03` — Goal-mode MVP handoff ready.
 - Completed delivery track: `BASE-01` through `BASE-06` passed the Foundation
   exit gate and are checked in `docs/mvp-roadmap.md`.
-- `04:00 HKT` stop checkpoint: implementation is paused at the owner's required
-  cutoff. The standalone continuation record is
+- `04:00 HKT` stop checkpoint: implementation was paused at the owner's required
+  cutoff. At that checkpoint, the standalone continuation record was
   `docs/mvp-handoff-2026-07-27-0400.md`. `dev` and
   `codex/mvp-foundation` are at `9695294`; `codex/mvp-api-contract` was at
   planning commit `803a619` before the handoff commit. No API implementation,
   merge, push, or pull request occurred. The Goal remains active because pause
   is user-controlled.
-- `API-01` Task 1 implementation is ready for required task and branch review
-  on `codex/mvp-api-contract`. The composed `v1Routes` mounts all seven current
+- `API-01` Task 1 implementation and task/broad reviews passed with no Critical
+  or Important findings on `codex/mvp-api-contract`. The composed `v1Routes`
+  mounts all seven current
   application route families at `/v1`; `/health` remains unversioned and
   `/v1/health` remains `404`. Existing unversioned routes are temporary
   compatibility aliases for current callers until `AUTH-01`.
@@ -36,14 +37,10 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   `npm.cmd run check` passed; and `npm.cmd test -- --runInBand` passed 16/16
   suites and 67/67 tests. Only documented `letyoucook-dev` PostgreSQL and
   Mailpit services were started; no Expo web, Metro, or backend listener ran.
-- Required task and branch reviews are still pending. Keep `API-01` unchecked
-  and do not advance the next implementation action to `API-02` until those
-  reviews pass.
-- Next delivery step: perform the required task and branch reviews for Task 1
-  in `docs/superpowers/plans/2026-07-27-api-contract-versioning.md`. The plan
-  preserves current unversioned callers while adding the canonical `/v1` route
-  tree; do not mark `API-01` complete or begin `API-02` until those reviews
-  pass.
+- The closure-documentation re-review is pending. `API-01` is complete and
+  checked; begin `API-02` only after that re-review confirms this closure wave.
+- Next delivery step: `API-02`, Define the shared error envelope and request
+  IDs. Do not start it until the API-01 closure re-review passes.
 - Detailed task index: `docs/mvp-roadmap.md`.
 - Goal-mode execution brief: `docs/mvp-goal-prompt.md`.
 - Completed Foundation execution plan:
