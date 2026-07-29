@@ -4,7 +4,7 @@ Plan: `docs/superpowers/plans/2026-07-30-zod-dto-contracts.md`
 Design: `docs/superpowers/specs/2026-07-30-zod-dto-contracts-design.md`
 Branch: `codex/mvp-dto-contracts`
 Base: `dev` at `5f6450e42b60a460e2c4c81032d967a3a73f9818`
-Status: implementation/reviews complete; exact closure-head verification pending
+Status: complete, merged, and merged-result verified
 
 ## Decisions
 
@@ -22,8 +22,8 @@ Status: implementation/reviews complete; exact closure-head verification pending
 - API-04B: complete after clean Important-finding re-review
 - API-04C: complete after clean fix-wave re-review
 - Whole-branch review: clean at `34e9b1f`
-- Exit verification: branch gates passed; exact docs head pending
-- Merge to `dev`: pending
+- Exit verification: exact closure and merged-result gates passed
+- Merge to `dev`: complete at `eca1533`
 
 ## Evidence
 
@@ -80,3 +80,8 @@ Status: implementation/reviews complete; exact closure-head verification pending
 - 2026-07-30: fresh branch gates passed server type-check, backend 75/75 with
   zero skips, root lint/type-check, 16/16 native-focused Jest suites with 67/67
   tests, and `git diff --check`.
+- 2026-07-30: closure docs committed at `eca1533`; API-04 fast-forwarded into
+  `dev`. Fresh merged-result verification repeated server type-check, backend
+  75/75 with zero skips, root lint/type-check, 16/16 native-focused Jest suites
+  with 67/67 tests, and `git diff --check`. The feature branch/worktree were
+  removed.

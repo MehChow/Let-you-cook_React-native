@@ -5,7 +5,7 @@
 > old task lists or screenshots.
 
 Last audited: 2026-07-30
-Current branch at audit: `codex/mvp-dto-contracts`
+Current branch at audit: `dev`
 Overall state: polished mocked Expo prototype plus an early local backend.
 
 - Planning milestone: `PLAN-03` — Goal-mode MVP handoff ready.
@@ -137,8 +137,15 @@ Overall state: polished mocked Expo prototype plus an early local backend.
 - Fresh API-04 branch gates: server type-check; backend 75/75 with zero skips;
   root lint/type-check; 16/16 native-focused Jest suites with 67/67 tests; and
   `git diff --check`.
-- Next action: commit closure docs, verify the exact head, fast-forward into
-  `dev`, repeat merged-result verification, and stop for the 04:00 HKT handoff.
+- `API-04` fast-forwarded into `dev` at `eca1533`. The merged result repeated
+  server type-check, backend 75/75 with zero skips, root lint/type-check, 16/16
+  native-focused Jest suites with 67/67 tests, and `git diff --check`. Its
+  feature branch/worktree were removed.
+- `04:00 HKT` stop checkpoint: implementation is stopped. The continuation
+  record is `docs/mvp-handoff-2026-07-30-0400.md`; no API-05 branch or work
+  started. The Goal remains active because pause is user-controlled.
+- Next queued delivery item: `API-05`, Export Hono `AppType` and configure the
+  typed mobile client, remains unchecked.
 - Detailed task index: `docs/mvp-roadmap.md`.
 - Goal-mode execution brief: `docs/mvp-goal-prompt.md`.
 - Completed Foundation execution plan:

@@ -16,16 +16,16 @@ This file is the backend handoff. When asked to continue backend work:
    - any new verification under [Verified](#verified)
    - the next unchecked task
 
-Current task: close and integrate `API-04` stable Zod DTO contracts from
+Current task: resume from the 04:00 HKT handoff and prepare `API-05` from
 `codex/mvp-dto-contracts` from exact verified `dev` head `5f6450e`. API-03 was
 fast-forwarded and its merged result passed focused 11/11, server type-check,
 backend 61/61 with zero skips, root check, and 67/67 native-focused Jest tests
 before branch/worktree cleanup. All three API-04 tasks are implemented and
-task re-reviews are clean. Finish whole-branch review and full exit gates, then
-fast-forward and repeat merged-result verification before the 04:00 handoff.
-Whole-branch review is now clean, and fresh branch gates passed server
-type-check, backend 75/75 with zero skips, root check, 67/67 native-focused
-Jest tests, and `git diff --check`.
+task re-reviews are clean. API-04 fast-forwarded into `dev` at `eca1533`; its
+merged result passed server type-check, backend 75/75 with zero skips, root
+check, 67/67 native-focused Jest tests, and `git diff --check`. Implementation
+is stopped; read `docs/mvp-handoff-2026-07-30-0400.md` before creating the
+API-05 branch.
 
 ## Current State
 
