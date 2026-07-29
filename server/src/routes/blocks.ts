@@ -1,5 +1,8 @@
 import { Hono } from "hono";
 
-export const blockRoutes = new Hono().post("/", (c) =>
-  c.json({ message: "Blocks are not implemented yet" }, 501),
+import { errorResponse } from "../http/errors";
+import type { RequestIdEnv } from "../http/requestId";
+
+export const blockRoutes = new Hono<RequestIdEnv>().post("/", (c) =>
+  errorResponse(c, "not_implemented"),
 );

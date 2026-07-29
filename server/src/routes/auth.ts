@@ -12,10 +12,8 @@ import {
 } from "../auth/tokens";
 import { db } from "../db/client";
 import { profiles, refreshTokens, users } from "../db/schema";
-
-interface DatabaseError {
-  code?: string;
-}
+import { errorResponse, validationErrorHook } from "../http/errors";
+import type { RequestIdEnv } from "../http/requestId";
 
 const authBodySchema = z.object({
   email: z.email().transform((email) => email.toLowerCase()),
@@ -48,94 +46,145 @@ const createTokenPair = async (userId: string) => {
   };
 };
 
-export const authRoutes = new Hono()
-  .post("/signup", zValidator("json", signupBodySchema), async (c) => {
-    const body = c.req.valid("json");
-    const passwordHash = await hashPassword(body.password);
+export const authRoutes = new Hono<RequestIdEnv>()
+  .post(
+    "/signup",
+    zValidator("json", signupBodySchema, validationErrorHook),
+    async (c) => {
+      const body = c.req.valid("json");
+      const passwordHash = await hashPassword(body.password);
 
-    try {
+      try {
+        const [user] = await db
+          .insert(users)
+          .values({ email: body.email, passwordHash })
+          .returning({ id: users.id, email: users.email });
+
+        await db.insert(profiles).values({
+          userId: user.id,
+          displayName: body.displayName ?? body.email.split("@")[0],
+        });
+
+        const tokens = await createTokenPair(user.id);
+
+        return c.json({ user, tokens }, 201);
+      } catch (error) {
+        const databaseError =
+          typeof error === "object" && error !== null && "cause" in error
+            ? error.cause
+            : error;
+        if (
+          typeof databaseError === "object" &&
+          databaseError !== null &&
+          "code" in databaseError &&
+          databaseError.code === "23505"
+        ) {
+          return errorResponse(c, "email_already_registered");
+        }
+
+        throw error;
+      }
+    },
+  )
+  .post(
+    "/login",
+    zValidator("json", authBodySchema, validationErrorHook),
+    async (c) => {
+      const body = c.req.valid("json");
       const [user] = await db
-        .insert(users)
-        .values({ email: body.email, passwordHash })
-        .returning({ id: users.id, email: users.email });
+        .select()
+        .from(users)
+        .where(eq(users.email, body.email))
+        .limit(1);
 
-      await db.insert(profiles).values({
-        userId: user.id,
-        displayName: body.displayName ?? body.email.split("@")[0],
-      });
+      if (!user || !(await verifyPassword(body.password, user.passwordHash))) {
+        return errorResponse(c, "invalid_credentials");
+      }
 
       const tokens = await createTokenPair(user.id);
 
-      return c.json({ user, tokens }, 201);
-    } catch (error) {
-      if (typeof error === "object" && error && (error as DatabaseError).code === "23505") {
-        return c.json({ message: "Email is already registered" }, 409);
+      return c.json(
+        { user: { id: user.id, email: user.email }, tokens },
+        200,
+      );
+    },
+  )
+  .post(
+    "/refresh",
+    zValidator("json", refreshBodySchema, validationErrorHook),
+    async (c) => {
+      const tokenHash = hashRefreshToken(c.req.valid("json").refreshToken);
+      const [currentToken] = await db
+        .select()
+        .from(refreshTokens)
+        .where(eq(refreshTokens.tokenHash, tokenHash))
+        .limit(1);
+
+      if (!currentToken) {
+        return errorResponse(c, "invalid_refresh_token");
       }
 
-      throw error;
-    }
-  })
-  .post("/login", zValidator("json", authBodySchema), async (c) => {
-    const body = c.req.valid("json");
-    const [user] = await db.select().from(users).where(eq(users.email, body.email)).limit(1);
+      if (currentToken.revokedAt) {
+        await db
+          .update(refreshTokens)
+          .set({ revokedAt: new Date() })
+          .where(
+            and(
+              eq(refreshTokens.userId, currentToken.userId),
+              isNull(refreshTokens.revokedAt),
+            ),
+          );
+        return errorResponse(c, "refresh_token_reuse_detected");
+      }
 
-    if (!user || !(await verifyPassword(body.password, user.passwordHash))) {
-      return c.json({ message: "Invalid email or password" }, 401);
-    }
+      const [activeToken] = await db
+        .select()
+        .from(refreshTokens)
+        .where(
+          and(
+            eq(refreshTokens.id, currentToken.id),
+            isNull(refreshTokens.revokedAt),
+            gt(refreshTokens.expiresAt, new Date()),
+          ),
+        )
+        .limit(1);
 
-    const tokens = await createTokenPair(user.id);
+      if (!activeToken) {
+        return errorResponse(c, "refresh_token_expired");
+      }
 
-    return c.json({ user: { id: user.id, email: user.email }, tokens }, 200);
-  })
-  .post("/refresh", zValidator("json", refreshBodySchema), async (c) => {
-    const tokenHash = hashRefreshToken(c.req.valid("json").refreshToken);
-    const [currentToken] = await db
-      .select()
-      .from(refreshTokens)
-      .where(eq(refreshTokens.tokenHash, tokenHash))
-      .limit(1);
+      const tokens = await createTokenPair(currentToken.userId);
+      await db
+        .update(refreshTokens)
+        .set({
+          revokedAt: new Date(),
+          replacedByTokenId: tokens.refreshTokenId,
+        })
+        .where(eq(refreshTokens.id, currentToken.id));
 
-    if (!currentToken) {
-      return c.json({ message: "Invalid refresh token" }, 401);
-    }
-
-    if (currentToken.revokedAt) {
+      return c.json(
+        {
+          accessToken: tokens.accessToken,
+          refreshToken: tokens.refreshToken,
+        },
+        200,
+      );
+    },
+  )
+  .post(
+    "/logout",
+    zValidator("json", refreshBodySchema, validationErrorHook),
+    async (c) => {
       await db
         .update(refreshTokens)
         .set({ revokedAt: new Date() })
-        .where(and(eq(refreshTokens.userId, currentToken.userId), isNull(refreshTokens.revokedAt)));
-      return c.json({ message: "Refresh token was reused" }, 403);
-    }
+        .where(
+          eq(
+            refreshTokens.tokenHash,
+            hashRefreshToken(c.req.valid("json").refreshToken),
+          ),
+        );
 
-    const [activeToken] = await db
-      .select()
-      .from(refreshTokens)
-      .where(
-        and(
-          eq(refreshTokens.id, currentToken.id),
-          isNull(refreshTokens.revokedAt),
-          gt(refreshTokens.expiresAt, new Date()),
-        ),
-      )
-      .limit(1);
-
-    if (!activeToken) {
-      return c.json({ message: "Refresh token expired" }, 401);
-    }
-
-    const tokens = await createTokenPair(currentToken.userId);
-    await db
-      .update(refreshTokens)
-      .set({ revokedAt: new Date(), replacedByTokenId: tokens.refreshTokenId })
-      .where(eq(refreshTokens.id, currentToken.id));
-
-    return c.json({ accessToken: tokens.accessToken, refreshToken: tokens.refreshToken }, 200);
-  })
-  .post("/logout", zValidator("json", refreshBodySchema), async (c) => {
-    await db
-      .update(refreshTokens)
-      .set({ revokedAt: new Date() })
-      .where(eq(refreshTokens.tokenHash, hashRefreshToken(c.req.valid("json").refreshToken)));
-
-    return c.json({ ok: true }, 200);
-  });
+      return c.json({ ok: true }, 200);
+    },
+  );

@@ -16,12 +16,13 @@ This file is the backend handoff. When asked to continue backend work:
    - any new verification under [Verified](#verified)
    - the next unchecked task
 
-Current task: execute `API-02`, Define the shared error envelope and request
-IDs, from `docs/superpowers/plans/2026-07-30-api-error-contract.md` on
-`codex/mvp-error-contract`. `API-01` passed closure re-review and merged-result
-verification before its branch was fast-forwarded into `dev` at `7d21b95`.
-Its canonical `/v1` route tree keeps `/health` unversioned and temporary
-compatibility aliases protect current callers until `AUTH-01`.
+Current task: review `API-02`, Define the shared error envelope and request IDs,
+from `docs/superpowers/plans/2026-07-30-api-error-contract.md` on
+`codex/mvp-error-contract`. Tasks 1-3 are implemented and their automated gates
+pass, but exact Task 3 review, whole-branch review, closure re-review, and fresh
+exit verification remain pending. Keep `API-02` unchecked and do not begin
+`API-03`. `API-01` was fast-forwarded into `dev` at `7d21b95`; its canonical
+`/v1` tree and temporary compatibility aliases remain unchanged.
 
 ## Current State
 
@@ -63,6 +64,31 @@ compatibility aliases protect current callers until `AUTH-01`.
 ## Progress Log
 
 Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
+
+### 2026-07-30 02:12:17 +08:00
+
+- Implemented the Task 3 route closure for `API-02`: every current auth and
+  profile validator uses the shared validation hook; missing/invalid access
+  tokens, auth failures, missing profiles, and all current recipe, image,
+  report, and block placeholders use their approved stable codes. Success
+  payloads and all statuses, including `501`, are unchanged.
+- `AuthVariables` now extends `RequestIdVariables` without casts or `any`.
+  Database-backed coverage uses one unique email per fixture, deletes only that
+  user afterward, expires only its stored refresh token, reaches reuse by
+  rotate-then-replay, and proves the access token works before deleting only
+  its profile.
+- Initial focused RED passed 6/14 and failed 8/14 with zero skips against raw
+  Zod and `{ message }` bodies. It also revealed that Drizzle wraps PostgreSQL
+  code `23505`, making the intended duplicate-email `409` branch unreachable;
+  the minimal cause inspection restored that existing branch. A follow-up
+  mutation RED passed 15/20 and failed 5/20 with zero skips for invalid bearer
+  and missing refresh/logout/profile validator mappings. Focused GREEN passed
+  34/34 with zero skips.
+- Fresh gates passed: server type-check; 48/48 backend tests with zero
+  failures/skips; root lint/type-check; 16/16 native-focused Jest suites with
+  67/67 tests; and `git diff --check`.
+- Exact Task 3 review and mandatory whole-branch review are pending. `API-02`
+  remains unchecked, and the next action is review rather than `API-03`.
 
 ### 2026-07-30 00:47:52 +08:00
 
@@ -317,6 +343,17 @@ Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
 - Moved backend planning docs into `server/docs/`.
 
 ## Verified
+
+Current API-02 Task 3 evidence:
+
+- Focused contract suite: 34/34 passed with zero failures/skips.
+- Server type-check passed; backend suite passed 48/48 with zero
+  failures/skips.
+- Root lint/type-check passed; all 16 native-focused Jest suites and 67 tests
+  passed.
+- `git diff --check` passed. No browser, Metro, backend listener, schema,
+  migration, DTO, mobile, or logging change was used.
+- Review remains pending, so this evidence does not close `API-02`.
 
 Current Foundation exit evidence:
 

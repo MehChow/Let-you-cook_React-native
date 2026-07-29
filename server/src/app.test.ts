@@ -2,8 +2,11 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { app } from "./app";
+import { createAccessToken } from "./auth/tokens";
 import type { ApiErrorEnvelope } from "./http/errors";
 import { REQUEST_ID_HEADER } from "./http/requestId";
+
+process.env.JWT_SECRET ??= "test-secret";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -46,6 +49,186 @@ test("client request IDs are ignored and overwritten", async () => {
 
   assert.match(response.headers.get("X-Request-Id") ?? "", UUID_PATTERN);
   assert.notEqual(response.headers.get("X-Request-Id"), "client-controlled");
+});
+
+test("current database-free route failures use the shared error envelope", async (t) => {
+  const profileAccessToken = await createAccessToken(
+    "00000000-0000-4000-8000-000000000001",
+  );
+  const cases = [
+    {
+      path: "/v1/auth/login",
+      method: "POST",
+      body: "{}",
+      status: 400,
+      code: "validation_failed",
+      message: "Some fields need attention.",
+      fieldErrors: {
+        email: ["Invalid input: expected string, received undefined"],
+        password: ["Invalid input: expected string, received undefined"],
+      },
+    },
+    {
+      path: "/v1/auth/login",
+      method: "POST",
+      body: "{",
+      status: 400,
+      code: "malformed_request",
+      message: "The request could not be read.",
+    },
+    {
+      path: "/v1/profiles/me",
+      method: "GET",
+      status: 401,
+      code: "authentication_required",
+      message: "Authentication is required.",
+    },
+    {
+      path: "/v1/profiles/me",
+      method: "GET",
+      authorization: "Bearer invalid-access-token",
+      status: 401,
+      code: "invalid_access_token",
+      message: "Authentication is invalid or expired.",
+    },
+    {
+      path: "/v1/auth/refresh",
+      method: "POST",
+      body: "{}",
+      status: 400,
+      code: "validation_failed",
+      message: "Some fields need attention.",
+      fieldErrors: {
+        refreshToken: [
+          "Invalid input: expected string, received undefined",
+        ],
+      },
+    },
+    {
+      path: "/v1/auth/logout",
+      method: "POST",
+      body: "{}",
+      status: 400,
+      code: "validation_failed",
+      message: "Some fields need attention.",
+      fieldErrors: {
+        refreshToken: [
+          "Invalid input: expected string, received undefined",
+        ],
+      },
+    },
+    {
+      path: "/v1/profiles/me",
+      method: "PATCH",
+      authorization: `Bearer ${profileAccessToken}`,
+      body: JSON.stringify({ displayName: "" }),
+      status: 400,
+      code: "validation_failed",
+      message: "Some fields need attention.",
+      fieldErrors: {
+        displayName: [
+          "Too small: expected string to have >=1 characters",
+        ],
+      },
+    },
+    {
+      path: "/v1/recipes/recipe-id",
+      method: "GET",
+      status: 501,
+      code: "not_implemented",
+      message: "This operation is not available yet.",
+    },
+    {
+      path: "/v1/recipes",
+      method: "POST",
+      body: "{}",
+      status: 501,
+      code: "not_implemented",
+      message: "This operation is not available yet.",
+    },
+    {
+      path: "/v1/images/upload-url",
+      method: "POST",
+      body: "{}",
+      status: 501,
+      code: "not_implemented",
+      message: "This operation is not available yet.",
+    },
+    {
+      path: "/v1/reports",
+      method: "POST",
+      body: "{}",
+      status: 501,
+      code: "not_implemented",
+      message: "This operation is not available yet.",
+    },
+    {
+      path: "/v1/blocks",
+      method: "POST",
+      body: "{}",
+      status: 501,
+      code: "not_implemented",
+      message: "This operation is not available yet.",
+    },
+    {
+      path: "/auth/login",
+      method: "POST",
+      body: "{}",
+      status: 400,
+      code: "validation_failed",
+      message: "Some fields need attention.",
+      fieldErrors: {
+        email: ["Invalid input: expected string, received undefined"],
+        password: ["Invalid input: expected string, received undefined"],
+      },
+    },
+    {
+      path: "/recipes/legacy-recipe-id",
+      method: "GET",
+      status: 501,
+      code: "not_implemented",
+      message: "This operation is not available yet.",
+    },
+  ] as const;
+
+  for (const routeCase of cases) {
+    const label =
+      `${routeCase.method} ${routeCase.path} returns ${routeCase.code}`;
+
+    await t.test(label, async () => {
+      const response = await app.request(routeCase.path, {
+        method: routeCase.method,
+        headers: {
+          ...("body" in routeCase
+            ? { "content-type": "application/json" }
+            : {}),
+          ...("authorization" in routeCase
+            ? { authorization: routeCase.authorization }
+            : {}),
+        },
+        body: "body" in routeCase ? routeCase.body : undefined,
+      });
+      const body = (await response.json()) as ApiErrorEnvelope;
+      const requestId = response.headers.get(REQUEST_ID_HEADER);
+
+      assert.equal(response.status, routeCase.status);
+      assert.match(requestId ?? "", UUID_PATTERN);
+      assert.equal(body.error.code, routeCase.code);
+      assert.equal(body.error.message, routeCase.message);
+      assert.equal(body.error.requestId, requestId);
+      assert.equal(
+        "fieldErrors" in body.error,
+        routeCase.code === "validation_failed",
+      );
+
+      if (
+        body.error.code === "validation_failed" &&
+        "fieldErrors" in routeCase
+      ) {
+        assert.deepEqual(body.error.fieldErrors, routeCase.fieldErrors);
+      }
+    });
+  }
 });
 
 test("all existing application route families are mounted under /v1", async () => {

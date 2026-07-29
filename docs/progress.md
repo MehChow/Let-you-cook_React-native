@@ -41,11 +41,30 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   then fast-forwarded into `dev` at `7d21b95`; its feature branch and worktree
   were removed after the merged tree passed focused 3/3, backend 19/19 with
   zero skips, root check, and 16/16 Jest suites with 67/67 tests.
-- Active delivery step: `API-02`, Define the shared error envelope and request
-  IDs. Its approved design is
-  `docs/superpowers/specs/2026-07-30-api-error-contract-design.md`; implementation
-  is ready to begin from `docs/superpowers/plans/2026-07-30-api-error-contract.md`
-  on `codex/mvp-error-contract`.
+- Active delivery step: review `API-02`, Define the shared error envelope and
+  request IDs, on `codex/mvp-error-contract`. Tasks 1-3 now assign a
+  server-owned request ID, provide the typed shared error helpers/root
+  boundaries, and convert every current validator, auth/profile failure, and
+  recipe/image/report/block placeholder without changing success bodies or
+  statuses. The approved design is
+  `docs/superpowers/specs/2026-07-30-api-error-contract-design.md`; the active
+  plan is `docs/superpowers/plans/2026-07-30-api-error-contract.md`.
+- `API-02` Task 3 TDD evidence: the initial focused command passed 6/14 and
+  failed 8/14 with zero skips against the raw Zod and `{ message }` responses.
+  It also exposed that Drizzle wraps PostgreSQL code `23505`, so the intended
+  duplicate-email `409` branch was unreachable until the wrapped cause was
+  recognized. A follow-up mutation RED passed 15/20 and failed 5/20 with zero
+  skips, proving the invalid-access-token branch and refresh, logout, and
+  profile validator hooks were independently protected. The final focused
+  suite passed 34/34 with zero skips.
+- Fresh `API-02` Task 3 gates: `npm.cmd run server:check` passed;
+  `npm.cmd run server:test` passed 48/48 with zero failures/skips;
+  `npm.cmd run check` passed; `npm.cmd test -- --runInBand` passed 16/16 suites
+  and 67/67 tests; and `git diff --check` passed. No backend listener, Metro,
+  Expo web, schema, migration, DTO, mobile, or logging work occurred.
+- Review state: exact Task 3 review and the mandatory whole-branch review are
+  pending. `API-02` remains unchecked, and work must not advance to `API-03`
+  until the reviewed closure wave and fresh exit verification pass.
 - Detailed task index: `docs/mvp-roadmap.md`.
 - Goal-mode execution brief: `docs/mvp-goal-prompt.md`.
 - Completed Foundation execution plan:

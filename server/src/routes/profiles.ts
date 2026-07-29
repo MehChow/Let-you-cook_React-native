@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { db } from "../db/client";
 import { profiles, users } from "../db/schema";
+import { errorResponse, validationErrorHook } from "../http/errors";
 import { requireAuth, type AuthVariables } from "../middleware/auth";
 
 const updateProfileSchema = z.object({
@@ -31,21 +32,25 @@ export const profileRoutes = new Hono<{ Variables: AuthVariables }>()
       .limit(1);
 
     if (!profile) {
-      return c.json({ message: "Profile not found" }, 404);
+      return errorResponse(c, "resource_not_found");
     }
 
     return c.json({ profile }, 200);
   })
-  .patch("/me", zValidator("json", updateProfileSchema), async (c) => {
-    const [profile] = await db
-      .update(profiles)
-      .set({ ...c.req.valid("json"), updatedAt: new Date() })
-      .where(eq(profiles.userId, c.get("userId")))
-      .returning({
-        displayName: profiles.displayName,
-        bio: profiles.bio,
-        avatarImageUrl: profiles.avatarImageUrl,
-      });
+  .patch(
+    "/me",
+    zValidator("json", updateProfileSchema, validationErrorHook),
+    async (c) => {
+      const [profile] = await db
+        .update(profiles)
+        .set({ ...c.req.valid("json"), updatedAt: new Date() })
+        .where(eq(profiles.userId, c.get("userId")))
+        .returning({
+          displayName: profiles.displayName,
+          bio: profiles.bio,
+          avatarImageUrl: profiles.avatarImageUrl,
+        });
 
-    return c.json({ profile }, 200);
-  });
+      return c.json({ profile }, 200);
+    },
+  );

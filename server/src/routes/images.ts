@@ -1,5 +1,9 @@
 import { Hono } from "hono";
 
-export const imageRoutes = new Hono().post("/upload-url", (c) =>
-  c.json({ message: "Image upload URLs need Cloudflare R2 credentials" }, 501),
+import { errorResponse } from "../http/errors";
+import type { RequestIdEnv } from "../http/requestId";
+
+export const imageRoutes = new Hono<RequestIdEnv>().post(
+  "/upload-url",
+  (c) => errorResponse(c, "not_implemented"),
 );

@@ -1,6 +1,9 @@
 import { Hono } from "hono";
 
-export const recipeRoutes = new Hono()
+import { errorResponse } from "../http/errors";
+import type { RequestIdEnv } from "../http/requestId";
+
+export const recipeRoutes = new Hono<RequestIdEnv>()
   .get("/", (c) => c.json({ recipes: [] }, 200))
-  .get("/:id", (c) => c.json({ message: "Recipe endpoint is not implemented yet" }, 501))
-  .post("/", (c) => c.json({ message: "Recipe creation is not implemented yet" }, 501));
+  .get("/:id", (c) => errorResponse(c, "not_implemented"))
+  .post("/", (c) => errorResponse(c, "not_implemented"));

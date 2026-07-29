@@ -3,6 +3,8 @@ import { after, test } from "node:test";
 
 import { app } from "../app";
 import { pool } from "../db/client";
+import type { ApiErrorEnvelope } from "../http/errors";
+import { REQUEST_ID_HEADER } from "../http/requestId";
 
 after(async () => {
   await pool.end();
@@ -20,4 +22,18 @@ test("signup rejects passwords longer than 20 characters", async () => {
   });
 
   assert.equal(response.status, 400);
+  const requestId = response.headers.get(REQUEST_ID_HEADER);
+  const body = (await response.json()) as ApiErrorEnvelope;
+
+  assert.ok(requestId);
+  assert.deepEqual(body, {
+    error: {
+      code: "validation_failed",
+      message: "Some fields need attention.",
+      fieldErrors: {
+        password: ["Too big: expected string to have <=20 characters"],
+      },
+      requestId,
+    },
+  });
 });
