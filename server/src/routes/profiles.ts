@@ -49,6 +49,10 @@ export const profileRoutes = new Hono<{ Variables: AuthVariables }>()
           avatarImageUrl: profiles.avatarImageUrl,
         });
 
+      if (!profile) {
+        return errorResponse(c, "resource_not_found");
+      }
+
       return c.json(updateProfileResponseSchema.parse({ profile }), 200);
     },
   );

@@ -4,7 +4,7 @@ Plan: `docs/superpowers/plans/2026-07-30-zod-dto-contracts.md`
 Design: `docs/superpowers/specs/2026-07-30-zod-dto-contracts-design.md`
 Branch: `codex/mvp-dto-contracts`
 Base: `dev` at `5f6450e42b60a460e2c4c81032d967a3a73f9818`
-Status: Tasks 1-2 complete; Task 3 implemented and awaiting review
+Status: all tasks implemented and task-reviewed; branch closure pending
 
 ## Decisions
 
@@ -20,7 +20,7 @@ Status: Tasks 1-2 complete; Task 3 implemented and awaiting review
 
 - API-04A: complete after clean fix-wave re-review
 - API-04B: complete after clean Important-finding re-review
-- API-04C: implementation complete; review pending
+- API-04C: complete after clean fix-wave re-review
 - Whole-branch review: pending
 - Exit verification: pending
 - Merge to `dev`: pending
@@ -67,3 +67,11 @@ Status: Tasks 1-2 complete; Task 3 implemented and awaiting review
 - 2026-07-30: profile input and both current response shapes now use strict
   inferred contracts. Server type-check passed, the backend suite passed 75/75
   with zero skips, and `git diff --check` passed.
+- 2026-07-30: Task 3 review found no Critical issues, one Important missing-row
+  PATCH path that produced a safe but incorrect 500, and one Minor real-route
+  coverage gap.
+- 2026-07-30: focused RED reproduced the missing-profile PATCH as 500 instead
+  of 404. GREEN returns `resource_not_found`; the real smoke also proves
+  canonical PATCH preserves exact nullable editable fields and uses inferred
+  contract types. Re-review found no remaining Critical, Important, or Minor
+  issues.

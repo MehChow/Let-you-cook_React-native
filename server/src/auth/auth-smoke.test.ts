@@ -5,6 +5,14 @@ import { eq } from "drizzle-orm";
 
 import { app } from "../app";
 import { hashRefreshToken } from "../auth/tokens";
+import type {
+  AuthSessionResponse as AuthResponse,
+  AuthTokens,
+} from "../contracts/auth";
+import type {
+  PrivateProfileResponse as ProfileResponse,
+  UpdateProfileResponse,
+} from "../contracts/profiles";
 import { db, pool } from "../db/client";
 import { profiles, refreshTokens, users } from "../db/schema";
 import {
@@ -18,29 +26,6 @@ process.env.JWT_SECRET ??= "test-secret";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-
-interface AuthTokens {
-  accessToken: string;
-  refreshToken: string;
-}
-
-interface AuthResponse {
-  user: {
-    id: string;
-    email: string;
-  };
-  tokens: AuthTokens;
-}
-
-interface ProfileResponse {
-  profile: {
-    id: string;
-    email: string;
-    displayName: string;
-    bio: string | null;
-    avatarImageUrl: string | null;
-  };
-}
 
 // Sends JSON requests through the real application route tree.
 const postJsonResponse = (path: string, body: object) =>
@@ -133,6 +118,29 @@ test("auth and profile endpoints work against local Postgres", async (t) => {
     const profile = await getJson<ProfileResponse>("/profiles/me", login.tokens.accessToken, 200);
     assert.equal(profile.profile.email, email);
     assert.equal(profile.profile.displayName, "Smoke Tester");
+
+    const updateResponse = await app.request("/v1/profiles/me", {
+      method: "PATCH",
+      headers: {
+        authorization: `Bearer ${login.tokens.accessToken}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        displayName: "Updated Tester",
+        bio: null,
+        avatarImageUrl: null,
+      }),
+    });
+    const updated = (await updateResponse.json()) as UpdateProfileResponse;
+
+    assert.equal(updateResponse.status, 200);
+    assert.deepEqual(updated, {
+      profile: {
+        displayName: "Updated Tester",
+        bio: null,
+        avatarImageUrl: null,
+      },
+    });
 
     const refreshed = await postJson<AuthTokens>(
       "/auth/refresh",
@@ -404,6 +412,21 @@ test("valid access token for a deleted profile returns not found", async () => {
     });
 
     await assertErrorResponse(response, {
+      status: 404,
+      code: "resource_not_found",
+      message: "The requested resource was not found.",
+    });
+
+    const patchResponse = await app.request("/v1/profiles/me", {
+      method: "PATCH",
+      headers: {
+        authorization: `Bearer ${signup.tokens.accessToken}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ displayName: "Missing Profile" }),
+    });
+
+    await assertErrorResponse(patchResponse, {
       status: 404,
       code: "resource_not_found",
       message: "The requested resource was not found.",
