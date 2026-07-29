@@ -16,10 +16,11 @@ This file is the backend handoff. When asked to continue backend work:
    - any new verification under [Verified](#verified)
    - the next unchecked task
 
-Current task to begin: execute Task 1 in
-`docs/superpowers/plans/2026-07-27-api-contract-versioning.md` to add the
-canonical `/v1` route tree while keeping `/health` unversioned and retaining
-temporary compatibility aliases for current callers.
+Current task: review the completed `API-01` Task 1 implementation in
+`docs/superpowers/plans/2026-07-27-api-contract-versioning.md`. The canonical
+`/v1` route tree is implemented while `/health` stays unversioned and temporary
+compatibility aliases protect current callers. Do not check `API-01` or begin
+`API-02` until task and branch reviews pass.
 
 ## Current State
 
@@ -42,8 +43,8 @@ temporary compatibility aliases for current callers.
 
 ## Next Task Queue
 
-- [ ] Create the `API-01` implementation plan, then add `/v1` routing in a
-  coordinated server/mobile change while keeping `/health` unversioned.
+- [ ] Review `API-01` Task 1 before marking its `/v1` routing complete; keep
+  `/health` unversioned and retain legacy aliases until `AUTH-01`.
 - [x] Add app-side auth API wrappers under `src/features/auth/api.ts`.
 - [x] Install and wire `expo-secure-store` for access and refresh token storage.
 - [x] Add a shared API client wrapper that retries once after token refresh.
@@ -59,6 +60,27 @@ temporary compatibility aliases for current callers.
 ## Progress Log
 
 Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
+
+### 2026-07-30 HKT
+
+- Implemented the canonical `v1Routes` composition for auth, profiles,
+  recipes, images, favourites, reports, and blocks. The root app mounts it at
+  `/v1` after unversioned `/health`, before unchanged unversioned aliases.
+  `/v1/health` deliberately has no handler.
+- Focused TDD RED used the Windows root-resolved equivalent
+  `npm.cmd --prefix server exec -- tsx --env-file=server/.env --test
+  server/src/app.test.ts`: 2/3 assertions passed and the versioned family test
+  failed because `POST /v1/auth/login` was `404`, not its existing `400`.
+  The minimal mount produced GREEN at 3/3. The literal brief command resolves
+  `.env` and `src/app.test.ts` from the repository root under this npm
+  invocation, producing setup-path failures instead of a routing result.
+- Fresh verification: `npm.cmd run server:check` passed; `npm.cmd run
+  server:test` passed 19/19 with 0 failures and 0 skips; `npm.cmd run check`
+  passed; and `npm.cmd test -- --runInBand` passed 16/16 suites and 67/67
+  tests. Only the documented `letyoucook-dev` PostgreSQL and Mailpit services
+  were started; no listener, Metro, or Expo web process ran.
+- Required task and branch reviews remain pending. Leave `API-01` unchecked
+  and do not begin `API-02`.
 
 ### 2026-07-27 03:31:00 HKT
 

@@ -18,11 +18,32 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   planning commit `803a619` before the handoff commit. No API implementation,
   merge, push, or pull request occurred. The Goal remains active because pause
   is user-controlled.
-- Next delivery step: execute Task 1 in
-  `docs/superpowers/plans/2026-07-27-api-contract-versioning.md` using
-  subagent-driven development. The plan preserves current unversioned callers
-  while adding the canonical `/v1` route tree; do not mark `API-01` complete
-  until its TDD, review, and verification gates pass.
+- `API-01` Task 1 implementation is ready for required task and branch review
+  on `codex/mvp-api-contract`. The composed `v1Routes` mounts all seven current
+  application route families at `/v1`; `/health` remains unversioned and
+  `/v1/health` remains `404`. Existing unversioned routes are temporary
+  compatibility aliases for current callers until `AUTH-01`.
+- TDD evidence: the Windows root-resolved equivalent focused command
+  `npm.cmd --prefix server exec -- tsx --env-file=server/.env --test
+  server/src/app.test.ts` was RED with 2/3 tests passing because
+  `POST /v1/auth/login` returned `404` instead of `400`; after the minimal
+  router mount it was GREEN at 3/3. The literal brief command resolves `.env`
+  and `src/app.test.ts` from the repository root under this npm invocation, so
+  it first failed on missing `.env` and then on the missing root-relative test
+  path rather than exercising routing.
+- Fresh API-01 Task 1 verification: `npm.cmd run server:check` passed;
+  `npm.cmd run server:test` passed 19/19 with 0 failures and 0 skips;
+  `npm.cmd run check` passed; and `npm.cmd test -- --runInBand` passed 16/16
+  suites and 67/67 tests. Only documented `letyoucook-dev` PostgreSQL and
+  Mailpit services were started; no Expo web, Metro, or backend listener ran.
+- Required task and branch reviews are still pending. Keep `API-01` unchecked
+  and do not advance the next implementation action to `API-02` until those
+  reviews pass.
+- Next delivery step: perform the required task and branch reviews for Task 1
+  in `docs/superpowers/plans/2026-07-27-api-contract-versioning.md`. The plan
+  preserves current unversioned callers while adding the canonical `/v1` route
+  tree; do not mark `API-01` complete or begin `API-02` until those reviews
+  pass.
 - Detailed task index: `docs/mvp-roadmap.md`.
 - Goal-mode execution brief: `docs/mvp-goal-prompt.md`.
 - Completed Foundation execution plan:

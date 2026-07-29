@@ -7,9 +7,11 @@ import { imageRoutes } from "./routes/images";
 import { profileRoutes } from "./routes/profiles";
 import { recipeRoutes } from "./routes/recipes";
 import { reportRoutes } from "./routes/reports";
+import { v1Routes } from "./routes/v1";
 
 export const app = new Hono()
   .get("/health", (c) => c.json({ ok: true }, 200))
+  .route("/v1", v1Routes)
   .route("/auth", authRoutes)
   .route("/profiles", profileRoutes)
   .route("/recipes", recipeRoutes)
