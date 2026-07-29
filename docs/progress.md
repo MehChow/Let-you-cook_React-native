@@ -5,7 +5,7 @@
 > old task lists or screenshots.
 
 Last audited: 2026-07-30
-Current branch at audit: `codex/mvp-pagination`
+Current branch at audit: `codex/mvp-dto-contracts`
 Overall state: polished mocked Expo prototype plus an early local backend.
 
 - Planning milestone: `PLAN-03` — Goal-mode MVP handoff ready.
@@ -111,9 +111,17 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   61/61 with zero skips, root lint/type-check, 16/16 native-focused Jest suites
   with 67/67 tests, and `git diff --check`. The branch is authorized for a
   local fast-forward.
-- Next action: fast-forward API-03 into `dev` and repeat merged-result
-  verification. Then start `API-04` from the exact verified `dev` head if
-  before the 04:00 HKT stop checkpoint.
+- `API-03` fast-forwarded into `dev` at `5f6450e`. The merged result repeated
+  focused 11/11, server type-check, backend 61/61 with zero skips, root
+  lint/type-check, 16/16 native-focused Jest suites with 67/67 tests, and
+  `git diff --check`. Its feature branch/worktree were removed.
+- Active delivery item: `API-04`, Create stable Zod request/response DTO
+  contracts, is on `codex/mvp-dto-contracts` from exact verified base
+  `5f6450e`. Its approved bounded design and executable plan cover only current
+  system/auth/profile routes plus shared error/page primitives; speculative
+  future feature DTOs and behavior changes are explicitly deferred.
+- Next action: commit the API-04 design/plan, establish its isolated baseline,
+  and begin Task 1 shared/system DTO primitives before the 04:00 HKT handoff.
 - Detailed task index: `docs/mvp-roadmap.md`.
 - Goal-mode execution brief: `docs/mvp-goal-prompt.md`.
 - Completed Foundation execution plan:
@@ -124,6 +132,8 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   `docs/superpowers/plans/2026-07-30-api-error-contract.md`.
 - Completed API-03 implementation plan:
   `docs/superpowers/plans/2026-07-30-cursor-pagination.md`.
+- Active API-04 implementation plan:
+  `docs/superpowers/plans/2026-07-30-zod-dto-contracts.md`.
 - API-03 design baseline commit: `2efdf1c`; its reviewed ordering clarification
   is part of the API-03 closure documentation.
 - Foundation branch at exit: `codex/mvp-foundation`. The final application checkout

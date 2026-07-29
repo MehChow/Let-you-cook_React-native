@@ -16,13 +16,12 @@ This file is the backend handoff. When asked to continue backend work:
    - any new verification under [Verified](#verified)
    - the next unchecked task
 
-Current task: integrate completed `API-03` cursor pagination and deterministic
-sorting from `codex/mvp-pagination` into `dev`. The branch started at exact base
-`8375a8a`; implementation commits are `90622f1` and `ed50c48`. Task and
-documentation re-reviews are clean. Exact closure head `eed6807` passed focused
-11/11, server type-check, backend 61/61 with zero skips, root check, and 67/67
-native-focused Jest tests. Fast-forward it and repeat merged-result verification
-before API-04.
+Current task: execute `API-04` stable Zod request/response DTO contracts on
+`codex/mvp-dto-contracts` from exact verified `dev` head `5f6450e`. API-03 was
+fast-forwarded and its merged result passed focused 11/11, server type-check,
+backend 61/61 with zero skips, root check, and 67/67 native-focused Jest tests
+before branch/worktree cleanup. API-04 design/plan are prepared; begin Task 1
+shared/system DTO primitives.
 
 ## Current State
 
@@ -65,6 +64,18 @@ before API-04.
 ## Progress Log
 
 Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
+
+### 2026-07-30 03:19:42 +08:00
+
+- Fast-forwarded reviewed API-03 into `dev` at `5f6450e`; merged-result
+  verification repeated focused 11/11, server type-check, backend 61/61 with
+  zero skips, root lint/type-check, 16/16 native-focused Jest suites with 67/67
+  tests, and `git diff --check`.
+- Removed the merged API-03 branch/worktree, then created
+  `codex/mvp-dto-contracts` from exact `5f6450e`.
+- API-04's bounded design covers only real current system/auth/profile
+  contracts plus shared error/page primitives. It preserves all runtime
+  behavior and defers future feature DTOs.
 
 ### 2026-07-30 03:09:19 +08:00
 
