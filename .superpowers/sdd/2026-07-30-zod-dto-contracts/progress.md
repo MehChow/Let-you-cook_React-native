@@ -4,7 +4,7 @@ Plan: `docs/superpowers/plans/2026-07-30-zod-dto-contracts.md`
 Design: `docs/superpowers/specs/2026-07-30-zod-dto-contracts-design.md`
 Branch: `codex/mvp-dto-contracts`
 Base: `dev` at `5f6450e42b60a460e2c4c81032d967a3a73f9818`
-Status: design and plan prepared; Task 1 not started
+Status: Task 1 implemented; exact task review pending
 
 ## Decisions
 
@@ -18,7 +18,7 @@ Status: design and plan prepared; Task 1 not started
 
 ## Task Status
 
-- API-04A: pending
+- API-04A: implementation complete; review pending
 - API-04B: pending
 - API-04C: pending
 - Whole-branch review: pending
@@ -30,3 +30,11 @@ Status: design and plan prepared; Task 1 not started
 - 2026-07-30: API-03 merged-result gates passed before creating this branch.
 - 2026-07-30: delegated owner approval selected the bounded recommended design
   without a blocking question.
+- 2026-07-30: isolated baseline passed server type-check and backend 61/61 with
+  zero skips.
+- 2026-07-30: Task 1 RED failed with `ERR_MODULE_NOT_FOUND` for the wished-for
+  common contract module.
+- 2026-07-30: focused GREEN passed 43/43. The first server type-check exposed a
+  discriminated page-info construction mismatch; after preserving literal
+  true/false branches, server type-check passed, the backend suite passed 67/67
+  with zero skips, and `git diff --check` passed.

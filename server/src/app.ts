@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 
+import { healthResponseSchema } from "./contracts/system";
 import { handleAppError, handleNotFound } from "./http/errors";
 import { requestIdMiddleware, type RequestIdEnv } from "./http/requestId";
 import { authRoutes } from "./routes/auth";
@@ -13,7 +14,7 @@ import { v1Routes } from "./routes/v1";
 
 export const app = new Hono<RequestIdEnv>()
   .use("*", requestIdMiddleware)
-  .get("/health", (c) => c.json({ ok: true }, 200))
+  .get("/health", (c) => c.json(healthResponseSchema.parse({ ok: true }), 200))
   .route("/v1", v1Routes)
   .route("/auth", authRoutes)
   .route("/profiles", profileRoutes)

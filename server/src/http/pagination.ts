@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { TextDecoder } from "node:util";
 
+import type { PageInfo } from "../contracts/common";
+
 export const DEFAULT_PAGE_SIZE = 20;
 export const MAX_PAGE_SIZE = 50;
 export const MAX_CURSOR_LENGTH = 2048;
@@ -12,10 +14,7 @@ export type CursorDecodeResult =
   | { success: true; values: CursorValue[] }
   | { success: false };
 
-export interface CursorPageInfo {
-  nextCursor: string | null;
-  hasNextPage: boolean;
-}
+export type CursorPageInfo = PageInfo;
 
 export interface CursorPage<T> {
   items: T[];
@@ -141,15 +140,18 @@ export const buildCursorPage = <T>(
 
   const hasNextPage = rows.length > limit;
   const items = rows.slice(0, limit);
-  const nextCursor = hasNextPage
-    ? encodeCursor(context, cursorValues(items[limit - 1] as T))
-    : null;
+  const pageInfo: CursorPageInfo = hasNextPage
+    ? {
+        nextCursor: encodeCursor(
+          context,
+          cursorValues(items[limit - 1] as T),
+        ),
+        hasNextPage: true,
+      }
+    : { nextCursor: null, hasNextPage: false };
 
   return {
     items,
-    pageInfo: {
-      nextCursor,
-      hasNextPage,
-    },
+    pageInfo,
   };
 };

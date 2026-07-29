@@ -2,26 +2,19 @@ import type { Context } from "hono";
 import { HTTPException } from "hono/http-exception";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 
+import type {
+  FieldErrors,
+  NonValidationErrorCode,
+} from "../contracts/common";
 import type { RequestIdEnv } from "./requestId";
 
-export type FieldErrors = Record<string, string[]>;
-
-export interface ValidationApiError {
-  code: "validation_failed";
-  message: string;
-  fieldErrors: FieldErrors;
-  requestId: string;
-}
-
-export interface NonValidationApiError {
-  code: NonValidationErrorCode;
-  message: string;
-  requestId: string;
-}
-
-export interface ApiErrorEnvelope {
-  error: ValidationApiError | NonValidationApiError;
-}
+export type {
+  ApiErrorEnvelope,
+  FieldErrors,
+  NonValidationApiError,
+  NonValidationErrorCode,
+  ValidationApiError,
+} from "../contracts/common";
 
 interface ValidationIssue {
   path: ReadonlyArray<PropertyKey>;
@@ -67,8 +60,6 @@ export const errorDefinitions = {
   string,
   { status: ContentfulStatusCode; message: string }
 >;
-
-export type NonValidationErrorCode = keyof typeof errorDefinitions;
 
 // Builds a safe non-validation response from its stable definition.
 export const errorResponse = <E extends RequestIdEnv>(
