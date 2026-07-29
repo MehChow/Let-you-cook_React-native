@@ -4,7 +4,7 @@ Plan: `docs/superpowers/plans/2026-07-30-zod-dto-contracts.md`
 Design: `docs/superpowers/specs/2026-07-30-zod-dto-contracts-design.md`
 Branch: `codex/mvp-dto-contracts`
 Base: `dev` at `5f6450e42b60a460e2c4c81032d967a3a73f9818`
-Status: Task 1 complete; Task 2 not started
+Status: Task 1 complete; Task 2 implemented and awaiting review
 
 ## Decisions
 
@@ -19,7 +19,7 @@ Status: Task 1 complete; Task 2 not started
 ## Task Status
 
 - API-04A: complete after clean fix-wave re-review
-- API-04B: pending
+- API-04B: implementation complete; review pending
 - API-04C: pending
 - Whole-branch review: pending
 - Exit verification: pending
@@ -48,4 +48,11 @@ Status: Task 1 complete; Task 2 not started
   and server type-check pass.
 - 2026-07-30: fix-wave re-review found no remaining Critical, Important, or
   Minor issues. Fresh backend verification passed 67/67 with zero skips,
+  server type-check, and `git diff --check`.
+- 2026-07-30: Task 2 RED failed with `ERR_MODULE_NOT_FOUND` for the wished-for
+  auth contract module. GREEN passed 13/13 focused tests.
+- 2026-07-30: auth requests now consume shared schemas and all current auth
+  success responses parse strict inferred DTOs. Signup/login no longer expose
+  internal `refreshTokenId`; access/refresh tokens, statuses, aliases, and auth
+  semantics are unchanged. Backend verification passed 71/71 with zero skips,
   server type-check, and `git diff --check`.

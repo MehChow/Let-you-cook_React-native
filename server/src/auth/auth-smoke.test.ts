@@ -118,9 +118,17 @@ test("auth and profile endpoints work against local Postgres", async (t) => {
     assert.equal(signup.user.email, email);
     assert.ok(signup.tokens.accessToken);
     assert.ok(signup.tokens.refreshToken);
+    assert.deepEqual(Object.keys(signup.tokens).sort(), [
+      "accessToken",
+      "refreshToken",
+    ]);
 
     const login = await postJson<AuthResponse>("/auth/login", { email, password }, 200);
     assert.equal(login.user.id, signup.user.id);
+    assert.deepEqual(Object.keys(login.tokens).sort(), [
+      "accessToken",
+      "refreshToken",
+    ]);
 
     const profile = await getJson<ProfileResponse>("/profiles/me", login.tokens.accessToken, 200);
     assert.equal(profile.profile.email, email);

@@ -1,7 +1,6 @@
 import { zValidator } from "@hono/zod-validator";
 import { and, eq, gt, isNull } from "drizzle-orm";
 import { Hono } from "hono";
-import { z } from "zod";
 
 import { hashPassword, verifyPassword } from "../auth/password";
 import {
@@ -10,23 +9,18 @@ import {
   hashRefreshToken,
   refreshTokenExpiry,
 } from "../auth/tokens";
+import {
+  authCredentialsSchema,
+  authSessionResponseSchema,
+  authTokensSchema,
+  logoutResponseSchema,
+  refreshTokenInputSchema,
+  signUpInputSchema,
+} from "../contracts/auth";
 import { db } from "../db/client";
 import { profiles, refreshTokens, users } from "../db/schema";
 import { errorResponse, validationErrorHook } from "../http/errors";
 import type { RequestIdEnv } from "../http/requestId";
-
-const authBodySchema = z.object({
-  email: z.email().transform((email) => email.toLowerCase()),
-  password: z.string().min(8).max(20),
-});
-
-const signupBodySchema = authBodySchema.extend({
-  displayName: z.string().min(1).max(80).optional(),
-});
-
-const refreshBodySchema = z.object({
-  refreshToken: z.string().min(1),
-});
 
 // Identifies duplicate emails from only the users email index.
 export const isUsersEmailUniqueViolation = (error: unknown): boolean => {
@@ -66,10 +60,19 @@ const createTokenPair = async (userId: string) => {
   };
 };
 
+// Projects internal token metadata into the public token DTO.
+const toAuthTokens = (
+  tokens: Awaited<ReturnType<typeof createTokenPair>>,
+) =>
+  authTokensSchema.parse({
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken,
+  });
+
 export const authRoutes = new Hono<RequestIdEnv>()
   .post(
     "/signup",
-    zValidator("json", signupBodySchema, validationErrorHook),
+    zValidator("json", signUpInputSchema, validationErrorHook),
     async (c) => {
       const body = c.req.valid("json");
       const passwordHash = await hashPassword(body.password);
@@ -95,12 +98,18 @@ export const authRoutes = new Hono<RequestIdEnv>()
 
       const tokens = await createTokenPair(user.id);
 
-      return c.json({ user, tokens }, 201);
+      return c.json(
+        authSessionResponseSchema.parse({
+          user,
+          tokens: toAuthTokens(tokens),
+        }),
+        201,
+      );
     },
   )
   .post(
     "/login",
-    zValidator("json", authBodySchema, validationErrorHook),
+    zValidator("json", authCredentialsSchema, validationErrorHook),
     async (c) => {
       const body = c.req.valid("json");
       const [user] = await db
@@ -116,14 +125,17 @@ export const authRoutes = new Hono<RequestIdEnv>()
       const tokens = await createTokenPair(user.id);
 
       return c.json(
-        { user: { id: user.id, email: user.email }, tokens },
+        authSessionResponseSchema.parse({
+          user: { id: user.id, email: user.email },
+          tokens: toAuthTokens(tokens),
+        }),
         200,
       );
     },
   )
   .post(
     "/refresh",
-    zValidator("json", refreshBodySchema, validationErrorHook),
+    zValidator("json", refreshTokenInputSchema, validationErrorHook),
     async (c) => {
       const tokenHash = hashRefreshToken(c.req.valid("json").refreshToken);
       const [currentToken] = await db
@@ -175,17 +187,17 @@ export const authRoutes = new Hono<RequestIdEnv>()
         .where(eq(refreshTokens.id, currentToken.id));
 
       return c.json(
-        {
+        authTokensSchema.parse({
           accessToken: tokens.accessToken,
           refreshToken: tokens.refreshToken,
-        },
+        }),
         200,
       );
     },
   )
   .post(
     "/logout",
-    zValidator("json", refreshBodySchema, validationErrorHook),
+    zValidator("json", refreshTokenInputSchema, validationErrorHook),
     async (c) => {
       await db
         .update(refreshTokens)
@@ -197,6 +209,6 @@ export const authRoutes = new Hono<RequestIdEnv>()
           ),
         );
 
-      return c.json({ ok: true }, 200);
+      return c.json(logoutResponseSchema.parse({ ok: true }), 200);
     },
   );

@@ -23,8 +23,10 @@ API-04 covers:
 It does not define speculative recipe, media, review, favourite, report, block,
 email-verification, password-reset, account-deletion, or public-profile DTOs.
 Those schemas are added with the feature that implements the route. It does not
-change endpoint paths, statuses, success bodies, authentication semantics,
-database schema, mobile code, or API-02 error behavior.
+change endpoint paths, statuses, documented success fields, authentication
+semantics, database schema, mobile code, or API-02 error behavior. It removes
+the accidentally exposed internal `refreshTokenId` from signup/login token
+objects; the documented and mobile `AuthTokens` contract never included it.
 
 The current signup response still issues a session. That behavior is temporary
 and will change deliberately in `AUTH-08` when mandatory verification is
@@ -139,14 +141,16 @@ untrusted persisted or network data crosses its boundary.
 
 ## Compatibility
 
-API-04 preserves every current successful JSON shape and status:
+API-04 preserves every documented successful JSON shape and status:
 
 - health `200`;
 - signup `201`;
 - login, refresh, logout, profile GET, and profile PATCH `200`.
 
 Canonical `/v1` routes and temporary unversioned aliases consume the same
-router schemas. Existing API-02 errors and request IDs remain unchanged.
+router schemas. Signup/login stop leaking the internal refresh-token row ID;
+their required `accessToken` and `refreshToken` fields are unchanged. Existing
+API-02 errors and request IDs remain unchanged.
 
 ## Verification
 
