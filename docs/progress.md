@@ -5,7 +5,7 @@
 > old task lists or screenshots.
 
 Last audited: 2026-07-30
-Current branch at audit: `codex/mvp-error-contract`
+Current branch at audit: `codex/mvp-pagination`
 Overall state: polished mocked Expo prototype plus an early local backend.
 
 - Planning milestone: `PLAN-03` — Goal-mode MVP handoff ready.
@@ -47,7 +47,7 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   boundaries, and convert every current validator, auth/profile failure, and
   recipe/image/report/block placeholder without changing success bodies or
   statuses. The approved design is
-  `docs/superpowers/specs/2026-07-30-api-error-contract-design.md`; the active
+  `docs/superpowers/specs/2026-07-30-api-error-contract-design.md`; the completed
   plan is `docs/superpowers/plans/2026-07-30-api-error-contract.md`.
 - `API-02` Task 3 TDD evidence: the initial focused command passed 6/14 and
   failed 8/14 with zero skips against the raw Zod and `{ message }` responses.
@@ -78,19 +78,51 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   type-check passed; the backend suite passed 50/50 with zero skips; root
   lint/type-check passed; all 16 native-focused Jest suites and 67 tests passed;
   and `git diff --check` passed.
-- Next queued delivery item: `API-03`, Define cursor pagination and
-  deterministic sorting, remains unchecked and has not started. The scoped
-  closure re-review and fresh verification on the exact committed closure head
-  remain pending before merge or API-03 implementation.
+- `API-02` passed its closure re-review and fresh merged-result verification,
+  then fast-forwarded into `dev` at `8375a8a`. Its feature branch and worktree
+  were removed after the merged tree passed focused 36/36, backend 50/50 with
+  zero skips, root check, and 16/16 native-focused Jest suites with 67/67
+  tests.
+- Completed delivery item: `API-03`, Define cursor pagination and deterministic
+  sorting, is checked on `codex/mvp-pagination` from exact base `8375a8a`.
+  Its approved design is
+  `docs/superpowers/specs/2026-07-30-cursor-pagination-design.md`; its completed
+  plan is `docs/superpowers/plans/2026-07-30-cursor-pagination.md`.
+- `API-03` Task 1 added strict page-size parsing, a versioned base64url cursor
+  codec bound to normalized query context, safe exact-version/context
+  decoding, and a generic immutable `limit + 1` page builder. Focused RED
+  failed because the module did not exist. Initial GREEN passed 10/10; server
+  type-check passed; and the backend suite passed 60/60 with zero skips.
+- Task review found no Critical issues and four Important cursor-boundary
+  defects plus one Minor literal-limit test gap. The fix wave added
+  locale-independent context ordering, canonical base64url and fatal UTF-8
+  decoding, runtime expected-context validation, correct `undefined` generic
+  item handling, and fixed 2048/2049 coverage. Adversarial RED passed 8/11 and
+  failed the intended three tests; GREEN passed 11/11. Re-review found no
+  remaining Critical, Important, or Minor issues.
+- Documentation review found and closed three Important contract precision
+  gaps and two Minors. The durable contract now specifies the API-02 validation
+  envelope, explicit null normalization, and strict exclusive lexicographic
+  seek predicates. Documentation re-review is clean.
+- Fresh API-03 branch gates after the fix wave: focused 11/11; server
+  type-check; backend 61/61 with zero skips; root lint/type-check; 16/16
+  native-focused Jest suites with 67/67 tests; and `git diff --check`.
+- Next action: commit the reviewed documentation, run exact-head verification,
+  fast-forward API-03 into `dev`, and repeat merged-result verification. Then
+  start `API-04` from the exact verified `dev` head if before the 04:00 HKT
+  stop checkpoint.
 - Detailed task index: `docs/mvp-roadmap.md`.
 - Goal-mode execution brief: `docs/mvp-goal-prompt.md`.
 - Completed Foundation execution plan:
   `docs/superpowers/plans/2026-07-26-foundation.md`.
 - Completed API-01 implementation plan:
   `docs/superpowers/plans/2026-07-27-api-contract-versioning.md`.
-- Active API-02 implementation plan:
+- Completed API-02 implementation plan:
   `docs/superpowers/plans/2026-07-30-api-error-contract.md`.
-- Last verified design commit: `af34464`.
+- Completed API-03 implementation plan:
+  `docs/superpowers/plans/2026-07-30-cursor-pagination.md`.
+- API-03 design baseline commit: `2efdf1c`; its reviewed ordering clarification
+  is part of the API-03 closure documentation.
 - Foundation branch at exit: `codex/mvp-foundation`. The final application checkout
   tested before the evidence-only documentation commit was
   `34695fcd92ee2fec6587b6945de5a52c658ecee8`.

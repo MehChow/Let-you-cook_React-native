@@ -157,6 +157,8 @@ Every paginated query must:
 - end with an immutable unique identifier as the final tie-breaker;
 - use the same direction and explicit null behavior in both `ORDER BY` and the
   seek predicate;
+- use a strict exclusive lexicographic seek predicate, comparing a later key
+  only after every preceding key equals its cursor value;
 - apply authorization and visibility filters before the page limit;
 - reject a cursor when normalized filters or sort do not match its context.
 
@@ -170,12 +172,18 @@ Initial endpoint rules are:
 | Published recipe search, `relevance` | `searchRank DESC, publishedAt DESC, id DESC` |
 | Public authored recipes | `publishedAt DESC, id DESC` |
 | Current user's recipes | `updatedAt DESC, id DESC` |
-| User favourites | `favouritedAt DESC, recipeId DESC` |
+| User favourites | `createdAt DESC, recipeId DESC` |
 | Recipe reviews | `createdAt DESC, id DESC` |
 
-Computed values such as `averageRating` and `searchRank` must use a documented
-non-null SQL expression before ordering. `relevance` requires a non-blank
-search query; without one, the route normalizes to `newest`.
+Published-list predicates require non-null `publishedAt`, and published recipes
+already require non-null `cookTimeMinutes`. `topRated` uses
+`COALESCE(averageRating, 0)` plus non-null `reviewCount`; `relevance` uses a
+non-null computed `searchRank`. Remaining listed timestamps and identifiers are
+non-null. These normalized values are used identically in ordering, cursor
+values, and seek comparisons.
+
+`relevance` requires a non-blank search query; without one, the route
+normalizes to `newest`.
 
 These are live keyset pages, not a frozen snapshot. Inserts and mutable ranking
 values can change later pages between requests. The contract prevents

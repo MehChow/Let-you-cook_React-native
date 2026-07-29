@@ -57,7 +57,7 @@ Dependencies: Foundation.
 
 - [x] `API-01` Introduce `/v1` while keeping `/health` unversioned.
 - [x] `API-02` Define the shared error envelope and request IDs.
-- [ ] `API-03` Define cursor pagination and deterministic sorting.
+- [x] `API-03` Define cursor pagination and deterministic sorting.
 - [ ] `API-04` Create stable Zod request/response DTO contracts.
 - [ ] `API-05` Export Hono `AppType` and configure the typed mobile client.
 - [ ] `API-06` Configure TanStack Query authentication, cancellation, and retries.

@@ -51,9 +51,45 @@ routes in one coordinated server/client change.
 }
 ```
 
-- Default list size is 20; maximum is 50.
-- Sorts include a stable secondary key so cursors cannot skip/duplicate equal
-  rows.
+- Default list size is 20; maximum is 50. Servers fetch `limit + 1`, return at
+  most `limit`, and set `nextCursor` from the last returned item only when the
+  extra row exists.
+- Cursors are forward-only, versioned base64url JSON tokens. They contain every
+  ordered seek value and the normalized sort/filter context. A cursor is
+  rejected with HTTP `400 validation_failed` and `fieldErrors.cursor` when it
+  is malformed, unsupported, or does not match the current normalized query.
+- Cursor opacity is not authorization or confidentiality. Every page reapplies
+  authentication, ownership, visibility, block, and moderation rules.
+- Paginated queries use keyset comparisons rather than decoded offsets. Every
+  `ORDER BY` expression appears in the cursor in the same order, direction, and
+  explicit null treatment. An immutable unique identifier is the final
+  tie-breaker.
+- The seek predicate is a strict exclusive lexicographic comparison. Each
+  later key is compared only when all preceding keys equal their cursor values;
+  the cursor row itself is never repeated.
+- Initial deterministic order tuples are:
+  - published recipes `newest`: `publishedAt DESC, id DESC`;
+  - published recipes `quickest`:
+    `cookTimeMinutes ASC, publishedAt DESC, id DESC`;
+  - published recipes `topRated`:
+    `averageRating DESC, reviewCount DESC, publishedAt DESC, id DESC`;
+  - recipe search `relevance`:
+    `searchRank DESC, publishedAt DESC, id DESC`;
+  - public authored recipes: `publishedAt DESC, id DESC`;
+  - current-user recipes: `updatedAt DESC, id DESC`;
+  - favourites: `createdAt DESC, recipeId DESC`;
+  - reviews: `createdAt DESC, id DESC`.
+- Published-list predicates require non-null `publishedAt`; publish validation
+  already requires non-null `cookTimeMinutes`. `topRated` orders by
+  `COALESCE(averageRating, 0)` and non-null `reviewCount`; `relevance` uses a
+  non-null computed `searchRank`. Remaining listed timestamps and identifiers
+  are non-null. These same normalized values are stored in the cursor and used
+  in the seek predicate.
+- Relevance requires a non-blank search query; otherwise the normalized sort is
+  `newest`.
+- Pages reflect live data rather than a frozen snapshot. The stable tuple
+  prevents ambiguity for equal values and offset drift, but inserts or changed
+  ranking values may still affect later requests.
 - `POST` create/finalize operations that a mobile client may retry accept an
   `Idempotency-Key`.
 - Aggregate updates carry a `version`; stale writes return `409 conflict`.

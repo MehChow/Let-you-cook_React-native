@@ -16,13 +16,12 @@ This file is the backend handoff. When asked to continue backend work:
    - any new verification under [Verified](#verified)
    - the next unchecked task
 
-Current task: finish the scoped closure re-review and fresh exact-head
-verification for completed `API-02` on `codex/mvp-error-contract`, then prepare
-the still-unchecked `API-03`. The final review's one Important and two Minor
-findings were handled in the single authorized fix wave; do not merge or begin
-API-03 implementation until closure re-review and exit verification pass.
-`API-01` was fast-forwarded into `dev` at `7d21b95`; its canonical `/v1` tree
-and temporary compatibility aliases remain unchanged.
+Current task: integrate completed `API-03` cursor pagination and deterministic
+sorting from `codex/mvp-pagination` into `dev`. The branch started at exact base
+`8375a8a`; implementation commits are `90622f1` and `ed50c48`. Task and
+documentation re-reviews are clean, and the full branch gates pass. Commit the
+reviewed closure docs, verify the exact head, fast-forward, and repeat
+merged-result verification before API-04.
 
 ## Current State
 
@@ -49,7 +48,7 @@ and temporary compatibility aliases remain unchanged.
   aliases remain until `AUTH-01`.
 - [x] `API-02` Define the shared error envelope and server-generated request
   IDs.
-- [ ] `API-03` Define cursor pagination and deterministic sorting.
+- [x] `API-03` Define cursor pagination and deterministic sorting.
 - [x] Add app-side auth API wrappers under `src/features/auth/api.ts`.
 - [x] Install and wire `expo-secure-store` for access and refresh token storage.
 - [x] Add a shared API client wrapper that retries once after token refresh.
@@ -65,6 +64,32 @@ and temporary compatibility aliases remain unchanged.
 ## Progress Log
 
 Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
+
+### 2026-07-30 03:09:19 +08:00
+
+- Created `codex/mvp-pagination` from clean, verified `dev` at `8375a8a`.
+  Approved the bounded API-03 design and committed its executable plan.
+- Task 1 focused RED failed with `ERR_MODULE_NOT_FOUND` for the wished-for
+  pagination module. GREEN passed 10/10 after adding strict limit/cursor query
+  parsing, deterministic context normalization, a versioned base64url codec,
+  safe exact-context/key-count decoding, and immutable `limit + 1` page
+  construction.
+- Fresh Task 1 gates passed: server type-check, backend 60/60 with zero skips,
+  and `git diff --check`. Exact task review then ran at `90622f1`.
+- Task review found no Critical issues and four Important boundary defects plus
+  one Minor limit-boundary test gap. Adversarial RED passed 8/11 and failed the
+  intended Unicode-ordering, decoder-strictness, and undefined-item tests.
+  GREEN passed 11/11 after the single fix wave. Re-review found no remaining
+  Critical, Important, or Minor issues.
+- Documentation review found and closed three Important precision gaps and two
+  Minors. It now specifies the standard `validation_failed` field error,
+  explicit null normalization, and a strict exclusive lexicographic seek
+  predicate. Documentation re-review is clean.
+- Fresh branch gates after fixes passed: focused 11/11, server type-check,
+  backend 61/61 with zero skips, root lint/type-check, 16/16 native-focused
+  Jest suites with 67/67 tests, and `git diff --check`.
+- No routes, database queries, schema, migrations, feature DTOs, mobile code,
+  Expo web, Metro, or backend listener were added or run.
 
 ### 2026-07-30 02:40:57 +08:00
 
