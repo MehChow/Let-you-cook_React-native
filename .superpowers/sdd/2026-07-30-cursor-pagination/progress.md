@@ -4,7 +4,7 @@ Plan: `docs/superpowers/plans/2026-07-30-cursor-pagination.md`
 Design: `docs/superpowers/specs/2026-07-30-cursor-pagination-design.md`
 Branch: `codex/mvp-pagination`
 Base: `dev` at `8375a8aeb52f5d4df71d9db2e93584b26ef3b05e`
-Status: implementation and reviews complete; exact-head verification pending
+Status: implementation, reviews, and exact-head verification complete
 
 ## Decisions
 
@@ -17,9 +17,9 @@ Status: implementation and reviews complete; exact-head verification pending
 ## Task Status
 
 - API-03A: complete at `90622f1` plus reviewed fix `ed50c48`
-- API-03B: reviewed and ready to commit
+- API-03B: complete at `eed6807`
 - Whole-branch review: clean
-- Exit verification: branch gates passed; exact docs head pending
+- Exit verification: exact closure head `eed6807` passed
 - Merge to `dev`: pending
 
 ## Evidence
@@ -52,3 +52,5 @@ Status: implementation and reviews complete; exact-head verification pending
 - 2026-07-30: fresh post-fix branch gates passed focused 11/11, server
   type-check, backend 61/61 with zero skips, root lint/type-check, 16/16
   native-focused Jest suites with 67/67 tests, and `git diff --check`.
+- 2026-07-30: exact closure head `eed6807` repeated the same full green gate
+  and is authorized for local fast-forward into `dev`.

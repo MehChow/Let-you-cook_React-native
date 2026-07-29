@@ -107,10 +107,13 @@ Overall state: polished mocked Expo prototype plus an early local backend.
 - Fresh API-03 branch gates after the fix wave: focused 11/11; server
   type-check; backend 61/61 with zero skips; root lint/type-check; 16/16
   native-focused Jest suites with 67/67 tests; and `git diff --check`.
-- Next action: commit the reviewed documentation, run exact-head verification,
-  fast-forward API-03 into `dev`, and repeat merged-result verification. Then
-  start `API-04` from the exact verified `dev` head if before the 04:00 HKT
-  stop checkpoint.
+- Exact closure head `eed6807` passed focused 11/11, server type-check, backend
+  61/61 with zero skips, root lint/type-check, 16/16 native-focused Jest suites
+  with 67/67 tests, and `git diff --check`. The branch is authorized for a
+  local fast-forward.
+- Next action: fast-forward API-03 into `dev` and repeat merged-result
+  verification. Then start `API-04` from the exact verified `dev` head if
+  before the 04:00 HKT stop checkpoint.
 - Detailed task index: `docs/mvp-roadmap.md`.
 - Goal-mode execution brief: `docs/mvp-goal-prompt.md`.
 - Completed Foundation execution plan:
