@@ -124,7 +124,7 @@
   Run `npm.cmd run check`, `npm.cmd run server:check`, and
   `git diff --check`. Expected: all exit zero.
 
-- [ ] **Step 7: Document and review API-05**
+- [x] **Step 7: Document and review API-05**
 
   Record the type-only boundary in `docs/api-and-data-model.md`, update both
   progress ledgers with RED/GREEN evidence, and complete the local SDD ledger.
@@ -132,7 +132,7 @@
   retry work, duplicated DTOs, Hono version drift, and missing purpose comments.
   Resolve every Critical or Important finding before checking API-05.
 
-- [ ] **Step 8: Run fresh branch exit gates**
+- [x] **Step 8: Run fresh branch exit gates**
 
   Run:
 
@@ -147,14 +147,14 @@
 
   Expected: every command exits zero, with no skipped backend tests.
 
-- [ ] **Step 9: Commit the completed task**
+- [x] **Step 9: Commit the completed task**
 
   Stage only API-05 files and commit as
   `API-05: Configure the typed mobile client`.
 
 ## Closure
 
-- [ ] Verify the exact clean branch head and complete the tracked SDD ledger.
+- [x] Verify the exact clean branch head and complete the tracked SDD ledger.
 - [ ] Use `superpowers:finishing-a-development-branch` and select local merge,
   as pre-authorized by the owner.
 - [ ] Fast-forward into `dev` and repeat merged-result verification.

@@ -153,15 +153,17 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   mounted auth/profile routes disappeared from `AppType`. Both packages are now
   pinned to 4.12.27, and the hook declares the stable validation-error/400
   response while preserving runtime behavior.
-- Fresh API-05 pre-review gates passed focused 1/1, server type-check, backend
-  75/75 with zero skips, root lint/type-check, 17/17 native-focused Jest suites
-  with 68/68 tests, and `git diff --check`. Exact task review and closure remain
-  pending, so API-05 is not yet checked or merged.
+- API-05 exact-range review of `7b42b67..cc047a2` found no Critical, Important,
+  or Minor issues. Fresh committed-head gates passed focused 1/1, server
+  type-check, backend 75/75 with zero skips, root lint/type-check, 17/17
+  native-focused Jest suites with 68/68 tests, and `git diff --check`. API-05 is
+  checked and authorized for a local fast-forward; merged-result verification
+  is still required.
 - Previous `04:00 HKT` checkpoint: the July 30 continuation record is
   `docs/mvp-handoff-2026-07-30-0400.md`; API-05 had not started at that earlier
   checkpoint. The Goal subsequently resumed on 2026-08-09.
-- Next queued delivery item: `API-05`, Export Hono `AppType` and configure the
-  typed mobile client, remains unchecked.
+- Next queued delivery item after API-05 merge: `API-06`, Configure TanStack
+  Query authentication, cancellation, and retries.
 - Detailed task index: `docs/mvp-roadmap.md`.
 - Goal-mode execution brief: `docs/mvp-goal-prompt.md`.
 - Completed Foundation execution plan:
@@ -174,6 +176,8 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   `docs/superpowers/plans/2026-07-30-cursor-pagination.md`.
 - Completed API-04 implementation plan:
   `docs/superpowers/plans/2026-07-30-zod-dto-contracts.md`.
+- Completed API-05 implementation plan:
+  `docs/superpowers/plans/2026-08-09-typed-mobile-client.md`.
 - API-03 design baseline commit: `2efdf1c`; its reviewed ordering clarification
   is part of the API-03 closure documentation.
 - Foundation branch at exit: `codex/mvp-foundation`. The final application checkout

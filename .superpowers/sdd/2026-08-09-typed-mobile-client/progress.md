@@ -4,7 +4,7 @@ Plan: `docs/superpowers/plans/2026-08-09-typed-mobile-client.md`
 Design: `docs/superpowers/specs/2026-08-09-typed-mobile-client-design.md`
 Branch: `codex/mvp-typed-client`
 Base: `dev` at `7b42b6740219da9bf68b4cabe89c58e904be719f`
-Status: implemented and pre-review verified; closure review pending
+Status: reviewed and branch-verified; local merge pending
 
 ## Decisions
 
@@ -22,7 +22,7 @@ Status: implemented and pre-review verified; closure review pending
 - Isolated baseline: 16/16 Jest suites, 67/67 tests
 - Focused TDD: RED and GREEN complete
 - Pre-review exit gates: complete
-- Exact task review: pending
+- Exact task review: clean with no findings
 - Merge to `dev`: pending
 
 ## Evidence
@@ -38,5 +38,10 @@ Status: implemented and pre-review verified; closure review pending
 - 2026-08-09: focused 1/1, server type-check, backend 75/75 with zero skips,
   root lint/type-check, 17/17 native-focused Jest suites with 68/68 tests, and
   `git diff --check` passed before review.
+- 2026-08-09: exact-range review of `7b42b67..cc047a2` found no Critical,
+  Important, or Minor issues and assessed the task ready to merge.
+- 2026-08-09: fresh committed-head verification repeated focused 1/1, server
+  type-check, backend 75/75 with zero skips, root lint/type-check, 17/17 Jest
+  suites with 68/68 tests, and `git diff --check`.
 - Docker PostgreSQL and Mailpit were started without reset and reported healthy.
   No Expo web command or Android UI verification ran.

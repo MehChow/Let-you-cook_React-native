@@ -16,10 +16,10 @@ This file is the backend handoff. When asked to continue backend work:
    - any new verification under [Verified](#verified)
    - the next unchecked task
 
-Current task: close `API-05` on `codex/mvp-typed-client` from exact `dev` head
-`7b42b67`. The Hono RPC client and protected profile contract compile and the
-pre-review gates pass. Exact task review, final documentation, commit, merge,
-and merged-result verification remain pending.
+Current task: merge reviewed `API-05` from `codex/mvp-typed-client` into `dev`.
+The exact range `7b42b67..cc047a2` has no Critical, Important, or Minor review
+findings, and all branch gates pass. Local fast-forward and merged-result
+verification remain pending.
 
 ## Current State
 
@@ -48,8 +48,8 @@ and merged-result verification remain pending.
   IDs.
 - [x] `API-03` Define cursor pagination and deterministic sorting.
 - [x] `API-04` Create stable Zod request/response DTO contracts.
-- [ ] `API-05` Export Hono `AppType` and configure the typed mobile client;
-  implementation passes pre-review gates and awaits closure review.
+- [x] `API-05` Export Hono `AppType` and configure the typed mobile client;
+  branch review and exit gates pass, with merge verification pending.
 - [x] Add app-side auth API wrappers under `src/features/auth/api.ts`.
 - [x] Install and wire `expo-secure-store` for access and refresh token storage.
 - [x] Add a shared API client wrapper that retries once after token refresh.
@@ -84,6 +84,10 @@ Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
   75/75 with zero skips, root lint/type-check, 17/17 native-focused Jest suites
   with 68/68 tests, and `git diff --check`. No schema, migration, database reset,
   Expo web, Metro, emulator, or rendered UI work occurred.
+- Exact-range review of `7b42b67..cc047a2` found no Critical, Important, or
+  Minor issues. Fresh committed-head verification repeated focused 1/1, server
+  type-check, backend 75/75 with zero skips, root lint/type-check, 17/17 Jest
+  suites with 68/68 tests, and `git diff --check`.
 
 ### 2026-07-30 03:19:42 +08:00
 
