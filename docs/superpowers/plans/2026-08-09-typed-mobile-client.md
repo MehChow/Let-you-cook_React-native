@@ -28,6 +28,8 @@
 **Files:**
 - Modify: `package.json`
 - Modify: `package-lock.json`
+- Modify: `server/package.json`
+- Modify: `server/package-lock.json`
 - Modify: `tsconfig.json`
 - Create: `src/lib/typedApiClient.ts`
 - Create: `__tests__/typed-api-client.test.ts`
@@ -41,13 +43,15 @@
 - Consumes: `server/src/app.ts` export `type AppType = typeof app` and `appEnv.apiBaseUrl`.
 - Produces: `TypedApiClientOptions`, `createTypedApiClient(options?: TypedApiClientOptions)`, and `typedApiClient`.
 
-- [ ] **Step 1: Add the aligned Hono runtime dependency**
+- [x] **Step 1: Add identical Hono runtime versions**
 
-  Run `npm.cmd install hono@^4.11.1 --save`. Confirm `package.json` and
-  `package-lock.json` contain the root dependency and that no unrelated
-  dependency ranges changed.
+  Pin both root and server Hono dependencies to the server lock's existing
+  `4.12.27`, then run `npm.cmd install hono@4.12.27 --save-exact`. Confirm both
+  lockfiles resolve the identical package version and that no unrelated
+  dependency metadata changed. Identical package identities are required for
+  Hono's nominal RPC types across the two TypeScript projects.
 
-- [ ] **Step 2: Write the failing protected-request test**
+- [x] **Step 2: Write the failing protected-request test**
 
   Create `__tests__/typed-api-client.test.ts` with a real injected fetch that
   captures a `Request`, returns a complete private-profile success fixture,
@@ -74,12 +78,12 @@
   `InferResponseType<typeof client.v1.profiles.me.$get, 200>` so a missing or
   widened route contract fails TypeScript compilation.
 
-- [ ] **Step 3: Run the focused test and verify RED**
+- [x] **Step 3: Run the focused test and verify RED**
 
   Run `npm.cmd test -- --runInBand __tests__/typed-api-client.test.ts`.
   Expected: fail because `@/lib/typedApiClient` does not exist.
 
-- [ ] **Step 4: Add the type-only server alias and minimal client**
+- [x] **Step 4: Add the type-only server alias and minimal client**
 
   Add this path to root `tsconfig.json`:
 
@@ -108,14 +112,14 @@
   export const typedApiClient = createTypedApiClient();
   ```
 
-- [ ] **Step 5: Run focused GREEN and refactor**
+- [x] **Step 5: Run focused GREEN and refactor**
 
   Run `npm.cmd test -- --runInBand __tests__/typed-api-client.test.ts`.
   Expected: one suite passes with no warnings. If Hono supplies the injected
   fetch with `(input, init)` rather than a `Request`, normalize only inside the
   test via `new Request(input, init)`; do not wrap production fetch.
 
-- [ ] **Step 6: Run task checks**
+- [x] **Step 6: Run task checks**
 
   Run `npm.cmd run check`, `npm.cmd run server:check`, and
   `git diff --check`. Expected: all exit zero.

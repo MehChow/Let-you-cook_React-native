@@ -141,9 +141,25 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   server type-check, backend 75/75 with zero skips, root lint/type-check, 16/16
   native-focused Jest suites with 67/67 tests, and `git diff --check`. Its
   feature branch/worktree were removed.
-- `04:00 HKT` stop checkpoint: implementation is stopped. The continuation
-  record is `docs/mvp-handoff-2026-07-30-0400.md`; no API-05 branch or work
-  started. The Goal remains active because pause is user-controlled.
+- `API-05` implementation is on `codex/mvp-typed-client` from clean `dev` at
+  `7b42b67`. The mobile project now owns an exact-version Hono runtime and a
+  type-only `@letyoucook/server` alias; `createTypedApiClient` constructs the
+  real `hc<AppType>` transport without changing current auth wrappers, refresh,
+  retries, route aliases, or rendered/native behavior.
+- API-05 RED failed because the wished-for typed client module did not exist.
+  Focused GREEN passed 1/1. Strict TypeScript then exposed two real integration
+  defects: separate Hono 4.11.1/4.12.27 package identities were incompatible,
+  and the generic validator hook leaked its environment into response types so
+  mounted auth/profile routes disappeared from `AppType`. Both packages are now
+  pinned to 4.12.27, and the hook declares the stable validation-error/400
+  response while preserving runtime behavior.
+- Fresh API-05 pre-review gates passed focused 1/1, server type-check, backend
+  75/75 with zero skips, root lint/type-check, 17/17 native-focused Jest suites
+  with 68/68 tests, and `git diff --check`. Exact task review and closure remain
+  pending, so API-05 is not yet checked or merged.
+- Previous `04:00 HKT` checkpoint: the July 30 continuation record is
+  `docs/mvp-handoff-2026-07-30-0400.md`; API-05 had not started at that earlier
+  checkpoint. The Goal subsequently resumed on 2026-08-09.
 - Next queued delivery item: `API-05`, Export Hono `AppType` and configure the
   typed mobile client, remains unchecked.
 - Detailed task index: `docs/mvp-roadmap.md`.

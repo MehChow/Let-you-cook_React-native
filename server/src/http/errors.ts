@@ -1,10 +1,11 @@
-import type { Context } from "hono";
+import type { Context, TypedResponse } from "hono";
 import { HTTPException } from "hono/http-exception";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 
 import type {
   FieldErrors,
   NonValidationErrorCode,
+  ValidationApiError,
 } from "../contracts/common";
 import type { RequestIdEnv } from "./requestId";
 
@@ -24,6 +25,9 @@ interface ValidationIssue {
 type ValidationHookResult =
   | { success: true }
   | { success: false; error: { issues: ReadonlyArray<ValidationIssue> } };
+
+type ValidationErrorResponse = Response &
+  TypedResponse<{ error: ValidationApiError }, 400, "json">;
 
 export const errorDefinitions = {
   malformed_request: { status: 400, message: "The request could not be read." },
@@ -96,24 +100,27 @@ export const fieldErrorsFromIssues = (
 export const validationErrorResponse = <E extends RequestIdEnv>(
   c: Context<E>,
   fieldErrors: FieldErrors,
-) =>
-  c.json(
+): ValidationErrorResponse => {
+  const requestId: string = c.get("requestId");
+
+  return c.json(
     {
       error: {
         code: "validation_failed" as const,
         message: "Some fields need attention.",
         fieldErrors,
-        requestId: c.get("requestId"),
+        requestId,
       },
     },
     400,
   );
+};
 
 // Converts unsuccessful validator results into the shared error response.
 export const validationErrorHook = <E extends RequestIdEnv>(
   result: ValidationHookResult,
   c: Context<E>,
-) => {
+): ValidationErrorResponse | undefined => {
   if (!result.success) {
     return validationErrorResponse(
       c,

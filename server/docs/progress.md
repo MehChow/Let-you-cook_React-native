@@ -16,16 +16,10 @@ This file is the backend handoff. When asked to continue backend work:
    - any new verification under [Verified](#verified)
    - the next unchecked task
 
-Current task: resume from the 04:00 HKT handoff and prepare `API-05` from
-`codex/mvp-dto-contracts` from exact verified `dev` head `5f6450e`. API-03 was
-fast-forwarded and its merged result passed focused 11/11, server type-check,
-backend 61/61 with zero skips, root check, and 67/67 native-focused Jest tests
-before branch/worktree cleanup. All three API-04 tasks are implemented and
-task re-reviews are clean. API-04 fast-forwarded into `dev` at `eca1533`; its
-merged result passed server type-check, backend 75/75 with zero skips, root
-check, 67/67 native-focused Jest tests, and `git diff --check`. Implementation
-is stopped; read `docs/mvp-handoff-2026-07-30-0400.md` before creating the
-API-05 branch.
+Current task: close `API-05` on `codex/mvp-typed-client` from exact `dev` head
+`7b42b67`. The Hono RPC client and protected profile contract compile and the
+pre-review gates pass. Exact task review, final documentation, commit, merge,
+and merged-result verification remain pending.
 
 ## Current State
 
@@ -53,6 +47,9 @@ API-05 branch.
 - [x] `API-02` Define the shared error envelope and server-generated request
   IDs.
 - [x] `API-03` Define cursor pagination and deterministic sorting.
+- [x] `API-04` Create stable Zod request/response DTO contracts.
+- [ ] `API-05` Export Hono `AppType` and configure the typed mobile client;
+  implementation passes pre-review gates and awaits closure review.
 - [x] Add app-side auth API wrappers under `src/features/auth/api.ts`.
 - [x] Install and wire `expo-secure-store` for access and refresh token storage.
 - [x] Add a shared API client wrapper that retries once after token refresh.
@@ -68,6 +65,25 @@ API-05 branch.
 ## Progress Log
 
 Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
+
+### 2026-08-09 02:57:48 +08:00
+
+- Created `codex/mvp-typed-client` from clean `dev` at `7b42b67`; the isolated
+  baseline passed 16/16 native-focused Jest suites with 67/67 tests.
+- API-05 RED failed because `@/lib/typedApiClient` did not exist. Focused GREEN
+  passed 1/1 after adding the real `hc<AppType>` factory, injected fetch seam,
+  normalized base URL, and type-only server alias.
+- Root TypeScript exposed Hono package identity skew between mobile 4.11.1 and
+  server 4.12.27. Pinning both to the server's existing 4.12.27 resolved the
+  nominal type incompatibility.
+- Route-type tracing then showed the generic validation hook leaked its
+  environment into the inferred response. An explicit stable
+  `ValidationApiError`/400 typed response preserves runtime behavior and keeps
+  mounted `/v1/auth` and `/v1/profiles` endpoints in `AppType`.
+- Fresh pre-review verification passed focused 1/1, server type-check, backend
+  75/75 with zero skips, root lint/type-check, 17/17 native-focused Jest suites
+  with 68/68 tests, and `git diff --check`. No schema, migration, database reset,
+  Expo web, Metro, emulator, or rendered UI work occurred.
 
 ### 2026-07-30 03:19:42 +08:00
 

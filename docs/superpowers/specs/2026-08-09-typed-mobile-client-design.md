@@ -85,9 +85,10 @@ configuration remains owned by `src/config/env.ts`. Trimming trailing slashes
 only prevents accidental double separators and does not modify path versions,
 headers, response bodies, or status codes.
 
-The root and server Hono version ranges stay aligned to avoid incompatible RPC
-types. The mobile contract uses a type-only import, and no server database,
-Node adapter, environment, or route module is imported at runtime.
+The root and server Hono dependencies are pinned to the same installed version
+because separate Hono package identities can make the nominal RPC types
+incompatible. The mobile contract uses a type-only import, and no server
+database, Node adapter, environment, or route module is imported at runtime.
 
 ## Verification
 

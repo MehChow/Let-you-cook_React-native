@@ -26,6 +26,12 @@ it with `import type` in the client. Keep both TypeScript projects strict. Publi
 DTOs and Zod schemas remain the durable contract; Drizzle row types do not cross
 the API boundary.
 
+The mobile Hono RPC runtime and server Hono dependency are pinned to the same
+exact version. Hono route types use nominal internals, so independently resolved
+versions can make an otherwise valid `AppType` incompatible. Validator hooks
+also declare stable response types explicitly so environment generics do not
+erase mounted routes from the RPC client contract.
+
 Current runtime schemas live under `server/src/contracts/` by feature. Each
 schema is the source of its inferred TypeScript DTO type. Routes consume request
 schemas through Hono validators and parse explicitly projected success objects

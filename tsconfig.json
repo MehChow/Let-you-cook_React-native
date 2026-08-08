@@ -12,6 +12,9 @@
       ],
       "@/assets/*": [
         "./assets/*"
+      ],
+      "@letyoucook/server": [
+        "./server/src/app.ts"
       ]
     }
   },
