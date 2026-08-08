@@ -16,10 +16,8 @@ This file is the backend handoff. When asked to continue backend work:
    - any new verification under [Verified](#verified)
    - the next unchecked task
 
-Current task: merge reviewed `API-05` from `codex/mvp-typed-client` into `dev`.
-The exact range `7b42b67..cc047a2` has no Critical, Important, or Minor review
-findings, and all branch gates pass. Local fast-forward and merged-result
-verification remain pending.
+Current task: start `API-06` from verified `dev` at `d86a9d9`. API-05 merged,
+its merged-result gates pass, and its branch/worktree registration is removed.
 
 ## Current State
 
@@ -49,7 +47,7 @@ verification remain pending.
 - [x] `API-03` Define cursor pagination and deterministic sorting.
 - [x] `API-04` Create stable Zod request/response DTO contracts.
 - [x] `API-05` Export Hono `AppType` and configure the typed mobile client;
-  branch review and exit gates pass, with merge verification pending.
+  merged-result verification passes.
 - [x] Add app-side auth API wrappers under `src/features/auth/api.ts`.
 - [x] Install and wire `expo-secure-store` for access and refresh token storage.
 - [x] Add a shared API client wrapper that retries once after token refresh.
@@ -88,6 +86,11 @@ Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
   Minor issues. Fresh committed-head verification repeated focused 1/1, server
   type-check, backend 75/75 with zero skips, root lint/type-check, 17/17 Jest
   suites with 68/68 tests, and `git diff --check`.
+- Fast-forwarded API-05 into `dev` at `d86a9d9`. Merged-result verification
+  repeated focused 1/1, server type-check, backend 75/75 with zero skips, root
+  lint/type-check, 17/17 Jest suites with 68/68 tests, and `git diff --check`.
+  Git removed the branch and worktree registration; an empty Windows-locked
+  `.worktrees/mvp-typed-client` directory remains for later cleanup.
 
 ### 2026-07-30 03:19:42 +08:00
 

@@ -155,10 +155,11 @@
 ## Closure
 
 - [x] Verify the exact clean branch head and complete the tracked SDD ledger.
-- [ ] Use `superpowers:finishing-a-development-branch` and select local merge,
+- [x] Use `superpowers:finishing-a-development-branch` and select local merge,
   as pre-authorized by the owner.
-- [ ] Fast-forward into `dev` and repeat merged-result verification.
-- [ ] Remove the merged feature branch/worktree.
+- [x] Fast-forward into `dev` and repeat merged-result verification.
+- [x] Remove the merged feature branch/worktree registration and task content.
+  Windows retained only an empty locked directory for later cleanup.
 - [ ] Start API-06 from exact verified `dev` only if the 04:00 HKT stop
   checkpoint has not arrived.
 

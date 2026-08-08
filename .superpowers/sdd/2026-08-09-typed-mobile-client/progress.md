@@ -4,7 +4,7 @@ Plan: `docs/superpowers/plans/2026-08-09-typed-mobile-client.md`
 Design: `docs/superpowers/specs/2026-08-09-typed-mobile-client-design.md`
 Branch: `codex/mvp-typed-client`
 Base: `dev` at `7b42b6740219da9bf68b4cabe89c58e904be719f`
-Status: reviewed and branch-verified; local merge pending
+Status: complete, merged, and merged-result verified
 
 ## Decisions
 
@@ -23,7 +23,7 @@ Status: reviewed and branch-verified; local merge pending
 - Focused TDD: RED and GREEN complete
 - Pre-review exit gates: complete
 - Exact task review: clean with no findings
-- Merge to `dev`: pending
+- Merge to `dev`: complete at `d86a9d9`
 
 ## Evidence
 
@@ -45,3 +45,10 @@ Status: reviewed and branch-verified; local merge pending
   suites with 68/68 tests, and `git diff --check`.
 - Docker PostgreSQL and Mailpit were started without reset and reported healthy.
   No Expo web command or Android UI verification ran.
+- 2026-08-09: API-05 fast-forwarded into `dev` at `d86a9d9`. Fresh merged
+  verification repeated focused 1/1, server type-check, backend 75/75 with zero
+  skips, root lint/type-check, 17/17 Jest suites with 68/68 tests, and
+  `git diff --check`.
+- Git removed the merged branch and worktree registration. Windows retained an
+  empty locked `.worktrees/mvp-typed-client` directory; no tracked or untracked
+  task content remains there.

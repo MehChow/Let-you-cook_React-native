@@ -141,8 +141,8 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   server type-check, backend 75/75 with zero skips, root lint/type-check, 16/16
   native-focused Jest suites with 67/67 tests, and `git diff --check`. Its
   feature branch/worktree were removed.
-- `API-05` implementation is on `codex/mvp-typed-client` from clean `dev` at
-  `7b42b67`. The mobile project now owns an exact-version Hono runtime and a
+- `API-05` started on `codex/mvp-typed-client` from clean `dev` at `7b42b67`.
+  The mobile project now owns an exact-version Hono runtime and a
   type-only `@letyoucook/server` alias; `createTypedApiClient` constructs the
   real `hc<AppType>` transport without changing current auth wrappers, refresh,
   retries, route aliases, or rendered/native behavior.
@@ -157,8 +157,13 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   or Minor issues. Fresh committed-head gates passed focused 1/1, server
   type-check, backend 75/75 with zero skips, root lint/type-check, 17/17
   native-focused Jest suites with 68/68 tests, and `git diff --check`. API-05 is
-  checked and authorized for a local fast-forward; merged-result verification
-  is still required.
+  checked and authorized for a local fast-forward.
+- `API-05` fast-forwarded into `dev` at `d86a9d9`. Fresh merged-result
+  verification repeated focused 1/1, server type-check, backend 75/75 with zero
+  skips, root lint/type-check, 17/17 native-focused Jest suites with 68/68
+  tests, and `git diff --check`. Git removed the merged branch and worktree
+  registration; Windows left one empty locked
+  `.worktrees/mvp-typed-client` directory for later cleanup.
 - Previous `04:00 HKT` checkpoint: the July 30 continuation record is
   `docs/mvp-handoff-2026-07-30-0400.md`; API-05 had not started at that earlier
   checkpoint. The Goal subsequently resumed on 2026-08-09.
