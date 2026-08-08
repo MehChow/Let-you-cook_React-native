@@ -4,7 +4,7 @@
 > feature handoff so a new agent can establish the real state without trusting
 > old task lists or screenshots.
 
-Last audited: 2026-07-30
+Last audited: 2026-08-09
 Current branch at audit: `dev`
 Overall state: polished mocked Expo prototype plus an early local backend.
 
@@ -190,6 +190,10 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   Jest suites with 75/75 tests, server type-check, backend 75/75 with zero
   skips, and `git diff --check`. API-06 is checked and authorized for a local
   fast-forward into `dev`.
+- `API-06` fast-forwarded into `dev` at `43a0114`. Fresh merged-result
+  verification repeated focused 12/12, server type-check, backend 75/75 with
+  zero skips, root lint/type-check, 18/18 native-focused Jest suites with 75/75
+  tests, and `git diff --check`. Its feature branch and worktree were removed.
 - Previous `04:00 HKT` checkpoint: the July 30 continuation record is
   `docs/mvp-handoff-2026-07-30-0400.md`; API-05 had not started at that earlier
   checkpoint. The Goal subsequently resumed on 2026-08-09.

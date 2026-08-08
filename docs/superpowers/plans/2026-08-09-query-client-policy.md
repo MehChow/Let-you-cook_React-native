@@ -50,7 +50,7 @@
 - [x] Review exact `dev..HEAD`; resolve every Critical/Important finding.
 - [x] Run focused tests, root/server checks, all root/server tests, and diff check.
 - [x] Check API-06 only after all gates pass and commit documentation.
-- [ ] Fast-forward merge to `dev`, repeat merged-result gates, and clean up.
+- [x] Fast-forward merge to `dev`, repeat merged-result gates, and clean up.
 
 ## Completion Conditions
 

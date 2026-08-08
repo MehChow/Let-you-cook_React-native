@@ -4,8 +4,8 @@
 - Base: `dev` at `66244abbd2e5237c901e86f8869c46bd1df7444c`
 - Design: `docs/superpowers/specs/2026-08-09-query-client-policy-design.md`
 - Plan: `docs/superpowers/plans/2026-08-09-query-client-policy.md`
-- Status: implementation, fix wave, clean re-review, and closure gates complete;
-  local fast-forward into `dev` authorized.
+- Status: complete and merged into `dev` at `43a0114`; feature branch/worktree
+  removed after merged-result verification.
 
 ## Evidence
 
@@ -22,3 +22,5 @@
 - All native-focused Jest tests pass: 18 suites, 75 tests.
 - Server type-check passes; server tests pass 75/75 with zero skips.
 - `git diff --check` passes.
+- Merged-result gates repeated focused 12/12, mobile 18 suites/75 tests, server
+  75/75 with zero skips, both checks, and diff check.

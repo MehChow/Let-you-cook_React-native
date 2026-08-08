@@ -16,8 +16,8 @@ This file is the backend handoff. When asked to continue backend work:
    - any new verification under [Verified](#verified)
    - the next unchecked task
 
-Current task: merge reviewed `API-06` from `codex/mvp-query-client` into `dev`.
-Its exact base is `66244ab`; all closure gates pass.
+Current task: start `API-07` from verified `dev` after the API-06 merge at
+`43a0114`.
 
 ## Current State
 
@@ -81,6 +81,10 @@ Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
   Fix-wave re-review is clean. Focused tests pass 12/12; fresh closure gates
   pass server type-check, backend 75/75 with zero skips, root lint/type-check,
   18/18 native-focused Jest suites with 75/75 tests, and `git diff --check`.
+- API-06 fast-forwarded into `dev` at `43a0114`. Merged-result verification
+  repeated focused 12/12, server type-check, backend 75/75 with zero skips,
+  root lint/type-check, 18/18 native-focused Jest suites with 75/75 tests, and
+  `git diff --check`. The feature branch/worktree were removed.
 
 ### 2026-08-09 02:57:48 +08:00
 
