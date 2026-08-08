@@ -13,17 +13,39 @@ interface ApiClientOptions {
   tokenStorage: ApiTokenStorage;
 }
 
-const AUTH_PATHS = new Set(["/auth/signup", "/auth/login", "/auth/refresh", "/auth/logout"]);
+const AUTH_PATHS = new Set([
+  "/auth/signup",
+  "/auth/login",
+  "/auth/refresh",
+  "/auth/logout",
+  "/v1/auth/signup",
+  "/v1/auth/login",
+  "/v1/auth/refresh",
+  "/v1/auth/logout",
+]);
 
 // Builds an absolute pathname for authentication route classification.
-const getPathname = (baseUrl: string, path: string) => new URL(path, `${baseUrl}/`).pathname;
+const getPathname = (baseUrl: string, input: RequestInfo | URL) => {
+  const value = input instanceof Request ? input.url : input.toString();
+  return new URL(value, `${baseUrl}/`).pathname;
+};
+
+// Normalizes fetch inputs into a replayable absolute request.
+const createRequest = (baseUrl: string, input: RequestInfo | URL, init?: RequestInit) => {
+  const value = input instanceof Request ? input.url : input.toString();
+  const url = new URL(value, `${baseUrl}/`).toString();
+
+  return input instanceof Request
+    ? new Request(new Request(url, input), init)
+    : new Request(url, init);
+};
 
 // Adds the current access token to outgoing request headers.
-const withBearerToken = (init: RequestInit | undefined, accessToken: string): RequestInit => {
-  const headers = new Headers(init?.headers);
+const withBearerToken = (request: Request, accessToken: string) => {
+  const headers = new Headers(request.headers);
   headers.set("Authorization", `Bearer ${accessToken}`);
 
-  return { ...init, headers };
+  return new Request(request.clone(), { headers });
 };
 
 // Creates an authenticated client with single-flight token refresh.
@@ -61,23 +83,23 @@ export const createApiClient = (options: ApiClientOptions) => {
   };
 
   // Sends a request and retries once after successful refresh.
-  const request = async (path: string, init?: RequestInit): Promise<Response> => {
-    const url = path.startsWith("http://") || path.startsWith("https://")
-      ? path
-      : `${baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
-    const isAuthPath = AUTH_PATHS.has(getPathname(baseUrl, path));
+  const request = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+    const baseRequest = createRequest(baseUrl, input, init);
+    const isAuthPath = AUTH_PATHS.has(getPathname(baseUrl, baseRequest));
     const tokens = await options.tokenStorage.getTokens();
-    const response = await fetchImpl(
-      url,
-      tokens?.accessToken && !isAuthPath ? withBearerToken(init, tokens.accessToken) : init,
-    );
+    const firstRequest = tokens?.accessToken && !isAuthPath
+      ? withBearerToken(baseRequest, tokens.accessToken)
+      : baseRequest.clone();
+    const response = await fetchImpl(firstRequest);
 
     if (response.status !== 401 || isAuthPath || !tokens?.refreshToken) {
       return response;
     }
 
     const refreshedTokens = await refreshTokens(tokens.refreshToken);
-    return refreshedTokens ? fetchImpl(url, withBearerToken(init, refreshedTokens.accessToken)) : response;
+    return refreshedTokens
+      ? fetchImpl(withBearerToken(baseRequest, refreshedTokens.accessToken))
+      : response;
   };
 
   return { request };

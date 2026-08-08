@@ -1,4 +1,5 @@
 import { createTypedApiClient } from "@/lib/typedApiClient";
+import { createApiClient } from "@/lib/apiClientCore";
 import type { InferResponseType } from "hono/client";
 
 const profileResponse = {
@@ -12,6 +13,41 @@ const profileResponse = {
 };
 
 describe("createTypedApiClient", () => {
+  it("uses an authenticated fetch transport and forwards cancellation", async () => {
+    const controller = new AbortController();
+    let capturedRequest: Request | undefined;
+    const transport = createApiClient({
+      baseUrl: "http://api.test",
+      tokenStorage: {
+        getTokens: async () => ({
+          accessToken: "stored-access",
+          refreshToken: "stored-refresh",
+        }),
+        saveTokens: async () => undefined,
+        clearTokens: async () => undefined,
+      },
+      fetch: async (input, init) => {
+        capturedRequest = new Request(input, init);
+        return new Response(JSON.stringify(profileResponse), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      },
+    });
+    const client = createTypedApiClient({
+      baseUrl: "http://api.test",
+      fetch: transport.request,
+    });
+
+    await client.v1.profiles.me.$get(undefined, {
+      init: { signal: controller.signal },
+    });
+    controller.abort();
+
+    expect(capturedRequest?.headers.get("Authorization")).toBe("Bearer stored-access");
+    expect(capturedRequest?.signal.aborted).toBe(true);
+  });
+
   it("sends a typed protected profile request to the normalized v1 URL", async () => {
     let capturedRequest: Request | undefined;
 
