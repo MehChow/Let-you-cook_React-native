@@ -23,3 +23,12 @@
 - Fresh closure gates pass focused 16/16, mobile 19 suites/91 tests, server
   75/75 with zero skips, both checks, and diff check.
 - Merged-result verification repeated every closure gate with the same counts.
+
+## 04:00 HKT Stop Checkpoint
+
+- Project record HEAD before the handoff commit:
+  `88fb5aa10ecb5c5d0fba362bbe6adcb2c2f37f2c` on clean `dev`.
+- API-07 branch/worktree removed; no AUTH-01 branch/worktree started.
+- PostgreSQL and Mailpit healthy; no Android device, Metro, or Hono listener.
+- Exact resume action: follow `docs/mvp-handoff-2026-08-09-0400.md` and start
+  `AUTH-01` from the new exact `dev` head.

@@ -19,6 +19,10 @@ This file is the backend handoff. When asked to continue backend work:
 Current task: start `AUTH-01` from verified `dev` after API-07 merged at
 `91b47e9`; the API contract track exit gate is complete.
 
+04:00 HKT checkpoint: execution stopped at clean project record HEAD `88fb5aa`.
+Resume from `docs/mvp-handoff-2026-08-09-0400.md`; no AUTH-01 branch or work
+started. PostgreSQL/Mailpit remain healthy, with no backend listener running.
+
 ## Current State
 
 - Backend lives in `server/`; mobile app code lives outside `server/`.

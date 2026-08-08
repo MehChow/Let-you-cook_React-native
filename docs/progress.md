@@ -220,6 +220,11 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   zero skips, root lint/type-check, 19/19 native-focused Jest suites with 91/91
   tests, and `git diff --check`. Its feature branch and worktree were removed.
   The API contract track exit gate is complete; the next task is `AUTH-01`.
+- `04:00 HKT` stop checkpoint: implementation stopped cleanly on `dev` after
+  the API track at record HEAD `88fb5aa`. The continuation record is
+  `docs/mvp-handoff-2026-08-09-0400.md`. All sub-agents are finished; no
+  AUTH-01 branch/worktree or implementation started. The Goal remains active
+  because pause is user-controlled.
 - Previous `04:00 HKT` checkpoint: the July 30 continuation record is
   `docs/mvp-handoff-2026-07-30-0400.md`; API-05 had not started at that earlier
   checkpoint. The Goal subsequently resumed on 2026-08-09.
