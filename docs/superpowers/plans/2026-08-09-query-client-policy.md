@@ -22,23 +22,23 @@
 `src/lib/typedApiClient.ts`, `__tests__/api-client.test.ts`,
 `__tests__/typed-api-client.test.ts`
 
-- [ ] Add failing tests for typed bearer injection and cancellation propagation.
-- [ ] Run focused RED and record the exact failure.
-- [ ] Make `request` fetch-compatible with replayable Request clones.
-- [ ] Inject `apiClient.request` into the typed singleton.
-- [ ] Run focused GREEN and root type-check.
-- [ ] Commit as `API-06: Authenticate and cancel typed requests`.
+- [x] Add failing tests for typed bearer injection and cancellation propagation.
+- [x] Run focused RED and record the exact failure.
+- [x] Make `request` fetch-compatible with replayable Request clones.
+- [x] Inject `apiClient.request` into the typed singleton.
+- [x] Run focused GREEN and root type-check.
+- [x] Commit as `API-06: Authenticate and cancel typed requests`.
 
 ### Task 2: Conservative TanStack Query defaults
 
 **Files:** `src/lib/queryClient.ts`, `__tests__/query-client.test.ts`
 
-- [ ] Add failing tests for abort, transient HTTP/network, non-transient HTTP,
+- [x] Add failing tests for abort, transient HTTP/network, non-transient HTTP,
   retry limit, delay cap, and mutation no-retry defaults.
-- [ ] Run focused RED and record the exact failure.
-- [ ] Add exported retry/delay predicates and configure the singleton defaults.
-- [ ] Run focused GREEN and root type-check.
-- [ ] Commit as `API-06: Configure query retry policy`.
+- [x] Run focused RED and record the exact failure.
+- [x] Add exported retry/delay predicates and configure the singleton defaults.
+- [x] Run focused GREEN and root type-check.
+- [x] Commit as `API-06: Configure query retry policy`.
 
 ### Task 3: Documentation, review, and closure
 
@@ -46,10 +46,10 @@
 `docs/progress.md`, `server/docs/progress.md`,
 `.superpowers/sdd/2026-08-09-query-client-policy/progress.md`
 
-- [ ] Record RED/GREEN evidence and the auth/cancellation/retry boundary.
-- [ ] Review exact `dev..HEAD`; resolve every Critical/Important finding.
-- [ ] Run focused tests, root/server checks, all root/server tests, and diff check.
-- [ ] Check API-06 only after all gates pass and commit documentation.
+- [x] Record RED/GREEN evidence and the auth/cancellation/retry boundary.
+- [x] Review exact `dev..HEAD`; resolve every Critical/Important finding.
+- [x] Run focused tests, root/server checks, all root/server tests, and diff check.
+- [x] Check API-06 only after all gates pass and commit documentation.
 - [ ] Fast-forward merge to `dev`, repeat merged-result gates, and clean up.
 
 ## Completion Conditions

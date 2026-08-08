@@ -14,6 +14,7 @@ describe("query client policy", () => {
     expect(shouldRetryQuery(1, createHttpError(429))).toBe(true);
     expect(shouldRetryQuery(2, createHttpError(503))).toBe(false);
     expect(shouldRetryQuery(0, createHttpError(400))).toBe(false);
+    expect(shouldRetryQuery(0, createHttpError(600))).toBe(false);
     expect(shouldRetryQuery(0, new Error("Invalid JSON"))).toBe(false);
   });
 

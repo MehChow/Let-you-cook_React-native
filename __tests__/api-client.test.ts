@@ -150,6 +150,44 @@ describe("createApiClient", () => {
     );
   });
 
+  it("replays a protected request method, headers, and body after refresh", async () => {
+    const protectedAttempts: Request[] = [];
+    const apiClient = createApiClient({
+      baseUrl: "http://api.test",
+      tokenStorage: createMemoryTokenStorage({
+        accessToken: "old-access",
+        refreshToken: "old-refresh",
+      }),
+      fetch: async (input, init) => {
+        const request = new Request(input, init);
+        if (request.url.endsWith("/auth/refresh")) {
+          return jsonResponse({
+            accessToken: "new-access",
+            refreshToken: "new-refresh",
+          });
+        }
+
+        protectedAttempts.push(request);
+        return protectedAttempts.length === 1
+          ? jsonResponse({ message: "Expired" }, 401)
+          : jsonResponse({ ok: true });
+      },
+    });
+
+    await apiClient.request("/v1/recipes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: "Soup" }),
+    });
+
+    expect(protectedAttempts).toHaveLength(2);
+    for (const request of protectedAttempts) {
+      expect(request.method).toBe("POST");
+      expect(request.headers.get("Content-Type")).toBe("application/json");
+      expect(await request.clone().json()).toEqual({ title: "Soup" });
+    }
+  });
+
   it("clears stored tokens when refresh is rejected", async () => {
     const tokenStorage = createMemoryTokenStorage({
       accessToken: "old-access",

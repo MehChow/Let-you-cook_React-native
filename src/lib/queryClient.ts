@@ -24,7 +24,7 @@ export const shouldRetryQuery = (failureCount: number, error: unknown) => {
 
   const status = getErrorStatus(error);
   if (status !== undefined) {
-    return status === 408 || status === 429 || status >= 500;
+    return status === 408 || status === 429 || (status >= 500 && status < 600);
   }
 
   return error instanceof TypeError;

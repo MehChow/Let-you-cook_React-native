@@ -164,11 +164,37 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   tests, and `git diff --check`. Git removed the merged branch and worktree
   registration; Windows left one empty locked
   `.worktrees/mvp-typed-client` directory for later cleanup.
+- `API-06` started on `codex/mvp-query-client` from exact `dev` at `66244ab`.
+  Its approved design composes the API-05 Hono client with the existing
+  SecureStore-backed, single-flight refresh transport and gives TanStack Query
+  bounded transient-query retries while mutations and aborts never retry.
+- API-06 RED passed 4/9 and failed the intended five tests: Request inputs
+  crashed at `path.startsWith`, and the wished-for retry/delay exports did not
+  exist. Focused GREEN passes 11/11 after adding fetch-compatible replayable
+  requests, bearer injection, cancellation propagation, and QueryClient
+  defaults.
+- Fresh API-06 pre-review verification passes root lint/type-check, 18/18
+  native-focused Jest suites with 74/74 tests, server type-check, backend 75/75
+  with zero skips, and `git diff --check`. The isolated worktree required its
+  locked server dependencies and ignored development `.env`; no dependency,
+  schema, migration, database reset, Expo web, Metro, emulator, or rendered UI
+  change occurred. Exact-range review and closure remain pending.
+- API-06 review found one Important custom-origin refresh mismatch and two
+  Minors: an unbounded 5xx predicate and missing write-body replay coverage.
+  The fix wave keeps the factory raw/injectable while authenticating only the
+  configured singleton, bounds 5xx to 500–599, and proves POST method, headers,
+  and JSON body survive refresh replay. Focused RED rejected status 600; GREEN
+  passes 12/12. Re-review found no remaining Critical, Important, or Minor
+  findings.
+- Fresh API-06 closure gates pass root lint/type-check, 18/18 native-focused
+  Jest suites with 75/75 tests, server type-check, backend 75/75 with zero
+  skips, and `git diff --check`. API-06 is checked and authorized for a local
+  fast-forward into `dev`.
 - Previous `04:00 HKT` checkpoint: the July 30 continuation record is
   `docs/mvp-handoff-2026-07-30-0400.md`; API-05 had not started at that earlier
   checkpoint. The Goal subsequently resumed on 2026-08-09.
-- Next queued delivery item after API-05 merge: `API-06`, Configure TanStack
-  Query authentication, cancellation, and retries.
+- Next queued delivery item after API-06 merge: `API-07`, Add reusable mobile
+  error-to-UI mapping.
 - Detailed task index: `docs/mvp-roadmap.md`.
 - Goal-mode execution brief: `docs/mvp-goal-prompt.md`.
 - Completed Foundation execution plan:

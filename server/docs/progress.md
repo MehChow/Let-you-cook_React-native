@@ -16,8 +16,8 @@ This file is the backend handoff. When asked to continue backend work:
    - any new verification under [Verified](#verified)
    - the next unchecked task
 
-Current task: start `API-06` from verified `dev` at `d86a9d9`. API-05 merged,
-its merged-result gates pass, and its branch/worktree registration is removed.
+Current task: merge reviewed `API-06` from `codex/mvp-query-client` into `dev`.
+Its exact base is `66244ab`; all closure gates pass.
 
 ## Current State
 
@@ -48,6 +48,8 @@ its merged-result gates pass, and its branch/worktree registration is removed.
 - [x] `API-04` Create stable Zod request/response DTO contracts.
 - [x] `API-05` Export Hono `AppType` and configure the typed mobile client;
   merged-result verification passes.
+- [x] `API-06` Configure authenticated/cancellable typed transport and bounded
+  TanStack Query retry defaults; review and closure gates pass.
 - [x] Add app-side auth API wrappers under `src/features/auth/api.ts`.
 - [x] Install and wire `expo-secure-store` for access and refresh token storage.
 - [x] Add a shared API client wrapper that retries once after token refresh.
@@ -63,6 +65,22 @@ its merged-result gates pass, and its branch/worktree registration is removed.
 ## Progress Log
 
 Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
+
+### 2026-08-09 03:24:00 +08:00
+
+- API-06 makes the existing mobile auth transport fetch-compatible so the Hono
+  typed singleton can reuse bearer injection and single-flight refresh while
+  preserving caller cancellation on initial and replayed requests.
+- TanStack Query now retries only bounded transient queries; mutations and
+  explicit aborts do not retry. No backend runtime, route, contract, schema, or
+  migration changed.
+- Focused tests pass 11/11. Fresh pre-review gates pass server type-check,
+  backend 75/75 with zero skips, root lint/type-check, 18/18 native-focused Jest
+  suites with 74/74 tests, and `git diff --check`. Review/merge are pending.
+- Review found and closed one Important custom-origin mismatch and two Minors.
+  Fix-wave re-review is clean. Focused tests pass 12/12; fresh closure gates
+  pass server type-check, backend 75/75 with zero skips, root lint/type-check,
+  18/18 native-focused Jest suites with 75/75 tests, and `git diff --check`.
 
 ### 2026-08-09 02:57:48 +08:00
 

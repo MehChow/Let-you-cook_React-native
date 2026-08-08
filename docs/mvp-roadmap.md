@@ -60,7 +60,7 @@ Dependencies: Foundation.
 - [x] `API-03` Define cursor pagination and deterministic sorting.
 - [x] `API-04` Create stable Zod request/response DTO contracts.
 - [x] `API-05` Export Hono `AppType` and configure the typed mobile client.
-- [ ] `API-06` Configure TanStack Query authentication, cancellation, and retries.
+- [x] `API-06` Configure TanStack Query authentication, cancellation, and retries.
 - [ ] `API-07` Add reusable mobile error-to-UI mapping.
 
 Exit: a protected request works through the typed standardized contract.

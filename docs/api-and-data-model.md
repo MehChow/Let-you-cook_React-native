@@ -32,6 +32,15 @@ versions can make an otherwise valid `AppType` incompatible. Validator hooks
 also declare stable response types explicitly so environment generics do not
 erase mounted routes from the RPC client contract.
 
+The configured mobile Hono client sends requests through the shared
+SecureStore-backed authenticated transport. That transport accepts the standard
+fetch input contract, adds bearer credentials only to protected routes, shares
+one refresh operation across concurrent `401` responses, and retains each
+caller's `AbortSignal` on its initial request and post-refresh replay. TanStack
+Query retries queries at most twice only for fetch network failures, HTTP 408,
+HTTP 429, and 5xx responses; explicit aborts and other failures do not retry.
+Mutations do not retry by default because write idempotency is endpoint-specific.
+
 Current runtime schemas live under `server/src/contracts/` by feature. Each
 schema is the source of its inferred TypeScript DTO type. Routes consume request
 schemas through Hono validators and parse explicitly projected success objects
