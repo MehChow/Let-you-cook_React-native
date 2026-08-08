@@ -155,6 +155,14 @@ Expected status mapping:
 Use stable machine codes; UI copy should be owned by the app except when the
 server must provide a safe generic message.
 
+The mobile error boundary parses unsuccessful responses into an `ApiError`
+containing status, machine code, validated field errors, request ID, and a safe
+delta-seconds `Retry-After` value. Server prose is not copied into the error's
+displayable message. A pure presentation mapper classifies cancellation,
+offline/network, validation, authentication, not-found, conflict, rate-limit,
+server, and unknown failures; it owns stable app copy and leaves toast,
+navigation, field rendering, retry, and sign-out effects to feature code.
+
 ### Authorization
 
 Every recipe/media/review mutation derives actor identity from the access token,

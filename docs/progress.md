@@ -194,11 +194,32 @@ Overall state: polished mocked Expo prototype plus an early local backend.
   verification repeated focused 12/12, server type-check, backend 75/75 with
   zero skips, root lint/type-check, 18/18 native-focused Jest suites with 75/75
   tests, and `git diff --check`. Its feature branch and worktree were removed.
+- `API-07` started on `codex/mvp-error-mapping` from exact verified `dev` at
+  `cf93f19`. Its bounded design adds a framework-independent API error parser
+  and presentation union; it does not wire screens, navigation, session
+  clearing, auth routes, or server behavior.
+- API-07 RED failed because `@/lib/apiError` did not exist. Initial GREEN passed
+  10/10. An adversarial RED then failed two cases proving server prose reached
+  `Error.message` and an unsafe Retry-After integer was accepted; GREEN passes
+  10/10 after hardening server-copy, request-ID, and retry-delay handling.
+- Fresh API-07 pre-review gates pass root lint/type-check, 19/19 native-focused
+  Jest suites with 85/85 tests, server type-check, backend 75/75 with zero
+  skips, and `git diff --check`. Review and closure remain pending.
+- API-07 review found two Important hostile-field gaps and two Minors. The fix
+  wave accepts field errors only for `400 validation_failed`, rejects
+  `__proto__`, `constructor`, and `prototype` at any dotted path depth, trims
+  request-ID headers while keeping body-first precedence, and covers generic
+  conflicts. Adversarial RED failed 4/16; GREEN passes 16/16. Re-review found
+  no remaining Critical, Important, or Minor issues.
+- Fresh API-07 closure gates pass focused 16/16, root lint/type-check, 19/19
+  native-focused Jest suites with 91/91 tests, server type-check, backend 75/75
+  with zero skips, and `git diff --check`. API-07 is checked and authorized for
+  a local fast-forward into `dev`.
 - Previous `04:00 HKT` checkpoint: the July 30 continuation record is
   `docs/mvp-handoff-2026-07-30-0400.md`; API-05 had not started at that earlier
   checkpoint. The Goal subsequently resumed on 2026-08-09.
-- Next queued delivery item after API-06 merge: `API-07`, Add reusable mobile
-  error-to-UI mapping.
+- Next queued delivery item after the API contract track: `AUTH-01`, Move
+  current auth/profile wrappers to `/v1`.
 - Detailed task index: `docs/mvp-roadmap.md`.
 - Goal-mode execution brief: `docs/mvp-goal-prompt.md`.
 - Completed Foundation execution plan:

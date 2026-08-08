@@ -47,6 +47,13 @@ export class ApiError extends Error {
   }
 }
 
+const FORBIDDEN_FIELD_SEGMENTS = new Set(["__proto__", "constructor", "prototype"]);
+
+// Accepts only inert dotted paths suitable for future form adapters.
+const isSafeFieldPath = (path: string) => path.length > 0 && path.split(".").every(
+  (segment) => /^[A-Za-z0-9_-]+$/.test(segment) && !FORBIDDEN_FIELD_SEGMENTS.has(segment),
+);
+
 // Validates the field-error subset needed by mobile forms.
 const readFieldErrors = (value: unknown) => {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
@@ -54,8 +61,9 @@ const readFieldErrors = (value: unknown) => {
   }
 
   const entries = Object.entries(value);
-  if (!entries.every(([, messages]) =>
-    Array.isArray(messages) && messages.length > 0 && messages.every((message) => typeof message === "string")
+  if (!entries.every(([path, messages]) =>
+    isSafeFieldPath(path) && Array.isArray(messages) && messages.length > 0
+      && messages.every((message) => typeof message === "string")
   )) {
     return undefined;
   }
@@ -90,12 +98,15 @@ export const apiErrorFromResponse = async (response: Response) => {
   const bodyRequestId = typeof error?.requestId === "string" && error.requestId.trim().length > 0
     ? error.requestId.trim()
     : undefined;
+  const headerRequestId = response.headers.get("X-Request-Id")?.trim() || undefined;
 
   return new ApiError({
     code,
     status: response.status,
-    fieldErrors: readFieldErrors(error?.fieldErrors),
-    requestId: bodyRequestId ?? response.headers.get("X-Request-Id") ?? undefined,
+    fieldErrors: code === "validation_failed" && response.status === 400
+      ? readFieldErrors(error?.fieldErrors)
+      : undefined,
+    requestId: bodyRequestId ?? headerRequestId,
     retryAfterMs: readRetryAfterMs(response.headers.get("Retry-After")),
   });
 };

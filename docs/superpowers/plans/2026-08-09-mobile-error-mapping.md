@@ -12,21 +12,21 @@
 
 **Files:** `src/lib/apiError.ts`, `__tests__/api-error.test.ts`
 
-- [ ] Write failing tests for envelope parsing, malformed fallback, request IDs,
+- [x] Write failing tests for envelope parsing, malformed fallback, request IDs,
   Retry-After, cancellation, offline, validation, auth, status, and unknown maps.
-- [ ] Run focused RED and record exact evidence.
-- [ ] Implement the minimal strict error model/parser/presentation mapper.
-- [ ] Run focused GREEN, root check, and diff check.
-- [ ] Commit as `API-07: Map API failures to UI states`.
+- [x] Run focused RED and record exact evidence.
+- [x] Implement the minimal strict error model/parser/presentation mapper.
+- [x] Run focused GREEN, root check, and diff check.
+- [x] Commit as `API-07: Map API failures to UI states`.
 
 ### Task 2: Document, review, and close
 
 **Files:** `docs/api-and-data-model.md`, `docs/mvp-roadmap.md`,
 `docs/progress.md`, `server/docs/progress.md`, and API-07 SDD ledger.
 
-- [ ] Record behavior and RED/GREEN evidence.
-- [ ] Review exact `dev..HEAD` and resolve Critical/Important findings.
-- [ ] Run focused, full root/server, check, and diff gates.
+- [x] Record behavior and RED/GREEN evidence.
+- [x] Review exact `dev..HEAD` and resolve Critical/Important findings.
+- [x] Run focused, full root/server, check, and diff gates.
 - [ ] Check API-07, commit closure, merge to `dev`, repeat gates, and clean up.
 
 ## Completion Conditions

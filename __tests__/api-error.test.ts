@@ -84,6 +84,51 @@ describe("apiErrorFromResponse", () => {
     expect(error.retryAfterMs).toBeUndefined();
     expect(error.requestId).toBe(REQUEST_ID);
   });
+
+  it("discards field errors from non-validation envelopes", async () => {
+    const error = await apiErrorFromResponse(createResponse({
+      error: {
+        code: "invalid_credentials",
+        message: "Invalid credentials",
+        fieldErrors: { password: ["Leaked server copy"] },
+        requestId: REQUEST_ID,
+      },
+    }, 401));
+
+    expect(error.fieldErrors).toBeUndefined();
+    expect(toErrorPresentation(error)).not.toHaveProperty("fieldErrors");
+  });
+
+  it.each(["__proto__", "constructor", "profile.prototype.name"])(
+    "rejects the dangerous validation path %s",
+    async (path) => {
+      const response = new Response(JSON.stringify({
+        error: {
+          code: "validation_failed",
+          message: "Bad input",
+          fieldErrors: { [path]: ["Do not apply this path"] },
+          requestId: REQUEST_ID,
+        },
+      }), { status: 400, headers: { "Content-Type": "application/json" } });
+
+      const error = await apiErrorFromResponse(response);
+
+      expect(error.fieldErrors).toBeUndefined();
+    },
+  );
+
+  it("prefers a valid body request ID and trims a header fallback", async () => {
+    const bodyId = "00000000-0000-4000-8000-000000000002";
+    const bodyError = await apiErrorFromResponse(createResponse({
+      error: { code: "resource_not_found", message: "Missing", requestId: bodyId },
+    }, 404, { "X-Request-Id": `  ${REQUEST_ID}  ` }));
+    const headerError = await apiErrorFromResponse(createResponse({}, 500, {
+      "X-Request-Id": `  ${REQUEST_ID}  `,
+    }));
+
+    expect(bodyError.requestId).toBe(bodyId);
+    expect(headerError.requestId).toBe(REQUEST_ID);
+  });
 });
 
 describe("toErrorPresentation", () => {
@@ -142,6 +187,17 @@ describe("toErrorPresentation", () => {
       message: "Something went wrong. Please try again.",
       retryable: false,
       shouldToast: true,
+    });
+  });
+
+  it("maps a generic conflict without using resource-specific copy", () => {
+    expect(toErrorPresentation(new ApiError({
+      code: "state_conflict",
+      status: 409,
+    }))).toMatchObject({
+      kind: "conflict",
+      message: "That change conflicts with newer data.",
+      retryable: false,
     });
   });
 });

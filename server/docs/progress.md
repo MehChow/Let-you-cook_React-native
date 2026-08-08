@@ -16,8 +16,8 @@ This file is the backend handoff. When asked to continue backend work:
    - any new verification under [Verified](#verified)
    - the next unchecked task
 
-Current task: start `API-07` from verified `dev` after the API-06 merge at
-`43a0114`.
+Current task: merge reviewed `API-07` from `codex/mvp-error-mapping` into `dev`.
+Its exact verified base is `cf93f19`.
 
 ## Current State
 
@@ -50,6 +50,8 @@ Current task: start `API-07` from verified `dev` after the API-06 merge at
   merged-result verification passes.
 - [x] `API-06` Configure authenticated/cancellable typed transport and bounded
   TanStack Query retry defaults; review and closure gates pass.
+- [x] `API-07` Add reusable mobile error-to-UI mapping; review and closure gates
+  pass.
 - [x] Add app-side auth API wrappers under `src/features/auth/api.ts`.
 - [x] Install and wire `expo-secure-store` for access and refresh token storage.
 - [x] Add a shared API client wrapper that retries once after token refresh.
@@ -65,6 +67,19 @@ Current task: start `API-07` from verified `dev` after the API-06 merge at
 ## Progress Log
 
 Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
+
+### 2026-08-09 03:39:00 +08:00
+
+- API-07 adds only mobile parsing/presentation code. It preserves the server
+  envelope and exposes status, code, validated fields, request ID, and retry
+  timing without trusting server prose for UI copy.
+- Focused tests pass 10/10. Fresh pre-review gates pass server type-check,
+  backend 75/75 with zero skips, root lint/type-check, 19/19 native-focused Jest
+  suites with 85/85 tests, and `git diff --check`. Review/merge are pending.
+- Review found and closed two Important hostile-field gaps and two Minors.
+  Fix-wave re-review is clean; focused tests pass 16/16. Fresh closure gates
+  pass server type-check, backend 75/75 with zero skips, root lint/type-check,
+  19/19 native-focused Jest suites with 91/91 tests, and `git diff --check`.
 
 ### 2026-08-09 03:24:00 +08:00
 
