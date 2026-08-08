@@ -4,8 +4,8 @@
 - Base: `dev` at `cf93f199f95a373760b9ac0b71520b21a0e81a73`
 - Design: `docs/superpowers/specs/2026-08-09-mobile-error-mapping-design.md`
 - Plan: `docs/superpowers/plans/2026-08-09-mobile-error-mapping.md`
-- Status: implementation, fix wave, clean re-review, and closure gates complete;
-  local fast-forward into `dev` authorized.
+- Status: complete and merged into `dev` at `91b47e9`; feature branch/worktree
+  removed after merged-result verification.
 
 ## Evidence
 
@@ -22,3 +22,4 @@
   failed 4/16; fix-wave GREEN passes 16/16. Re-review is clean.
 - Fresh closure gates pass focused 16/16, mobile 19 suites/91 tests, server
   75/75 with zero skips, both checks, and diff check.
+- Merged-result verification repeated every closure gate with the same counts.

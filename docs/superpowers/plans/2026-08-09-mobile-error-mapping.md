@@ -27,7 +27,7 @@
 - [x] Record behavior and RED/GREEN evidence.
 - [x] Review exact `dev..HEAD` and resolve Critical/Important findings.
 - [x] Run focused, full root/server, check, and diff gates.
-- [ ] Check API-07, commit closure, merge to `dev`, repeat gates, and clean up.
+- [x] Check API-07, commit closure, merge to `dev`, repeat gates, and clean up.
 
 ## Completion Conditions
 

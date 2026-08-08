@@ -16,8 +16,8 @@ This file is the backend handoff. When asked to continue backend work:
    - any new verification under [Verified](#verified)
    - the next unchecked task
 
-Current task: merge reviewed `API-07` from `codex/mvp-error-mapping` into `dev`.
-Its exact verified base is `cf93f19`.
+Current task: start `AUTH-01` from verified `dev` after API-07 merged at
+`91b47e9`; the API contract track exit gate is complete.
 
 ## Current State
 
@@ -80,6 +80,10 @@ Use local time in `YYYY-MM-DD HH:mm:ss Z` format for future entries.
   Fix-wave re-review is clean; focused tests pass 16/16. Fresh closure gates
   pass server type-check, backend 75/75 with zero skips, root lint/type-check,
   19/19 native-focused Jest suites with 91/91 tests, and `git diff --check`.
+- API-07 fast-forwarded into `dev` at `91b47e9`. Merged-result verification
+  repeated focused 16/16, server type-check, backend 75/75 with zero skips,
+  root lint/type-check, 19/19 native-focused Jest suites with 91/91 tests, and
+  `git diff --check`. The feature branch/worktree were removed.
 
 ### 2026-08-09 03:24:00 +08:00
 
