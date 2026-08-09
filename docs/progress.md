@@ -29,6 +29,9 @@ Do not resume the historical whole-MVP Goal and do not use the obsolete
 - `BASE-01` through `BASE-06`: Foundation exit gate complete.
 - `API-01` through `API-07`: API contract/mobile data foundation exit gate
   complete and merged into `dev`.
+- `AUTH-01`: Auth/profile mobile wrappers and refresh transport now use `/v1`;
+  the server's temporary unversioned auth/profile aliases are retired on the
+  Auth feature branch.
 - Latest delivery verification at API-07 closure:
   - `npm.cmd run check`: passed;
   - `npm.cmd test -- --runInBand`: 19 suites/91 tests passed;
@@ -46,8 +49,8 @@ Do not resume the historical whole-MVP Goal and do not use the obsolete
 - Sign-up reaches the backend. Mobile login is still the local demo flow.
 - Server login, refresh rotation/reuse revocation, logout, access-token auth,
   and protected current-profile routes exist.
-- `/v1` mounts all current application route families. Temporary unversioned
-  auth/profile aliases remain until the coordinated `AUTH-01` migration.
+- `/v1` mounts all current application route families. Auth/profile callers are
+  canonicalized to `/v1`; unrelated legacy aliases remain outside this Goal.
 - The mobile project has a typed Hono client, SecureStore-backed auth transport,
   single-flight refresh/replay support, bounded query retry defaults, and safe
   API-error presentation mapping.

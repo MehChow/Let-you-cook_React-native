@@ -11,7 +11,7 @@ after(async () => {
 });
 
 test("signup rejects passwords longer than 20 characters", async () => {
-  const response = await app.request("/auth/signup", {
+  const response = await app.request("/v1/auth/signup", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({

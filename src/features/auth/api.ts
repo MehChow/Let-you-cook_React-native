@@ -84,12 +84,14 @@ export const createAuthApi = (options: AuthApiOptions = {}) => {
   const fetchImpl = options.fetch ?? fetch;
 
   return {
-    signUp: (body: SignUpInput) => postJson<AuthResponse>(fetchImpl, baseUrl, "/auth/signup", body),
-    login: (body: AuthCredentials) => postJson<AuthResponse>(fetchImpl, baseUrl, "/auth/login", body),
+    signUp: (body: SignUpInput) =>
+      postJson<AuthResponse>(fetchImpl, baseUrl, "/v1/auth/signup", body),
+    login: (body: AuthCredentials) =>
+      postJson<AuthResponse>(fetchImpl, baseUrl, "/v1/auth/login", body),
     refresh: (body: RefreshTokenInput) =>
-      postJson<AuthTokens>(fetchImpl, baseUrl, "/auth/refresh", body),
+      postJson<AuthTokens>(fetchImpl, baseUrl, "/v1/auth/refresh", body),
     logout: (body: RefreshTokenInput) =>
-      postJson<LogoutResponse>(fetchImpl, baseUrl, "/auth/logout", body),
+      postJson<LogoutResponse>(fetchImpl, baseUrl, "/v1/auth/logout", body),
     sendPasswordResetCode: async (body: PasswordResetCodeInput) => {
       if (!body.email.trim()) {
         throw new Error("Enter your email address.");

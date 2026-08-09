@@ -95,7 +95,7 @@ test("auth and profile endpoints work against local Postgres", async (t) => {
 
   try {
     const signup = await postJson<AuthResponse>(
-      "/auth/signup",
+      "/v1/auth/signup",
       { email, password, displayName: "Smoke Tester" },
       201,
     );
@@ -108,14 +108,18 @@ test("auth and profile endpoints work against local Postgres", async (t) => {
       "refreshToken",
     ]);
 
-    const login = await postJson<AuthResponse>("/auth/login", { email, password }, 200);
+    const login = await postJson<AuthResponse>("/v1/auth/login", { email, password }, 200);
     assert.equal(login.user.id, signup.user.id);
     assert.deepEqual(Object.keys(login.tokens).sort(), [
       "accessToken",
       "refreshToken",
     ]);
 
-    const profile = await getJson<ProfileResponse>("/profiles/me", login.tokens.accessToken, 200);
+    const profile = await getJson<ProfileResponse>(
+      "/v1/profiles/me",
+      login.tokens.accessToken,
+      200,
+    );
     assert.equal(profile.profile.email, email);
     assert.equal(profile.profile.displayName, "Smoke Tester");
 
@@ -143,7 +147,7 @@ test("auth and profile endpoints work against local Postgres", async (t) => {
     });
 
     const refreshed = await postJson<AuthTokens>(
-      "/auth/refresh",
+      "/v1/auth/refresh",
       { refreshToken: login.tokens.refreshToken },
       200,
     );
@@ -152,7 +156,7 @@ test("auth and profile endpoints work against local Postgres", async (t) => {
     assert.notEqual(refreshed.refreshToken, login.tokens.refreshToken);
 
     const logout = await postJson<{ ok: boolean }>(
-      "/auth/logout",
+      "/v1/auth/logout",
       { refreshToken: refreshed.refreshToken },
       200,
     );

@@ -27,17 +27,17 @@ This is not a cookie session, but refresh tokens still need server-side state so
 ## Endpoints
 
 ```text
-POST /auth/signup
-POST /auth/login
-POST /auth/refresh
-POST /auth/logout
-POST /auth/verify-email
-POST /auth/forgot-password
-POST /auth/reset-password
-DELETE /auth/me
+POST /v1/auth/signup
+POST /v1/auth/login
+POST /v1/auth/refresh
+POST /v1/auth/logout
+POST /v1/auth/verify-email
+POST /v1/auth/forgot-password
+POST /v1/auth/reset-password
+DELETE /v1/auth/me
 ```
 
-`/auth/login` and `/auth/refresh` return:
+`/v1/auth/login` and `/v1/auth/refresh` return:
 
 ```ts
 interface AuthTokens {
@@ -65,7 +65,8 @@ Use one shared API client wrapper so screens and feature hooks never implement r
 
 - Retry the original request once after refresh.
 - Do not refresh forever on repeated `401`.
-- Do not refresh after `/auth/login`, `/auth/signup`, `/auth/refresh`, or `/auth/logout`.
+- Do not refresh after `/v1/auth/login`, `/v1/auth/signup`, `/v1/auth/refresh`, or
+  `/v1/auth/logout`.
 - Use a single in-flight refresh promise so multiple expired requests do not rotate the same refresh token at the same time.
 - Clear tokens if refresh returns `401` or `403`.
 

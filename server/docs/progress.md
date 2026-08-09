@@ -10,17 +10,16 @@ and schema contract remains `docs/api-and-data-model.md`.
 - Feature branch: `codex/mvp-auth-account`
 - Goal prompt: `docs/current-goal.md`
 
-The API contract track is complete. Start by migrating current auth/profile
-wrappers through the coordinated `/v1` boundary, reverifying sign-up, and
-wiring real mobile login. Do not begin hydration refresh, logout integration,
-email verification, password reset, or deletion in this Goal.
+The API contract track and `AUTH-01` are complete. Continue by reverifying
+sign-up and wiring real mobile login. Do not begin hydration refresh, logout
+integration, email verification, password reset, or deletion in this Goal.
 
 ## Current state
 
 - Backend stack: Node 20+, Hono, Zod, Drizzle, and PostgreSQL.
 - `/health` is unversioned; `/v1` mounts all current application route families.
-- Temporary unversioned auth/profile compatibility aliases remain for
-  `AUTH-01`.
+- Auth/profile routes and mobile callers use `/v1`; temporary unversioned
+  auth/profile aliases are retired.
 - Stable request IDs, error envelopes, pagination primitives, and current
   auth/profile DTO contracts exist.
 - Server signup, login, refresh rotation/reuse revocation, logout,
@@ -39,6 +38,10 @@ email verification, password reset, or deletion in this Goal.
 - [x] `API-06` Authenticated cancellable transport and bounded query retries.
 - [x] `API-07` Safe reusable mobile error presentation.
 
+## Completed Auth work
+
+- [x] `AUTH-01` Versioned auth/profile mobile integration and alias retirement.
+
 Latest delivery verification:
 
 - server typecheck passed;
@@ -54,8 +57,6 @@ historical evidence.
 
 Within the current Goal:
 
-- `AUTH-01`: move current auth/profile integration to `/v1` and retire legacy
-  aliases only when coordinated mobile/server coverage permits it.
 - `AUTH-02`: reverify sign-up persistence, duplicate classification, and
   request validation against real PostgreSQL.
 - `AUTH-03`: support real mobile login through current stable DTOs and session

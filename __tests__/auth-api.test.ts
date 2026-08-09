@@ -12,6 +12,43 @@ const jsonResponse = (body: unknown, status = 200): Response =>
   });
 
 describe("createAuthApi", () => {
+  it("uses versioned paths for every implemented auth operation", async () => {
+    const calls: FetchCall[] = [];
+    const api = createAuthApi({
+      baseUrl: "http://api.test",
+      fetch: async (url, init) => {
+        calls.push({ url: String(url), init });
+
+        if (String(url).endsWith("/refresh")) {
+          return jsonResponse({ accessToken: "access", refreshToken: "refresh" });
+        }
+        if (String(url).endsWith("/logout")) {
+          return jsonResponse({ ok: true });
+        }
+        return jsonResponse({
+          user: { id: "user-1", email: "cook@example.com" },
+          tokens: { accessToken: "access", refreshToken: "refresh" },
+        });
+      },
+    });
+
+    await api.signUp({
+      displayName: "Cook",
+      email: "cook@example.com",
+      password: "password123",
+    });
+    await api.login({ email: "cook@example.com", password: "password123" });
+    await api.refresh({ refreshToken: "refresh" });
+    await api.logout({ refreshToken: "refresh" });
+
+    expect(calls.map((call) => call.url)).toEqual([
+      "http://api.test/v1/auth/signup",
+      "http://api.test/v1/auth/login",
+      "http://api.test/v1/auth/refresh",
+      "http://api.test/v1/auth/logout",
+    ]);
+  });
+
   it("uses the shared Android default for login requests without a base URL", async () => {
     const calls: FetchCall[] = [];
     const api = createAuthApi({
@@ -27,7 +64,7 @@ describe("createAuthApi", () => {
     await api.login({ email: "cook@example.com", password: "password123" });
 
     expect(calls).toHaveLength(1);
-    expect(calls[0]?.url).toBe("http://10.0.2.2:8787/auth/login");
+    expect(calls[0]?.url).toBe("http://10.0.2.2:8787/v1/auth/login");
   });
 
   it("accepts a password reset email through the placeholder API", async () => {
@@ -68,7 +105,7 @@ describe("createAuthApi", () => {
       accessToken: "access",
       refreshToken: "refresh",
     });
-    expect(calls[0]?.url).toBe("http://api.test/auth/login");
+    expect(calls[0]?.url).toBe("http://api.test/v1/auth/login");
     expect(calls[0]?.init?.method).toBe("POST");
     expect(calls[0]?.init?.body).toBe(
       JSON.stringify({ email: "cook@example.com", password: "password123" }),

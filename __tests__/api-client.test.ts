@@ -67,7 +67,7 @@ describe("createApiClient", () => {
       }),
       fetch: async (input, init) => {
         const request = new Request(input, init);
-        if (request.url.endsWith("/auth/refresh")) {
+        if (request.url.endsWith("/v1/auth/refresh")) {
           controller.abort();
           return jsonResponse({
             accessToken: "new-access",
@@ -99,10 +99,10 @@ describe("createApiClient", () => {
       },
     });
 
-    await apiClient.request("/profiles/me");
+    await apiClient.request("/v1/profiles/me");
 
     expect(calls).toHaveLength(1);
-    expect(calls[0]?.request.url).toBe("http://10.0.2.2:8787/profiles/me");
+    expect(calls[0]?.request.url).toBe("http://10.0.2.2:8787/v1/profiles/me");
   });
 
   it("retries one protected request after refreshing tokens", async () => {
@@ -118,7 +118,7 @@ describe("createApiClient", () => {
         const request = new Request(url, init);
         calls.push({ request });
 
-        if (request.url.endsWith("/auth/refresh")) {
+        if (request.url.endsWith("/v1/auth/refresh")) {
           return jsonResponse({
             accessToken: "new-access",
             refreshToken: "new-refresh",
@@ -131,7 +131,7 @@ describe("createApiClient", () => {
       },
     });
 
-    const response = await apiClient.request("/profiles/me");
+    const response = await apiClient.request("/v1/profiles/me");
 
     expect(response.status).toBe(200);
     expect(calls).toHaveLength(3);
@@ -160,7 +160,7 @@ describe("createApiClient", () => {
       }),
       fetch: async (input, init) => {
         const request = new Request(input, init);
-        if (request.url.endsWith("/auth/refresh")) {
+        if (request.url.endsWith("/v1/auth/refresh")) {
           return jsonResponse({
             accessToken: "new-access",
             refreshToken: "new-refresh",
@@ -197,12 +197,12 @@ describe("createApiClient", () => {
       baseUrl: "http://api.test",
       tokenStorage,
       fetch: async (url, init) =>
-        new Request(url, init).url.endsWith("/auth/refresh")
+        new Request(url, init).url.endsWith("/v1/auth/refresh")
           ? jsonResponse({ message: "Invalid refresh token" }, 401)
           : jsonResponse({ message: "Expired" }, 401),
     });
 
-    const response = await apiClient.request("/profiles/me");
+    const response = await apiClient.request("/v1/profiles/me");
 
     expect(response.status).toBe(401);
     expect(tokenStorage.cleared).toBe(true);
@@ -220,7 +220,7 @@ describe("createApiClient", () => {
       tokenStorage,
       fetch: async (url, init) => {
         const request = new Request(url, init);
-        if (request.url.endsWith("/auth/refresh")) {
+        if (request.url.endsWith("/v1/auth/refresh")) {
           refreshCalls += 1;
           return jsonResponse({
             accessToken: "new-access",
@@ -235,8 +235,8 @@ describe("createApiClient", () => {
     });
 
     const responses = await Promise.all([
-      apiClient.request("/profiles/me"),
-      apiClient.request("/profiles/me"),
+      apiClient.request("/v1/profiles/me"),
+      apiClient.request("/v1/profiles/me"),
     ]);
 
     expect(refreshCalls).toBe(1);

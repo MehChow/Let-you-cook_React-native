@@ -171,18 +171,6 @@ test("current database-free route failures use the shared error envelope", async
       message: "This operation is not available yet.",
     },
     {
-      path: "/auth/login",
-      method: "POST",
-      body: "{}",
-      status: 400,
-      code: "validation_failed",
-      message: "Some fields need attention.",
-      fieldErrors: {
-        email: ["Invalid input: expected string, received undefined"],
-        password: ["Invalid input: expected string, received undefined"],
-      },
-    },
-    {
       path: "/recipes/legacy-recipe-id",
       method: "GET",
       status: 501,
@@ -261,14 +249,16 @@ test("all existing application route families are mounted under /v1", async () =
   }
 });
 
-test("legacy application routes remain available during migration", async () => {
+test("legacy auth and profile routes retire after mobile migration", async () => {
   const recipesResponse = await app.request("/recipes");
   const loginResponse = await app.request("/auth/login", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: "{}",
   });
+  const profileResponse = await app.request("/profiles/me");
 
   assert.equal(recipesResponse.status, 200);
-  assert.equal(loginResponse.status, 400);
+  assert.equal(loginResponse.status, 404);
+  assert.equal(profileResponse.status, 404);
 });
