@@ -100,14 +100,14 @@ Auth checkpoint, and no application, backend, migration, test, or package file
 differs. Do not rerun the completed independent review or manufacture redundant
 automated evidence.
 
-- [ ] **Step 6: Commit the Auth exit handoff**
+- [x] **Step 6: Commit the Auth exit handoff**
 
 ```powershell
 git add -- AGENTS.md docs/current-goal.md docs/progress.md server/docs/progress.md docs/superpowers/plans/2026-08-09-user-owned-native-qa-auth-exit.md
 git commit -m "AUTH-EXIT: Adopt user-owned native QA"
 ```
 
-- [ ] **Step 7: Fast-forward into `dev` and verify identity**
+- [x] **Step 7: Fast-forward into `dev` and verify identity**
 
 From the main checkout, first confirm its only changes are the preserved `.idea`
 files, then run:
@@ -124,7 +124,7 @@ git status --short
 Expected: both refs and both trees are identical; the main checkout still has
 only its unrelated `.idea` changes; the Auth worktree is clean and preserved.
 
-- [ ] **Step 8: Stop at the boundary**
+- [x] **Step 8: Stop at the boundary**
 
 Return a copy-paste-ready prompt containing the exact contents of
 `docs/current-goal.md`. Do not create the Recipe Data branch/worktree and do not
