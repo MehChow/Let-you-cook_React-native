@@ -47,6 +47,8 @@ Do not resume the historical whole-MVP Goal and do not use the obsolete
 - `AUTH-06`: Logout presents the stored refresh token for server revocation,
   then clears SecureStore and private session state even when revocation is
   unreachable.
+- `AUTH-07`: Server email delivery is application-owned, local development uses
+  SMTP/Mailpit, and automated auth tests can inject an in-memory sender.
 - `AUTH-01` through `AUTH-06` are integrated into `dev`; the latest Auth code
   checkpoint is `5bd56d9`.
 - Latest integrated Auth verification:
