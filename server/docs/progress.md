@@ -10,9 +10,9 @@ and schema contract remains `docs/api-and-data-model.md`.
 - Feature branch: `codex/mvp-auth-account`
 - Goal prompt: `docs/current-goal.md`
 
-The API contract track and `AUTH-01` are complete. Continue by reverifying
-sign-up and wiring real mobile login. Do not begin hydration refresh, logout
-integration, email verification, password reset, or deletion in this Goal.
+The API contract track and `AUTH-01` through `AUTH-02` are complete. Continue by
+wiring real mobile login. Do not begin hydration refresh, logout integration,
+email verification, password reset, or deletion in this Goal.
 
 ## Current state
 
@@ -41,6 +41,8 @@ integration, email verification, password reset, or deletion in this Goal.
 ## Completed Auth work
 
 - [x] `AUTH-01` Versioned auth/profile mobile integration and alias retirement.
+- [x] `AUTH-02` PostgreSQL signup persistence, duplicate, and validation
+  reverification.
 
 Latest delivery verification:
 
@@ -57,8 +59,6 @@ historical evidence.
 
 Within the current Goal:
 
-- `AUTH-02`: reverify sign-up persistence, duplicate classification, and
-  request validation against real PostgreSQL.
 - `AUTH-03`: support real mobile login through current stable DTOs and session
   transport without stealing `AUTH-04` hydration behavior.
 

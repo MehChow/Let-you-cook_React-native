@@ -107,6 +107,33 @@ test("auth and profile endpoints work against local Postgres", async (t) => {
       "accessToken",
       "refreshToken",
     ]);
+    const [persistedUser] = await db
+      .select({ id: users.id, email: users.email })
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+    const [persistedProfile] = await db
+      .select({ userId: profiles.userId, displayName: profiles.displayName })
+      .from(profiles)
+      .where(eq(profiles.userId, signup.user.id))
+      .limit(1);
+    const [persistedRefreshToken] = await db
+      .select({ userId: refreshTokens.userId })
+      .from(refreshTokens)
+      .where(
+        eq(
+          refreshTokens.tokenHash,
+          hashRefreshToken(signup.tokens.refreshToken),
+        ),
+      )
+      .limit(1);
+
+    assert.deepEqual(persistedUser, { id: signup.user.id, email });
+    assert.deepEqual(persistedProfile, {
+      userId: signup.user.id,
+      displayName: "Smoke Tester",
+    });
+    assert.deepEqual(persistedRefreshToken, { userId: signup.user.id });
 
     const login = await postJson<AuthResponse>("/v1/auth/login", { email, password }, 200);
     assert.equal(login.user.id, signup.user.id);
@@ -188,6 +215,26 @@ test("duplicate signup returns the registered-email error envelope", async () =>
       code: "email_already_registered",
       message: "Email is already registered.",
     });
+
+    const persistedUsers = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, email));
+    assert.equal(persistedUsers.length, 1);
+    const persistedUserId = persistedUsers[0]?.id;
+    assert.ok(persistedUserId);
+
+    const persistedProfiles = await db
+      .select({ userId: profiles.userId })
+      .from(profiles)
+      .where(eq(profiles.userId, persistedUserId));
+    const persistedRefreshTokens = await db
+      .select({ id: refreshTokens.id })
+      .from(refreshTokens)
+      .where(eq(refreshTokens.userId, persistedUserId));
+
+    assert.equal(persistedProfiles.length, 1);
+    assert.equal(persistedRefreshTokens.length, 1);
   } finally {
     await db.delete(users).where(eq(users.email, email));
   }

@@ -5,6 +5,7 @@ import { EmailOtpScreen } from "@/features/auth/EmailOtpScreen";
 import { ForgotPasswordScreen } from "@/features/auth/ForgotPasswordScreen";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react-native";
 import { toast } from "sonner-native";
+import { ApiError } from "@/lib/apiError";
 
 const mockLogin = jest.fn();
 const mockEstablishSession = jest.fn();
@@ -239,6 +240,24 @@ describe("auth screens", () => {
 
     await waitFor(() =>
       expect(mockToastError).toHaveBeenCalledWith("Unable to create account."),
+    );
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it("shows the safe duplicate-account message from the API error boundary", async () => {
+    mockCreateAccount.mockRejectedValueOnce(
+      new ApiError({ code: "email_already_registered", status: 409 }),
+    );
+
+    render(<CreateAccountScreen />);
+    fireEvent.changeText(screen.getByPlaceholderText("Your name"), "Mei Lin");
+    fireEvent.changeText(screen.getByPlaceholderText("name@example.com"), "mei@example.com");
+    fireEvent.changeText(screen.getByPlaceholderText("Enter your password"), "cook1234");
+    fireEvent.changeText(screen.getByPlaceholderText("Confirm your password"), "cook1234");
+    fireEvent.press(screen.getByText("Create account"));
+
+    await waitFor(() =>
+      expect(mockToastError).toHaveBeenCalledWith("That email is already registered."),
     );
     expect(mockReplace).not.toHaveBeenCalled();
   });

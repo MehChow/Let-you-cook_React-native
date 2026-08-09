@@ -112,17 +112,57 @@ describe("createAuthApi", () => {
     );
   });
 
-  it("surfaces auth errors with status and message", async () => {
+  it("preserves signup validation metadata from the shared error envelope", async () => {
     const api = createAuthApi({
       baseUrl: "http://api.test",
-      fetch: async () => jsonResponse({ message: "Invalid email or password" }, 401),
+      fetch: async () =>
+        jsonResponse(
+          {
+            error: {
+              code: "validation_failed",
+              message: "Unsafe server prose",
+              fieldErrors: { email: ["Enter a valid email address."] },
+              requestId: "request-1",
+            },
+          },
+          400,
+        ),
     });
 
     await expect(
-      api.login({ email: "cook@example.com", password: "wrong-password" }),
+      api.signUp({ email: "invalid", password: "password123" }),
     ).rejects.toMatchObject({
-      message: "Invalid email or password",
-      status: 401,
+      message: "Request failed",
+      code: "validation_failed",
+      status: 400,
+      fieldErrors: { email: ["Enter a valid email address."] },
+      requestId: "request-1",
+    });
+  });
+
+  it("preserves duplicate-signup classification without displaying server prose", async () => {
+    const api = createAuthApi({
+      baseUrl: "http://api.test",
+      fetch: async () =>
+        jsonResponse(
+          {
+            error: {
+              code: "email_already_registered",
+              message: "Unsafe server prose",
+              requestId: "request-2",
+            },
+          },
+          409,
+        ),
+    });
+
+    await expect(
+      api.signUp({ email: "cook@example.com", password: "password123" }),
+    ).rejects.toMatchObject({
+      message: "Request failed",
+      code: "email_already_registered",
+      status: 409,
+      requestId: "request-2",
     });
   });
 });

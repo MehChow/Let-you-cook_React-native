@@ -1,4 +1,5 @@
 import { appEnv } from "@/config/env";
+import { apiErrorFromResponse } from "@/lib/apiError";
 
 export interface AuthUser {
   id: string;
@@ -41,23 +42,6 @@ interface AuthApiOptions {
   fetch?: typeof fetch;
 }
 
-// Represents a safe authentication failure returned to mobile screens.
-export class AuthApiError extends Error {
-  constructor(
-    message: string,
-    public readonly status: number,
-  ) {
-    super(message);
-    this.name = "AuthApiError";
-  }
-}
-
-// Extracts a safe user-facing message from failed responses.
-const readErrorMessage = async (response: Response) => {
-  const body = (await response.json().catch(() => null)) as { message?: unknown } | null;
-  return typeof body?.message === "string" ? body.message : "Request failed";
-};
-
 // Sends JSON and converts failed responses into authentication errors.
 const postJson = async <Result>(
   fetchImpl: typeof fetch,
@@ -72,7 +56,7 @@ const postJson = async <Result>(
   });
 
   if (!response.ok) {
-    throw new AuthApiError(await readErrorMessage(response), response.status);
+    throw await apiErrorFromResponse(response);
   }
 
   return (await response.json()) as Result;

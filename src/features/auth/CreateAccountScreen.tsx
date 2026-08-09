@@ -1,6 +1,7 @@
 import { Text } from "@/components/ui/text";
 import { images } from "@/data/images";
 import { useAuth } from "@/features/auth/useAuth";
+import { toErrorPresentation } from "@/lib/apiError";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { LockIcon, MailIcon, UserIcon } from "lucide-react-native";
@@ -17,8 +18,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner-native";
 
-const getErrorMessage = (error: unknown) =>
-  error instanceof Error ? error.message : "Unable to create your account right now.";
+// Maps account-creation failures through the shared safe presentation policy.
+const getErrorMessage = (error: unknown) => {
+  const presentation = toErrorPresentation(error);
+  return presentation.kind === "unknown" && error instanceof Error
+    ? error.message
+    : presentation.message;
+};
 
 export function CreateAccountScreen() {
   const router = useRouter();

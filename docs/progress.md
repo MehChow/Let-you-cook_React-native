@@ -32,6 +32,9 @@ Do not resume the historical whole-MVP Goal and do not use the obsolete
 - `AUTH-01`: Auth/profile mobile wrappers and refresh transport now use `/v1`;
   the server's temporary unversioned auth/profile aliases are retired on the
   Auth feature branch.
+- `AUTH-02`: Real PostgreSQL coverage verifies persisted user/profile/session
+  rows, duplicate isolation, and `/v1` validation; signup failures now retain
+  safe structured API metadata for mobile presentation.
 - Latest delivery verification at API-07 closure:
   - `npm.cmd run check`: passed;
   - `npm.cmd test -- --runInBand`: 19 suites/91 tests passed;
