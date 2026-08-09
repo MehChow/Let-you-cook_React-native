@@ -51,6 +51,10 @@ describe("createAuthApi", () => {
           tokens: { accessToken: "access", refreshToken: "refresh" },
         });
       },
+      request: async (url, init) => {
+        calls.push({ url: String(url), init });
+        return jsonResponse({ ok: true });
+      },
     });
 
     await api.signUp({
@@ -75,6 +79,7 @@ describe("createAuthApi", () => {
       resetGrant: "reset-grant",
       password: "new-password-123",
     });
+    await api.deleteAccount();
 
     expect(calls.map((call) => call.url)).toEqual([
       "http://api.test/v1/auth/signup",
@@ -86,7 +91,9 @@ describe("createAuthApi", () => {
       "http://api.test/v1/auth/password-reset/requests",
       "http://api.test/v1/auth/password-reset/verifications",
       "http://api.test/v1/auth/password-reset/completions",
+      "/v1/users/me",
     ]);
+    expect(calls.at(-1)?.init?.method).toBe("DELETE");
   });
 
   it("uses the shared Android default for login requests without a base URL", async () => {

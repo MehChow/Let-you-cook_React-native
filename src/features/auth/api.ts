@@ -1,4 +1,5 @@
 import { appEnv } from "@/config/env";
+import { apiClient } from "@/lib/apiClient";
 import { apiErrorFromResponse } from "@/lib/apiError";
 
 export interface AuthUser {
@@ -49,6 +50,10 @@ export interface LogoutResponse {
   ok: boolean;
 }
 
+export interface AccountDeletionResponse {
+  ok: true;
+}
+
 export interface PasswordResetGrantResponse {
   resetGrant: string;
   expiresAt: string;
@@ -66,6 +71,7 @@ export interface PasswordResetCompletionResponse {
 interface AuthApiOptions {
   baseUrl?: string;
   fetch?: typeof fetch;
+  request?: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
 }
 
 // Sends JSON and converts failed responses into authentication errors.
@@ -88,10 +94,24 @@ const postJson = async <Result>(
   return (await response.json()) as Result;
 };
 
+// Deletes the authenticated account through the shared token-aware transport.
+const deleteAccount = async (
+  request: NonNullable<AuthApiOptions["request"]>,
+): Promise<AccountDeletionResponse> => {
+  const response = await request("/v1/users/me", { method: "DELETE" });
+
+  if (!response.ok) {
+    throw await apiErrorFromResponse(response);
+  }
+
+  return (await response.json()) as AccountDeletionResponse;
+};
+
 // Creates authentication operations against the configured backend URL.
 export const createAuthApi = (options: AuthApiOptions = {}) => {
   const baseUrl = (options.baseUrl ?? appEnv.apiBaseUrl).replace(/\/$/, "");
   const fetchImpl = options.fetch ?? fetch;
+  const request = options.request ?? apiClient.request;
 
   return {
     signUp: (body: SignUpInput) =>
@@ -137,6 +157,7 @@ export const createAuthApi = (options: AuthApiOptions = {}) => {
         "/v1/auth/password-reset/completions",
         body,
       ),
+    deleteAccount: () => deleteAccount(request),
   };
 };
 

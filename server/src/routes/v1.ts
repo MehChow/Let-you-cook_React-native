@@ -8,11 +8,13 @@ import { imageRoutes } from "./images";
 import { profileRoutes } from "./profiles";
 import { recipeRoutes } from "./recipes";
 import { reportRoutes } from "./reports";
+import { userRoutes } from "./users";
 
 // Composes versioned routes around server-owned runtime dependencies.
 export const createV1Routes = (emailSender: EmailSender) =>
   new Hono()
     .route("/auth", createAuthRoutes(emailSender))
+    .route("/users", userRoutes)
     .route("/profiles", profileRoutes)
     .route("/recipes", recipeRoutes)
     .route("/images", imageRoutes)

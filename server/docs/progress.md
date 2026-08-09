@@ -57,6 +57,9 @@ with the deletion-policy gate and Auth hardening; do not begin exit review.
   unverified-login denial, and first-session issuance on confirmation.
 - [x] `AUTH-09` Generic password-reset request, OTP verification, short-lived
   grant, atomic password replacement, and refresh-session revocation.
+- [x] `AUTH-10` Immediate irreversible account tombstoning, credential/profile
+  erasure, private media-reference cleanup, refresh revocation, live-access
+  denial, published-content/moderation reference retention, and mobile cleanup.
 
 Latest Auth branch verification:
 
@@ -73,10 +76,9 @@ No Android device was available for the exact native checks in
 
 ## Next backend responsibilities
 
-Within the next Goal, `AUTH-10` and `AUTH-11` own the confirmed deletion policy,
-account deletion, Auth-scoped rate limits, redacted logging, and adversarial
-concurrency/failure coverage. A later fresh task owns independent Auth exit
-review before Recipe Data starts.
+The active Goal continues with `AUTH-11`: Auth-scoped rate limits, redacted
+logging, and adversarial concurrency/failure coverage. A later fresh task owns
+independent Auth exit review before Recipe Data starts.
 
 ## Do not redo or expand
 

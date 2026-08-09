@@ -213,6 +213,23 @@ resend cooldown, and consumption. An injected `EmailSender` owns delivery.
 Development SMTP points to Mailpit in Docker and tests inject an in-memory fake.
 A verified sender domain/provider is required before public beta.
 
+Account deletion is an immediate, irreversible authenticated transaction. It
+sets the user to `deleted`, records `deletedAt`, replaces the normalized email
+with an opaque non-address tombstone value, destroys the password credential,
+clears verification state and profile fields, deletes auth challenges, and
+revokes every refresh token. Protected middleware must also load account status
+so a still-live access JWT cannot authorize the deleted user. The original email
+therefore becomes available for registration immediately.
+
+Published recipes and their attached recipe media remain public under the
+neutral author attribution "Deleted cook". Draft and archived recipes become
+hidden, and private/unattached media references are erased. Reports and
+moderation actions retain opaque tombstone references needed for referential
+integrity. Resolved moderation evidence is retained for 24 months, then personal
+and free-text evidence not needed for the audit outcome is erased. This later
+retention cleanup belongs to moderation operations; account deletion must not
+break or prematurely erase those records.
+
 Login and email confirmation session DTOs contain only public `user.id`,
 `user.email`, `tokens.accessToken`, and `tokens.refreshToken`. Internal
 refresh-token row IDs are never response fields. Signup instead returns only
@@ -571,8 +588,10 @@ using a process-memory map.
 - Favourite add/remove: relation change; counts are queried/derived or updated
   safely, never accepted from the client.
 - Review upsert/delete: row change and rating aggregate consistency.
-- Account deletion: revoke tokens, hide profile/content, detach access, and apply
-  retention/erasure policy.
+- Account deletion: atomically tombstone identity, erase credentials/profile and
+  private references, revoke tokens, hide non-public content, retain published
+  recipes as "Deleted cook," and preserve moderation references for the
+  documented retention window.
 
 Avoid mutable counter columns until query performance proves they are needed. If
 introduced, update them transactionally and retain a reconciliation path.

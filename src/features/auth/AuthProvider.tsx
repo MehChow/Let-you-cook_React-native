@@ -29,6 +29,7 @@ interface AuthContextValue {
   requestEmailVerification(email: string): Promise<AuthChallengeResponse>;
   confirmEmailVerification(input: AuthChallengeConfirmation): Promise<void>;
   logout(): Promise<void>;
+  deleteAccount(): Promise<void>;
   sendPasswordResetCode(email: string): Promise<AuthChallengeResponse>;
   verifyOtp(input: AuthChallengeConfirmation): Promise<void>;
   resetPassword(input: {
@@ -131,6 +132,17 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setPasswordResetGrant(response.resetGrant);
   };
 
+  // Clears local credentials only after server account deletion succeeds.
+  const deleteAccount = async () => {
+    await authApi.deleteAccount();
+    try {
+      await authTokenStorage.clearTokens();
+    } finally {
+      setPasswordResetGrant(null);
+      setSession(null);
+    }
+  };
+
   // Completes password replacement using the in-memory reset grant.
   const resetPassword: AuthContextValue["resetPassword"] = async ({
     password,
@@ -166,6 +178,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         requestEmailVerification,
         confirmEmailVerification,
         logout,
+        deleteAccount,
         sendPasswordResetCode,
         verifyOtp,
         resetPassword,

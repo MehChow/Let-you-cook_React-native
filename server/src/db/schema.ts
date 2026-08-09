@@ -20,10 +20,18 @@ export const users = pgTable(
     email: text("email").notNull(),
     passwordHash: text("password_hash").notNull(),
     emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
+    accountStatus: text("account_status").default("active").notNull(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [uniqueIndex("users_email_unique").on(table.email)],
+  (table) => [
+    uniqueIndex("users_email_unique").on(table.email),
+    check(
+      "users_account_status_check",
+      sql`${table.accountStatus} in ('active', 'disabled', 'deletion_pending', 'deleted')`,
+    ),
+  ],
 );
 
 export const authChallenges = pgTable(

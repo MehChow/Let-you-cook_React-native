@@ -29,6 +29,7 @@ jest.mock("@/features/auth/api", () => ({
     requestPasswordReset: jest.fn(),
     verifyPasswordReset: jest.fn(),
     completePasswordReset: jest.fn(),
+    deleteAccount: jest.fn(),
   },
 }));
 
@@ -42,6 +43,7 @@ const mockConfirmEmailVerification = authApi.confirmEmailVerification as jest.Mo
 const mockRequestPasswordReset = authApi.requestPasswordReset as jest.Mock;
 const mockVerifyPasswordReset = authApi.verifyPasswordReset as jest.Mock;
 const mockCompletePasswordReset = authApi.completePasswordReset as jest.Mock;
+const mockDeleteAccount = authApi.deleteAccount as jest.Mock;
 
 // Supplies the authentication provider to hook tests.
 const wrapper = ({ children }: PropsWithChildren) => (
@@ -77,6 +79,7 @@ describe("AuthProvider", () => {
       expiresAt: "2026-08-09T10:10:00.000Z",
     });
     mockCompletePasswordReset.mockResolvedValue({ ok: true });
+    mockDeleteAccount.mockResolvedValue({ ok: true });
   });
 
   it("hydrates an expired session through the refresh boundary", async () => {
@@ -183,6 +186,24 @@ describe("AuthProvider", () => {
     });
     expect(mockSaveSession).toHaveBeenCalledTimes(1);
     expect(result.current.session?.user.email).toBe("cook@example.com");
+  });
+
+  it("clears persisted and provider session state after account deletion", async () => {
+    mockGetSession.mockResolvedValue({
+      ...expiredSession,
+      accessTokenExpiresAt: Number.MAX_SAFE_INTEGER,
+    });
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await waitFor(() => expect(result.current.isHydrating).toBe(false));
+
+    await act(async () => {
+      await result.current.deleteAccount();
+    });
+
+    expect(mockDeleteAccount).toHaveBeenCalledTimes(1);
+    expect(mockClearTokens).toHaveBeenCalledTimes(1);
+    expect(result.current.session).toBeNull();
+    expect(result.current.isLoggedIn).toBe(false);
   });
 
   it("holds the reset grant in memory through password completion", async () => {

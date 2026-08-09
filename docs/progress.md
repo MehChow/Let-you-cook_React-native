@@ -11,6 +11,10 @@
 - Next bounded Goal: `AUTH-10` through `AUTH-11`
 - Feature branch: `codex/mvp-auth-account`
 - Standalone Goal prompt: `docs/current-goal.md`
+- Confirmed account-deletion policy: immediate irreversible opaque tombstone;
+  credentials/profile erased, published recipes retained as "Deleted cook,"
+  resolved moderation evidence retained for 24 months, former email immediately
+  reusable, and all sessions denied immediately.
 
 ## Resume now
 
@@ -43,6 +47,9 @@ Do not resume the historical whole-MVP Goal and do not use the obsolete
 - `AUTH-09`: Password recovery uses a generic request, purpose-bound OTP,
   in-memory short-lived reset grant, atomic password completion, and refresh
   session revocation.
+- `AUTH-10`: Account deletion immediately and irreversibly tombstones identity,
+  erases credentials/profile/private media references, revokes sessions, keeps
+  published recipe and moderation references, and allows immediate email reuse.
 - `AUTH-01` through `AUTH-09` are integrated into `dev`; the latest Auth code
   checkpoint is `83dfefa`.
 - Latest integrated Auth verification:
@@ -62,6 +69,10 @@ Do not resume the historical whole-MVP Goal and do not use the obsolete
   the SecureStore boundary.
 - Server login, refresh rotation/reuse revocation, logout, access-token auth,
   protected current-profile routes, verified signup, and password reset exist.
+- Authenticated `DELETE /v1/users/me` enforces the confirmed tombstone policy in
+  one transaction; protected middleware denies still-live access tokens for a
+  deleted account, and the mobile boundary clears persisted session state after
+  a successful deletion response.
 - Auth/profile callers are canonicalized to `/v1`; unrelated legacy aliases
   remain outside the completed Goal.
 - The mobile project has a typed Hono client, SecureStore-backed auth transport,

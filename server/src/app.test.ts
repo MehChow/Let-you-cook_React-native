@@ -122,14 +122,9 @@ test("current database-free route failures use the shared error envelope", async
       method: "PATCH",
       authorization: `Bearer ${profileAccessToken}`,
       body: JSON.stringify({ displayName: "" }),
-      status: 400,
-      code: "validation_failed",
-      message: "Some fields need attention.",
-      fieldErrors: {
-        displayName: [
-          "Too small: expected string to have >=1 characters",
-        ],
-      },
+      status: 401,
+      code: "invalid_access_token",
+      message: "Authentication is invalid or expired.",
     },
     {
       path: "/v1/recipes/recipe-id",

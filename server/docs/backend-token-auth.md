@@ -70,6 +70,13 @@ Use one shared API client wrapper so screens and feature hooks never implement r
 Password-reset completion revokes all refresh-token rows for the account.
 Already-issued access JWTs remain bounded by their normal short lifetime.
 
+Account deletion is stricter: it immediately and irreversibly tombstones the
+identity, revokes every refresh token, and removes credentials/profile state in
+one transaction. Protected middleware verifies the database account status
+after JWT verification, so an otherwise live access JWT for a deleted account
+is denied immediately. The mobile deletion boundary clears SecureStore state
+only after the server confirms deletion.
+
 ## Retry Rules
 
 - Retry the original request once after refresh.

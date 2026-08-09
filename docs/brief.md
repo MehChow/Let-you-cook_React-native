@@ -140,8 +140,15 @@ recipes, total received hearts, and average recipe rating. Email and other
 account data are private.
 
 The current user can edit their profile and delete their account. Account
-deletion, content retention, and moderation evidence need an explicit policy
-before public beta.
+deletion is immediate and irreversible. The identity row remains only as an
+opaque deleted tombstone: credentials, verification data, profile fields, and
+private media references are erased immediately, and every session is denied.
+Published recipes remain visible under the neutral attribution "Deleted cook"
+with their recipe media; drafts and archived content are hidden. Reports and
+moderation records keep only the opaque references needed for integrity.
+Resolved moderation evidence is retained for 24 months, after which
+unnecessary personal and free-text detail is removed while the audit outcome
+remains. The former email address may register again immediately.
 
 ### Ratings and Reviews
 
@@ -284,7 +291,8 @@ media, and core integration are stable.
 
 ## Confirmed Product Decisions
 
-The owner confirmed these decisions on 2026-07-26:
+The owner confirmed decisions 1-9 on 2026-07-26 and decision 10 on
+2026-08-09:
 
 1. Keep the backend as a Node 20 Hono service; use R2's S3-compatible API rather
    than moving the whole API to Cloudflare Workers.
@@ -306,6 +314,11 @@ The owner confirmed these decisions on 2026-07-26:
 9. Require email verification before entering the private app. Use Mailpit SMTP
    for local development and keep real email delivery as a pre-beta external
    prerequisite.
+10. Delete accounts immediately and irreversibly by retaining an opaque identity
+    tombstone while erasing credentials and profile data. Keep published recipes
+    attributed to "Deleted cook," preserve moderation referential integrity with
+    a 24-month resolved-evidence retention period, and allow immediate reuse of
+    the former email address.
 
 If the owner changes any item later, update the dependent contracts and roadmap
 rather than leaving the decision only in chat history.

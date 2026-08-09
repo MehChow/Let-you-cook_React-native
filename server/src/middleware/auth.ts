@@ -1,6 +1,9 @@
 import type { MiddlewareHandler } from "hono";
+import { and, eq } from "drizzle-orm";
 
 import { verifyAccessToken } from "../auth/tokens";
+import { db } from "../db/client";
+import { users } from "../db/schema";
 import { errorResponse } from "../http/errors";
 import type { RequestIdVariables } from "../http/requestId";
 
@@ -18,7 +21,18 @@ export const requireAuth: MiddlewareHandler<{ Variables: AuthVariables }> = asyn
   }
 
   try {
-    c.set("userId", await verifyAccessToken(token));
+    const userId = await verifyAccessToken(token);
+    const [activeUser] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(and(eq(users.id, userId), eq(users.accountStatus, "active")))
+      .limit(1);
+
+    if (!activeUser) {
+      return errorResponse(c, "invalid_access_token");
+    }
+
+    c.set("userId", activeUser.id);
   } catch {
     return errorResponse(c, "invalid_access_token");
   }
