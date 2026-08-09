@@ -400,8 +400,8 @@ test("reused refresh token returns the reuse-detected envelope", async () => {
   }
 });
 
-test("logout-revoked refresh detects reuse and invalidates active sessions", async () => {
-  const email = `api02-logout-reuse-${Date.now()}@example.com`;
+test("reused refresh token revokes only its token family", async () => {
+  const email = `api02-family-reuse-${Date.now()}@example.com`;
   const password = "correct-horse-batter";
 
   try {
@@ -410,14 +410,13 @@ test("logout-revoked refresh detects reuse and invalidates active sessions", asy
       password,
       displayName: "Logout Reuse Tester",
     });
-    const activeSession = await postJson<AuthResponse>(
+    const independentSession = await postJson<AuthResponse>(
       "/v1/auth/login",
       { email, password },
       200,
     );
-
-    await postJson<{ ok: boolean }>(
-      "/v1/auth/logout",
+    const rotatedFamilySession = await postJson<AuthTokens>(
+      "/v1/auth/refresh",
       { refreshToken: signup.tokens.refreshToken },
       200,
     );
@@ -431,26 +430,32 @@ test("logout-revoked refresh detects reuse and invalidates active sessions", asy
       message: "This session is no longer valid.",
     });
 
-    const [invalidatedSession] = await db
+    const [invalidatedFamilySession] = await db
       .select({ revokedAt: refreshTokens.revokedAt })
       .from(refreshTokens)
       .where(
         eq(
           refreshTokens.tokenHash,
-          hashRefreshToken(activeSession.tokens.refreshToken),
+          hashRefreshToken(rotatedFamilySession.refreshToken),
         ),
       )
       .limit(1);
-    assert.ok(invalidatedSession?.revokedAt);
+    assert.ok(invalidatedFamilySession?.revokedAt);
 
-    const invalidatedResponse = await postJsonResponse("/v1/auth/refresh", {
-      refreshToken: activeSession.tokens.refreshToken,
+    const invalidatedFamilyResponse = await postJsonResponse("/v1/auth/refresh", {
+      refreshToken: rotatedFamilySession.refreshToken,
     });
-    await assertErrorResponse(invalidatedResponse, {
+    await assertErrorResponse(invalidatedFamilyResponse, {
       status: 403,
       code: "refresh_token_reuse_detected",
       message: "This session is no longer valid.",
     });
+
+    await postJson<AuthTokens>(
+      "/v1/auth/refresh",
+      { refreshToken: independentSession.tokens.refreshToken },
+      200,
+    );
   } finally {
     await db.delete(users).where(eq(users.email, email));
   }

@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+
 import { and, eq, isNull } from "drizzle-orm";
 
 import { verifyPassword } from "./password";
@@ -25,12 +27,17 @@ interface AuthSessionServiceOptions {
 }
 
 // Creates and persists one internal access/refresh token pair.
-const createTokenPair = async (database: TokenDatabase, userId: string) => {
+const createTokenPair = async (
+  database: TokenDatabase,
+  userId: string,
+  familyId: string = randomUUID(),
+) => {
   const refreshToken = createRefreshToken();
   const [row] = await database
     .insert(refreshTokens)
     .values({
       userId,
+      familyId,
       tokenHash: hashRefreshToken(refreshToken),
       expiresAt: refreshTokenExpiry(),
     })
@@ -93,7 +100,7 @@ export const createAuthSessionService = ({
     } as const;
   };
 
-  // Serializes rotation and revokes every active token on detected reuse.
+  // Serializes rotation and revokes only the compromised token family.
   const refresh = async (rawRefreshToken: string) => {
     const tokenHash = hashRefreshToken(rawRefreshToken);
     const [currentToken] = await database
@@ -130,6 +137,7 @@ export const createAuthSessionService = ({
           .where(
             and(
               eq(refreshTokens.userId, currentToken.userId),
+              eq(refreshTokens.familyId, currentToken.familyId),
               isNull(refreshTokens.revokedAt),
             ),
           );
@@ -143,10 +151,15 @@ export const createAuthSessionService = ({
         return { ok: false, error: "refresh_token_expired" } as const;
       }
 
-      const tokens = await createTokenPair(tx, currentToken.userId);
+      const tokens = await createTokenPair(
+        tx,
+        currentToken.userId,
+        lockedToken.familyId,
+      );
       await tx
         .update(refreshTokens)
         .set({
+          usedAt: rotatedAt,
           revokedAt: rotatedAt,
           replacedByTokenId: tokens.refreshTokenId,
         })

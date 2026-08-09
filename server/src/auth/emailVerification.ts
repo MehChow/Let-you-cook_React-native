@@ -294,6 +294,7 @@ export const createEmailVerificationService = ({
       const refreshToken = createRefreshToken();
       await tx.insert(refreshTokens).values({
         userId: user.id,
+        familyId: randomUUID(),
         tokenHash: hashRefreshToken(refreshToken),
         expiresAt: refreshTokenExpiry(),
       });
