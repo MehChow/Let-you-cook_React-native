@@ -57,6 +57,13 @@
       "when": 1786288822015,
       "tag": "0007_flowery_morlocks",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1786289118416,
+      "tag": "0008_aromatic_alice",
+      "breakpoints": true
     }
   ]
 }

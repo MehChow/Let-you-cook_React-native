@@ -3,9 +3,9 @@ import {
   check,
   index,
   integer,
-  jsonb,
   numeric,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -142,7 +142,6 @@ export const recipes = pgTable(
     cookTimeMinutes: integer("cook_time_minutes").notNull(),
     servings: integer("servings").notNull(),
     calories: integer("calories"),
-    tags: jsonb("tags").$type<string[]>().default([]).notNull(),
     status: text("status").$type<RecipeStatus>().default("draft").notNull(),
     version: integer("version").default(1).notNull(),
     publishedAt: timestamp("published_at", { withTimezone: true }),
@@ -172,6 +171,34 @@ export const recipes = pgTable(
       table.status,
       table.updatedAt,
     ),
+  ],
+);
+
+export const tags = pgTable(
+  "tags",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    slug: text("slug").notNull(),
+    label: text("label").notNull(),
+  },
+  (table) => [uniqueIndex("tags_slug_unique").on(table.slug)],
+);
+
+export const recipeTags = pgTable(
+  "recipe_tags",
+  {
+    recipeId: uuid("recipe_id")
+      .notNull()
+      .references(() => recipes.id, { onDelete: "cascade" }),
+    tagId: uuid("tag_id")
+      .notNull()
+      .references(() => tags.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.recipeId, table.tagId],
+      name: "recipe_tags_recipe_id_tag_id_pk",
+    }),
   ],
 );
 
