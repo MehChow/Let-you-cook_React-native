@@ -242,8 +242,11 @@ the same limiter and response. Rejected requests return `429 rate_limited` with
 a positive delta-seconds `Retry-After` and the normal request-ID envelope.
 
 The limiter is intentionally single-process for the local MVP: counters reset
-on restart and are not coordinated across replicas. Distributed enforcement
-belongs to the later operations track before horizontal scaling. Operational
+on restart and are not coordinated across replicas. Its store is capped at
+10,000 live buckets, prunes expired buckets before admitting new keys, and
+fails closed with the nearest positive `Retry-After` while saturated.
+Distributed enforcement belongs to the later operations track before
+horizontal scaling. Operational
 failure logs are strict allowlisted events containing only level, safe
 classification, request ID, method, coarse route scope, and status. They never
 include request bodies, raw identifiers, credentials, challenges, tokens,

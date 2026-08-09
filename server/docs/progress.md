@@ -6,15 +6,15 @@ and schema contract remains `docs/api-and-data-model.md`.
 ## Current backend resume point
 
 - Active feature track: Authentication and account lifecycle
-- Next bounded Goal: independent `AUTH-01` through `AUTH-11` exit review
+- Next bounded Goal: complete remaining Android-native Auth exit evidence
 - Feature branch: `codex/mvp-auth-account`
-- Last integrated Goal checkpoint: `AUTH-11` implementation and exit-review
-  handoff (`8347d84` and `8fe1641` are the latest code checkpoints)
+- Last integrated Goal checkpoint: `AUTH-11` implementation and independent
+  exit-review fixes (`90c5a84`, `8abdcad`, `14bd4bd`, and `11d91d1`)
 - Goal prompt: `docs/current-goal.md`
 
-The API contract track and `AUTH-01` through `AUTH-11` are implemented and
-verified. Continue with the independent read-only-first Auth exit review; do
-not begin Recipe Data or Profile UI.
+The API contract track and `AUTH-01` through `AUTH-11` are implemented. The
+independent review and all confirmed fixes are complete; continue only with the
+remaining native Auth exit evidence. Do not begin Recipe Data or Profile UI.
 
 ## Current state
 
@@ -62,27 +62,27 @@ not begin Recipe Data or Profile UI.
   allowlisted operational logging, transactional refresh serialization, and
   deterministic concurrency/delivery/database failure coverage.
 
-Latest Auth branch verification after `AUTH-11`:
+Latest Auth branch verification after independent exit-review fixes:
 
 - server typecheck passed;
-- backend tests passed 102/102 with zero skips;
+- backend tests passed 104/104 with zero skips;
 - mobile/root checks passed;
-- native-focused mobile tests passed 21 suites/115 tests;
+- native-focused mobile tests passed 21 suites/122 tests;
 - diff check passed.
 
-Real SMTP/PostgreSQL verification passed for verification and reset delivery,
-session issuance, reset revocation, password replacement, and subsequent login.
-AUTH-11 Mailpit verification also proved three accepted reset requests produce
-one cooldown-controlled delivery and the fourth returns `429` with a positive
-`Retry-After`; its QA row and message were removed.
-Android discovery returned no connected target. The exact pending native checks
-remain in `docs/progress.md`; the exact QA account was removed before handoff.
+Fresh real SMTP/PostgreSQL verification passed verification delivery,
+unverified denial, reset completion, `202/202/202/429` limiting with one reset
+message, password replacement, refresh-family replay isolation, deletion,
+immediate old-token denial, and email reuse. Exact QA database and Mailpit
+records were removed and verified at zero. Migration `0004` applied
+successfully. Android discovery again returned no connected target; exact
+pending native checks remain in `docs/progress.md`.
 
 ## Next backend responsibilities
 
-`AUTH-10` and `AUTH-11` are implemented. A fresh task owns independent Auth exit
-review before Recipe Data starts; do not mark the track complete until that
-read-only-first review and its complete exit gate pass.
+The independent Auth review and confirmed fixes are complete. A fresh task owns
+only the remaining Android-native exit evidence; do not mark the track complete
+or start Recipe Data until those reachable checks pass.
 
 ## Do not redo or expand
 

@@ -5,10 +5,10 @@
 
 - Last audited: 2026-08-09
 - Current integration branch: `dev`
-- Last integrated Goal checkpoint: `AUTH-11` implementation and exit-review
-  handoff (`8347d84` and `8fe1641` are the two latest code checkpoints)
+- Last integrated Goal checkpoint: `AUTH-11` implementation and independent
+  exit-review fixes (`90c5a84`, `8abdcad`, `14bd4bd`, and `11d91d1`)
 - Active feature track: Authentication and account lifecycle
-- Next bounded Goal: independent `AUTH-01` through `AUTH-11` exit review
+- Next bounded Goal: complete remaining Android-native Auth exit evidence
 - Feature branch: `codex/mvp-auth-account`
 - Standalone Goal prompt: `docs/current-goal.md`
 - Confirmed account-deletion policy: immediate irreversible opaque tombstone;
@@ -23,8 +23,8 @@
 3. Use `docs/current-goal.md` as the complete Goal prompt.
 4. Reuse `codex/mvp-auth-account` and its existing Auth worktree after verifying
    it contains current `dev` and has no unpreserved changes.
-5. Perform the independent review's first pass strictly read-only. Confirm
-   findings before fixes and do not begin Recipe Data or Profile UI.
+5. Discover an Android target and run the exact pending native Auth checks. Do
+   not repeat the completed review or begin Recipe Data/Profile UI.
 6. Before stopping, the Goal must fast-forward its verified checkpoint into
    `dev` so the next Goal file is visible from this main checkout.
 
@@ -42,31 +42,37 @@ Do not resume the historical whole-MVP Goal and do not use the obsolete
   denies sessions, retains required references, and permits email reuse.
 - `AUTH-11`: scoped keyed-HMAC limits, stable `429`/`Retry-After`, allowlisted
   logs, and deterministic PostgreSQL Auth races are covered.
-- `AUTH-01` through `AUTH-11` are implemented, verified, and integrated into
-  `dev`; the independent Auth-track exit review remains outstanding.
-- Latest Auth branch verification:
+- `AUTH-01` through `AUTH-11` are implemented. The independent Auth review and
+  all five confirmed fixes are complete; only native exit evidence remains.
+- Latest Auth branch verification after the exit-review fixes:
   - `npm.cmd run check`: passed;
-  - `npm.cmd test -- --runInBand`: 21 suites/115 tests passed;
+  - `npm.cmd test -- --runInBand`: 21 suites/122 tests passed;
   - `npm.cmd run server:check`: passed;
-  - `npm.cmd run server:test`: 102/102 passed with zero skips;
+  - `npm.cmd run server:test`: 104/104 passed with zero skips;
   - `git diff --check`: passed.
 
 ## Current implementation truth
 
 - Recipe/discovery/profile content remains mostly mocked; recipe, media,
   favourite, report, and block server routes remain stubs or `501`.
-- Mobile Auth uses typed `/v1` operations, SecureStore, hydration refresh,
-  single-flight invalidation, best-effort logout, and safe error mapping.
+- Mobile Auth validates successful `/v1` payloads, persists one authoritative
+  SecureStore session through rotation/relaunch, performs hydration refresh and
+  single-flight invalidation, and retains best-effort logout/safe error mapping.
 - Account deletion is transactional; protected middleware denies deleted users,
   and the mobile boundary clears persisted state only after server success.
-- Refresh locks account/token rows; limits are injectable but single-process;
-  operational logs expose only allowlisted classification and request metadata.
+- Refresh locks account/token rows and scopes reuse to indexed token families;
+  Auth limits are bounded but single-process; password reset/deletion share
+  account-first lock ordering; logs remain strictly allowlisted.
 
 ## Blockers and local-state snapshot
 
-- Real PostgreSQL/SMTP/Mailpit Auth verification passed; QA records were removed.
-- `agent-device` Android discovery returned no connected emulator/device in
-  this environment. Pending native checks: signup confirmation lands on Home;
+- Fresh real PostgreSQL/SMTP/Mailpit exit verification passed signup and
+  verification, unverified denial, reset completion, `202/202/202/429` rate
+  limiting with one reset delivery, password replacement, family-scoped replay,
+  deletion, immediate old-token denial, and email reuse. Exact QA rows/messages
+  were removed and verified at zero.
+- `agent-device` Android discovery again returned no connected emulator/device.
+  Pending native checks: signup confirmation lands on Home;
   resend cooldown and challenge replacement survive relaunch; unverified login
   remains outside private routes; reset completion exits an old live session;
   the old password is denied and the new password logs in; and, once
@@ -74,10 +80,9 @@ Do not resume the historical whole-MVP Goal and do not use the obsolete
   SecureStore/auth state, exits private routes, remains signed out after
   relaunch, and both old refresh and still-live access tokens are denied.
 - `dev` is local-only. No push or pull request was created.
-- AUTH-11 real SMTP/Mailpit verification returned `202`, `202`, `202`, then
-  `429` with a positive delta-seconds `Retry-After`; exactly one reset message
-  was delivered. The temporary QA database row and uniquely prefixed Mailpit
-  message were removed afterward.
+- Migration `0004_common_krista_starr.sql` applied successfully to the guarded
+  local database; it adds refresh-token families/usage time and the required
+  unique/active-family indexes while revoking legacy ungrouped active sessions.
 - A historical Foundation worktree remains; a Windows-locked typed-client
   directory is not registered. Do not clean either without rechecking scope.
 - Existing dependency audit output reported 30 vulnerabilities. No automatic
@@ -99,7 +104,7 @@ one relevant.
 | --- | --- | --- | --- |
 | 0 | Foundation | Complete | Deferred debt only |
 | 1 | API contracts | Complete | Do not redo |
-| 2 | Auth/account | Implementation complete; exit review pending | Independent exit review |
+| 2 | Auth/account | Review/fixes complete; native exit pending | Android-native exit evidence |
 | 3 | Recipe data | Pending | After Auth exit |
 | 4 | R2 media | Pending | After Recipe data |
 | 5 | Profile | Pending | After Auth and Media |

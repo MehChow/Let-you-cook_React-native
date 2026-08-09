@@ -18,7 +18,9 @@ Use stateless JWT access tokens.
 Use opaque random refresh tokens with server-side rotation:
 
 - store only a hash of the refresh token
-- store `userId`, `expiresAt`, `revokedAt`, `replacedByTokenId`, and `createdAt`
+- store `userId`, `familyId`, `expiresAt`, `usedAt`, `revokedAt`,
+  `replacedByTokenId`, and `createdAt`
+- uniquely index token hashes and index active tokens by account/family
 - rotate the refresh token on every successful refresh
 - revoke the whole token family if an old refresh token is reused
 
@@ -54,7 +56,8 @@ interface AuthTokens {
 
 ## Client Flow
 
-Store both tokens in `expo-secure-store`.
+Store one validated session envelope in `expo-secure-store`; its token pair is
+the authoritative credential source across rotation and relaunch.
 
 For protected requests:
 
@@ -86,7 +89,9 @@ requests use `429 rate_limited`, the shared request-ID envelope, and a positive
 delta-seconds `Retry-After`. Known and unknown account flows are
 indistinguishable at this boundary.
 
-The current limiter is process-memory only. It resets on restart and does not
+The current limiter is process-memory only and capped at 10,000 live buckets.
+Expired buckets are pruned before new admission; a saturated store fails closed
+with the nearest positive `Retry-After`. It resets on restart and does not
 coordinate replicas; the operations track must provide coordinated enforcement
 before horizontal scaling. Logs contain only an allowlisted operational event:
 level, safe classification, request ID, method, coarse route scope, and status.
@@ -97,6 +102,8 @@ Refresh rotation locks the account row and refresh row in one transaction.
 Concurrent use permits one rotation, then treats the second request as reuse
 and revokes the active family. Account deletion takes the same account lock, so
 deletion and refresh cannot leave a surviving session.
+Password-reset completion also takes the account lock before its challenge
+lock, matching account deletion and preventing an inverted-lock deadlock.
 
 ## Retry Rules
 
@@ -115,7 +122,9 @@ Install SecureStore before wiring auth:
 npx expo install expo-secure-store
 ```
 
-Use small values only: access token, refresh token, and optionally the current user id. Keep profile data in normal app state or TanStack Query cache.
+Use one small validated session value containing the public Auth user, token
+pair, and access-token expiry. Keep profile data in normal app state or
+TanStack Query cache.
 
 ## Server Notes
 
