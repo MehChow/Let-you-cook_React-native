@@ -5,9 +5,9 @@
 
 - Last audited: 2026-08-09
 - Current integration branch: `dev`
-- Last integrated Goal checkpoint: `dbf887d` (`AUTH-03`)
+- Last integrated Goal checkpoint: `5bd56d9` (`AUTH-06` code checkpoint)
 - Active feature track: Authentication and account lifecycle
-- Next bounded Goal: `AUTH-04` through `AUTH-06`
+- Next bounded Goal: `AUTH-07` through `AUTH-09`
 - Feature branch: `codex/mvp-auth-account`
 - Standalone Goal prompt: `docs/current-goal.md`
 
@@ -18,7 +18,8 @@
 3. Use `docs/current-goal.md` as the complete Goal prompt.
 4. Reuse `codex/mvp-auth-account` and its existing Auth worktree after verifying
    it contains current `dev` and has no unpreserved changes.
-5. Stop that Goal after `AUTH-06`; do not begin email delivery or verification.
+5. Stop that Goal after `AUTH-09`; do not begin account deletion or rate-limit
+   hardening.
 6. Before stopping, the Goal must fast-forward its verified checkpoint into
    `dev` so the next Goal file is visible from this main checkout.
 
@@ -46,10 +47,11 @@ Do not resume the historical whole-MVP Goal and do not use the obsolete
 - `AUTH-06`: Logout presents the stored refresh token for server revocation,
   then clears SecureStore and private session state even when revocation is
   unreachable.
-- `AUTH-01` through `AUTH-03` are integrated into `dev` at `dbf887d`.
+- `AUTH-01` through `AUTH-06` are integrated into `dev`; the latest Auth code
+  checkpoint is `5bd56d9`.
 - Latest integrated Auth verification:
   - `npm.cmd run check`: passed;
-  - `npm.cmd test -- --runInBand`: 19 suites/95 tests passed;
+  - `npm.cmd test -- --runInBand`: 20 suites/105 tests passed;
   - `npm.cmd run server:check`: passed;
   - `npm.cmd run server:test`: 74/74 passed with zero skips;
   - `git diff --check`: passed.
@@ -66,19 +68,21 @@ Do not resume the historical whole-MVP Goal and do not use the obsolete
 - Auth/profile callers are canonicalized to `/v1`; unrelated legacy aliases
   remain outside the completed Goal.
 - The mobile project has a typed Hono client, SecureStore-backed auth transport,
-  single-flight refresh/replay support, bounded query retry defaults, and safe
-  API-error presentation mapping.
+  refresh-on-hydration, single-flight refresh/replay, one invalid-session
+  navigation transition, best-effort server logout, bounded query retry
+  defaults, and safe API-error presentation mapping.
 - Recipe, media, favourite, report, and block routes remain mostly empty or
   `501`; wizard save and AI nutrition remain simulations.
 
 ## Blockers and local-state snapshot
 
-- Android interaction remains pending because no attached device/emulator was
-  available. Verify real login opens Home and survives an immediate app
-  relaunch while the access token remains valid; do not use Expo web.
+- Android verification passed on `Codex API 36`: real login reached Home, a
+  valid SecureStore session survived relaunch, a temporary three-second local
+  QA token expired and rotated once during hydration, and logout returned to
+  login. The token lifetime was restored and the exact QA account was removed.
 - `dev` is local-only. No push or pull request was created.
-- PostgreSQL and Mailpit were healthy for the AUTH-03 exit suite; Android,
-  Metro, and the backend development listener were not running.
+- PostgreSQL was healthy for the AUTH-06 exit suite. The Android QA session,
+  Metro, and backend development listener were stopped before handoff.
 - A registered historical Foundation worktree remains at
   `.worktrees/mvp-foundation`.
 - An empty Windows-locked `.worktrees/mvp-typed-client` directory was not a
@@ -103,7 +107,7 @@ one relevant.
 | --- | --- | --- | --- |
 | 0 | Foundation | Complete | Deferred debt only |
 | 1 | API contracts | Complete | Do not redo |
-| 2 | Auth/account | In progress | `AUTH-04`–`AUTH-06` |
+| 2 | Auth/account | In progress | `AUTH-07`–`AUTH-09` |
 | 3 | Recipe data | Pending | After Auth exit |
 | 4 | R2 media | Pending | After Recipe data |
 | 5 | Profile | Pending | After Auth and Media |
@@ -123,24 +127,13 @@ Use `docs/mvp-roadmap.md` for every task ID, dependency, branch, and exit gate.
 
 - Latest pre-Auth handoff: `docs/mvp-handoff-2026-08-09-0400.md`
 - API ledgers: `.superpowers/sdd/2026-08-09-*/progress.md`
-- Approved MVP design: `docs/superpowers/specs/2026-07-26-mvp-delivery-design.md`
-- Current workflow design:
-  `docs/superpowers/specs/2026-08-09-codex-workflow-optimization-design.md`
-- Git history retains prior detailed execution streams.
+- Designs remain under `docs/superpowers/specs/`; Git preserves detail.
 
 ## Progress maintenance rules
 
-After meaningful implementation:
-
-1. Keep this top snapshot compact; target fewer than 140 lines for the whole
-   file.
-2. Record current branch, completed range, next Goal, fresh verification, and
-   blockers—not step-by-step command narration.
-3. Check `docs/mvp-roadmap.md` only when a task meets its completion definition.
-4. Update `server/docs/progress.md` only for backend-specific current state.
-5. Put detailed RED/GREEN evidence in the commit, bounded plan, or dated
-   handoff when it materially helps later diagnosis.
-6. Never use chat history as the only record of an architectural decision or
-   resume point.
-7. Before a bounded Goal stops, fast-forward its verified branch into `dev` and
-   confirm the next Goal file is visible from the main checkout.
+- Keep this file below 140 lines; record verified state and blockers, not
+  command narration. Put detailed RED/GREEN evidence in Git or dated handoffs.
+- Check roadmap items only when complete and update the backend supplement only
+  for backend state.
+- Before stopping, integrate the verified branch into `dev` and confirm the
+  next Goal is readable from the main checkout.

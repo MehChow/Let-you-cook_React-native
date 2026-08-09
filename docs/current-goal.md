@@ -1,21 +1,21 @@
-# Current Goal: Auth Session Lifecycle
+# Current Goal: Auth Verification and Recovery
 
 Use this document as the complete prompt in a new Codex Goal-mode task with
 Sol High.
 
 ## Outcome
 
-Complete `AUTH-04` through `AUTH-06` on the existing Auth feature branch:
+Complete `AUTH-07` through `AUTH-09` on the existing Auth feature branch:
 
-1. During app hydration, refresh once when the stored access token is expired
-   but a refresh token is available.
-2. Coordinate concurrent expiry/refresh failures and navigate an invalid
-   session back to login exactly once.
-3. Revoke the refresh token during logout when reachable, then clear the local
-   session even when the network call fails.
+1. Add an application-owned `EmailSender`, local SMTP delivery to Mailpit, and
+   an in-memory test fake.
+2. Enforce mandatory email verification with secure OTP request/resend and
+   confirmation behavior; only confirmation may issue the first full session.
+3. Implement the password-reset request, OTP verification, short-lived reset
+   grant, password completion, and refresh-session revocation lifecycle.
 
 Stop after these three tasks are separately committed, relevant verification
-passes, and the next exact Goal is recorded. Do not start `AUTH-07`.
+passes, and the next exact Goal is recorded. Do not start `AUTH-10`.
 
 ## Verified Starting State
 
@@ -23,17 +23,22 @@ passes, and the next exact Goal is recorded. Do not start `AUTH-07`.
 - Integration branch: `dev`
 - Feature branch: `codex/mvp-auth-account`
 - Worktree: `C:\Let-you-cook_React-native\.worktrees\mvp-auth-account`
-- Integrated checkpoint: `dbf887d` (`AUTH-03`)
+- Latest Auth code checkpoint: `5bd56d9` (`AUTH-06`); verify current refs and
+  the later Goal-handoff commit instead of assuming that code hash is HEAD.
 - Completed roadmap range: `BASE-01` through `BASE-06`, `API-01` through
-  `API-07`, and `AUTH-01` through `AUTH-03`.
-- Auth routes/mobile wrappers use `/v1`; real signup and login persist the
-  returned session through SecureStore.
-- Latest automated Auth verification: mobile 19 suites/95 tests; backend 74/74
-  tests with zero skips; root and server checks passed.
-- Android login interaction is pending because no device/emulator was attached.
+  `API-07`, and `AUTH-01` through `AUTH-06`.
+- Auth routes/mobile wrappers use `/v1`; real signup and login persist sessions
+  through SecureStore, hydration refreshes expired access once, concurrent
+  invalid refreshes leave private navigation once, and logout revokes then
+  clears locally even when revocation is unreachable.
+- Latest automated Auth verification: mobile 20 suites/105 tests; backend
+  74/74 tests with zero skips; root and server checks passed.
+- Android verification passed for real login, valid-session relaunch, expired
+  access hydration with one database-confirmed refresh rotation, and logout
+  navigation back to login.
 
-Verify the current clean Auth branch and its three task-ID commits rather than
-assuming historical hashes or process state.
+Verify the current clean Auth branch and its integrated handoff state rather
+than assuming historical hashes or process state.
 
 ## Read Before Acting
 
@@ -41,19 +46,16 @@ Read only the context required for this bounded Goal:
 
 1. `AGENTS.md`
 2. The top `Current progress` section of `docs/progress.md`
-3. `docs/mvp-roadmap.md`, especially `AUTH-04` through `AUTH-06`
+3. `docs/mvp-roadmap.md`, especially `AUTH-07` through `AUTH-09`
 4. Authentication/session sections of `docs/brief.md` and
    `docs/api-and-data-model.md`
-5. Relevant files under `docs/backend-integration/`
+5. `docs/backend-integration/opt-setup.md`
 6. `server/docs/progress.md` and `server/docs/backend-token-auth.md`
-7. Current auth/session implementation and tests, especially:
-   - `src/features/auth/AuthProvider.tsx`
-   - `src/features/auth/api.ts`
-   - `src/features/auth/session.ts`
-   - `src/features/auth/tokenStorage.ts`
-   - `src/lib/apiClientCore.ts`
-   - auth routing/navigation tests
-   - server auth/logout routes and PostgreSQL smoke tests
+7. Current auth contracts, schema, migrations, routes, token services, config,
+   and PostgreSQL smoke tests
+8. Current mobile signup/login/OTP/password-reset screens, pending-reset state,
+   API wrappers, provider, session, and SecureStore boundaries
+9. `compose.dev.yaml` and existing Mailpit/local-service configuration
 
 Do not load AI nutrition, media, recipe, Home, Search, or later-track documents
 unless a concrete dependency requires them.
@@ -71,21 +73,39 @@ changes before acting.
 - Work inline in this task. Do not spawn subagents.
 - Treat approved product/API decisions as settled; do not repeat brainstorming.
 - Use TDD for every behavior change and commit each roadmap item separately:
-  - `AUTH-04: Refresh session during hydration`
-  - `AUTH-05: Handle concurrent session expiry`
-  - `AUTH-06: Revoke session on logout`
-- Preserve the existing single-flight refresh transport, cancellation behavior,
-  safe error mapping, typed Hono boundary, and SecureStore-only token storage.
-- Logout must clear local state even when revocation is unreachable.
-- Do not implement email delivery/verification, password reset, deletion, rate
-  limits, or later Auth work.
+  - `AUTH-07: Add auth email delivery`
+  - `AUTH-08: Enforce email verification`
+  - `AUTH-09: Implement password reset lifecycle`
+- Keep email delivery behind an application-owned interface. Local development
+  sends SMTP to Mailpit; automated tests inject an in-memory fake. Do not choose
+  or integrate a production provider in this Goal.
+- Use cryptographically secure OTP generation, keyed hashes at rest, expiry,
+  attempt limits, resend cooldowns, and replacement invalidation. Never log or
+  return OTPs outside the explicit in-memory test fake.
+- Keep verification and reset request responses non-enumerating. Persist only
+  the opaque challenge identifiers and cooldown state needed to resume mobile
+  flows.
+- Change signup so it creates an unverified account and sends verification but
+  does not issue a session. Email confirmation issues the first access/refresh
+  pair and enters Home; unverified login must not enter the private app.
+- Password-reset verification must issue a short-lived, purpose-bound grant;
+  completion changes the password and revokes existing refresh sessions.
+- Keep the existing single-flight refresh, invalid-session navigation,
+  cancellation behavior, safe error mapping, typed Hono boundary, and
+  SecureStore-only token storage intact.
+- Follow the migration rules for every schema change; never edit an applied
+  migration.
+- Do not implement account deletion, rate limits, production email-provider
+  setup, recipe/media work, or later Auth tasks.
 - Preserve unrelated user changes; do not push or open a pull request.
 - Do not run Expo web.
 
 ## Verification
 
 During each task, run focused RED/GREEN tests and the smallest relevant type
-check. Before this Goal stops, run at least:
+check. For schema changes, generate and apply a forward Drizzle migration
+against the guarded local development database. Before this Goal stops, run at
+least:
 
 ```powershell
 npm.cmd run check
@@ -95,21 +115,23 @@ npm.cmd run server:test
 git diff --check
 ```
 
-Use an Android emulator/device for login restore, expiry, and logout navigation.
-If none is available, record the exact pending device checks in
+Use Mailpit plus an Android emulator/device to verify signup verification,
+resend/resume behavior, unverified-login denial, password-reset completion,
+old-session revocation, and successful login with the new password. If no
+device is available, record the exact pending device checks in
 `docs/progress.md`; do not substitute web.
 
 ## Done When
 
-- `AUTH-04`, `AUTH-05`, and `AUTH-06` satisfy their roadmap definitions and are
+- `AUTH-07`, `AUTH-08`, and `AUTH-09` satisfy their roadmap definitions and are
   separately committed on `codex/mvp-auth-account`.
 - Relevant automated checks pass without skipped required coverage.
-- Android session lifecycle checks pass or their exact pending checks are
+- Mailpit and Android verification pass or their exact pending checks are
   recorded.
 - `docs/progress.md`, `server/docs/progress.md`, and `docs/mvp-roadmap.md`
   describe the verified state.
 - `docs/current-goal.md` is replaced with the next bounded assignment for
-  `AUTH-07` through `AUTH-09` on the same branch using Sol High.
+  `AUTH-10` through `AUTH-11` on the same branch using Sol High.
 - The Auth worktree is clean.
 - The verified Auth branch is fast-forwarded into the main `dev` checkout.
 - `git rev-parse dev` and `git rev-parse codex/mvp-auth-account` return the same

@@ -6,14 +6,14 @@ and schema contract remains `docs/api-and-data-model.md`.
 ## Current backend resume point
 
 - Active feature track: Authentication and account lifecycle
-- Next bounded Goal: `AUTH-04` through `AUTH-06`
+- Next bounded Goal: `AUTH-07` through `AUTH-09`
 - Feature branch: `codex/mvp-auth-account`
-- Last integrated Goal checkpoint: `dbf887d` (`AUTH-03`)
+- Last integrated Goal checkpoint: `5bd56d9` (`AUTH-06` code checkpoint)
 - Goal prompt: `docs/current-goal.md`
 
-The API contract track and `AUTH-01` through `AUTH-03` are complete. Continue
-with hydration refresh, concurrent expiry handling, and logout integration. Do
-not begin email delivery, verification, password reset, or deletion next.
+The API contract track and `AUTH-01` through `AUTH-06` are complete. Continue
+with email delivery, mandatory verification, and password reset. Do not begin
+account deletion or rate-limit hardening next.
 
 ## Current state
 
@@ -26,7 +26,8 @@ not begin email delivery, verification, password reset, or deletion next.
 - Server signup, login, refresh rotation/reuse revocation, logout,
   access-token authentication, and protected current-profile read/update exist.
 - The mobile app uses real signup and login through `/v1`; successful sessions
-  are stored through the existing SecureStore-backed boundary.
+  are stored through the SecureStore-backed boundary, expired access refreshes
+  once during hydration, and logout revokes before unconditional local clear.
 - Recipe, image/media, favourite, report, and block routes remain mostly stubs
   or `501` responses.
 
@@ -55,18 +56,21 @@ Latest Auth branch verification:
 - server typecheck passed;
 - backend tests passed 74/74 with zero skips;
 - mobile/root checks passed;
-- native-focused mobile tests passed 19 suites/95 tests;
+- native-focused mobile tests passed 20 suites/105 tests;
 - diff check passed.
+
+Android verification passed for real login, valid and expired-session relaunch,
+one database-confirmed refresh rotation, and logout navigation. Temporary QA
+token settings and the exact QA account were removed before handoff.
 
 See `docs/mvp-handoff-2026-08-09-0400.md` and the API task ledgers for exact
 historical evidence.
 
 ## Next backend responsibilities
 
-Within the next Goal, `AUTH-04` through `AUTH-06` own refresh-on-hydration,
-concurrent expiry navigation, and server logout integration. Later Auth Goals
-own email delivery/verification, reset, deletion, rate limits, redacted logging,
-and concurrency/failure hardening.
+Within the next Goal, `AUTH-07` through `AUTH-09` own application email
+delivery, mandatory verification, and password reset. Later Auth Goals own
+deletion, rate limits, redacted logging, and concurrency/failure hardening.
 
 ## Do not redo or expand
 
