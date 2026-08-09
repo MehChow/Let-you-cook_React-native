@@ -604,7 +604,8 @@ still requires explicit owner approval.
 6. Add favourites, reviews, blocks, reports, and moderation.
 7. Add release hardening and only then run the AI nutrition experiment.
 
-The detailed checklist and completion gates are in `docs/progress.md`.
+The detailed checklist and completion gates are in `docs/mvp-roadmap.md`; the
+current resume point is in `docs/progress.md`.
 
 ## Primary References
 

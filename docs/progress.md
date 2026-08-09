@@ -1,726 +1,127 @@
 # Current progress
 
-> Keep this section at the top of the file. Update it after every meaningful
-> feature handoff so a new agent can establish the real state without trusting
-> old task lists or screenshots.
+> This compact section is the canonical resume point. Keep it current and move
+> historical execution detail to Git, dated handoffs, or task ledgers.
 
-Last audited: 2026-08-09
-Current branch at audit: `dev`
-Overall state: polished mocked Expo prototype plus an early local backend.
+- Last audited: 2026-08-09
+- Current integration branch: `dev`
+- Last delivery handoff commit: `9f99a6f`
+- Active feature track: Authentication and account lifecycle
+- Next bounded Goal: `AUTH-01` through `AUTH-03`
+- Feature branch: `codex/mvp-auth-account`
+- Standalone Goal prompt: `docs/current-goal.md`
 
-- Planning milestone: `PLAN-03` — Goal-mode MVP handoff ready.
-- Completed delivery track: `BASE-01` through `BASE-06` passed the Foundation
-  exit gate and are checked in `docs/mvp-roadmap.md`.
-- `04:00 HKT` stop checkpoint: implementation was paused at the owner's required
-  cutoff. At that checkpoint, the standalone continuation record was
-  `docs/mvp-handoff-2026-07-27-0400.md`. `dev` and
-  `codex/mvp-foundation` are at `9695294`; `codex/mvp-api-contract` was at
-  planning commit `803a619` before the handoff commit. No API implementation,
-  merge, push, or pull request occurred. The Goal remains active because pause
-  is user-controlled.
-- `API-01` Task 1 implementation and task/broad reviews passed with no Critical
-  or Important findings on `codex/mvp-api-contract`. The composed `v1Routes`
-  mounts all seven current
-  application route families at `/v1`; `/health` remains unversioned and
-  `/v1/health` remains `404`. Existing unversioned routes are temporary
-  compatibility aliases for current callers until `AUTH-01`.
-- TDD evidence: the Windows root-resolved equivalent focused command
-  `npm.cmd --prefix server exec -- tsx --env-file=server/.env --test
-  server/src/app.test.ts` was RED with 2/3 tests passing because
-  `POST /v1/auth/login` returned `404` instead of `400`; after the minimal
-  router mount it was GREEN at 3/3. The literal brief command resolves `.env`
-  and `src/app.test.ts` from the repository root under this npm invocation, so
-  it first failed on missing `.env` and then on the missing root-relative test
-  path rather than exercising routing.
-- Fresh API-01 Task 1 verification: `npm.cmd run server:check` passed;
-  `npm.cmd run server:test` passed 19/19 with 0 failures and 0 skips;
-  `npm.cmd run check` passed; and `npm.cmd test -- --runInBand` passed 16/16
-  suites and 67/67 tests. Only documented `letyoucook-dev` PostgreSQL and
-  Mailpit services were started; no Expo web, Metro, or backend listener ran.
-- `API-01` passed its closure re-review and fresh merged-result verification,
-  then fast-forwarded into `dev` at `7d21b95`; its feature branch and worktree
-  were removed after the merged tree passed focused 3/3, backend 19/19 with
-  zero skips, root check, and 16/16 Jest suites with 67/67 tests.
-- Completed delivery item: `API-02`, Define the shared error envelope and
-  request IDs, is checked in `docs/mvp-roadmap.md`. Its three tasks assign a
-  server-owned request ID, provide the typed shared error helpers/root
-  boundaries, and convert every current validator, auth/profile failure, and
-  recipe/image/report/block placeholder without changing success bodies or
-  statuses. The approved design is
-  `docs/superpowers/specs/2026-07-30-api-error-contract-design.md`; the completed
-  plan is `docs/superpowers/plans/2026-07-30-api-error-contract.md`.
-- `API-02` Task 3 TDD evidence: the initial focused command passed 6/14 and
-  failed 8/14 with zero skips against the raw Zod and `{ message }` responses.
-  It also exposed that Drizzle wraps PostgreSQL code `23505`, so the intended
-  duplicate-email `409` branch was unreachable until the wrapped cause was
-  recognized. A follow-up mutation RED passed 15/20 and failed 5/20 with zero
-  skips, proving the invalid-access-token branch and refresh, logout, and
-  profile validator hooks were independently protected. The final focused
-  suite passed 34/34 with zero skips.
-- Fresh `API-02` Task 3 gates: `npm.cmd run server:check` passed;
-  `npm.cmd run server:test` passed 48/48 with zero failures/skips;
-  `npm.cmd run check` passed; `npm.cmd test -- --runInBand` passed 16/16 suites
-  and 67/67 tests; and `git diff --check` passed. No backend listener, Metro,
-  Expo web, schema, migration, DTO, mobile, or logging work occurred.
-- Final review found one Important contract mismatch for logout-revoked refresh
-  tokens and two Minors for broad signup `23505` classification and missing
-  durable request-ID guarantees. The single authorized fix wave preserves the
-  existing `403` plus revoke-all behavior for every already-revoked token,
-  narrows duplicate email to the user insert's exact `users_email_unique`
-  constraint, and updates the durable API contract.
-- Closure-wave TDD evidence: the new real-Postgres logout/replay
-  characterization passed 8/8 immediately, proving runtime semantics already
-  matched the required behavior. The wished-for constraint classifier was RED
-  because its export did not exist; after the minimal strict implementation,
-  auth smoke passed 9/9 with zero skips against real `users_email_unique` and
-  `profiles_pkey` violations.
-- Fresh closure-wave gates: the focused contract suite passed 36/36; server
-  type-check passed; the backend suite passed 50/50 with zero skips; root
-  lint/type-check passed; all 16 native-focused Jest suites and 67 tests passed;
-  and `git diff --check` passed.
-- `API-02` passed its closure re-review and fresh merged-result verification,
-  then fast-forwarded into `dev` at `8375a8a`. Its feature branch and worktree
-  were removed after the merged tree passed focused 36/36, backend 50/50 with
-  zero skips, root check, and 16/16 native-focused Jest suites with 67/67
-  tests.
-- Completed delivery item: `API-03`, Define cursor pagination and deterministic
-  sorting, is checked on `codex/mvp-pagination` from exact base `8375a8a`.
-  Its approved design is
-  `docs/superpowers/specs/2026-07-30-cursor-pagination-design.md`; its completed
-  plan is `docs/superpowers/plans/2026-07-30-cursor-pagination.md`.
-- `API-03` Task 1 added strict page-size parsing, a versioned base64url cursor
-  codec bound to normalized query context, safe exact-version/context
-  decoding, and a generic immutable `limit + 1` page builder. Focused RED
-  failed because the module did not exist. Initial GREEN passed 10/10; server
-  type-check passed; and the backend suite passed 60/60 with zero skips.
-- Task review found no Critical issues and four Important cursor-boundary
-  defects plus one Minor literal-limit test gap. The fix wave added
-  locale-independent context ordering, canonical base64url and fatal UTF-8
-  decoding, runtime expected-context validation, correct `undefined` generic
-  item handling, and fixed 2048/2049 coverage. Adversarial RED passed 8/11 and
-  failed the intended three tests; GREEN passed 11/11. Re-review found no
-  remaining Critical, Important, or Minor issues.
-- Documentation review found and closed three Important contract precision
-  gaps and two Minors. The durable contract now specifies the API-02 validation
-  envelope, explicit null normalization, and strict exclusive lexicographic
-  seek predicates. Documentation re-review is clean.
-- Fresh API-03 branch gates after the fix wave: focused 11/11; server
-  type-check; backend 61/61 with zero skips; root lint/type-check; 16/16
-  native-focused Jest suites with 67/67 tests; and `git diff --check`.
-- Exact closure head `eed6807` passed focused 11/11, server type-check, backend
-  61/61 with zero skips, root lint/type-check, 16/16 native-focused Jest suites
-  with 67/67 tests, and `git diff --check`. The branch is authorized for a
-  local fast-forward.
-- `API-03` fast-forwarded into `dev` at `5f6450e`. The merged result repeated
-  focused 11/11, server type-check, backend 61/61 with zero skips, root
-  lint/type-check, 16/16 native-focused Jest suites with 67/67 tests, and
-  `git diff --check`. Its feature branch/worktree were removed.
-- Completed delivery item: `API-04`, Create stable Zod request/response DTO
-  contracts, is checked on `codex/mvp-dto-contracts` from exact verified base
-  `5f6450e`. Its approved bounded design and executable plan cover only current
-  system/auth/profile routes plus shared error/page primitives; speculative
-  future feature DTOs and behavior changes are explicitly deferred.
-- Task 1 added strict Zod sources for health, API-02 errors, and API-03 pages.
-  Review found and closed two Important drift gaps and two Minors: the error
-  registry is constrained/runtime-compared to its code schema, and the generic
-  page type is inferred from the schema factory. Re-review is clean.
-- Task 2 moved current auth requests/successes to strict inferred contracts.
-  It removed the accidentally exposed internal `refreshTokenId`. Review found
-  and closed one Important bare login select with an explicit field projection;
-  one route-parse mutation-strength Minor was non-blocking.
-- Task 3 moved current profile requests and GET/PATCH responses to strict
-  inferred contracts. Review found missing-profile PATCH returned 500; focused
-  RED reproduced it and GREEN now returns the standard 404. Real route coverage
-  proves exact nullable editable fields. Re-review is clean.
-- Whole-branch review of `dev..34e9b1f` found no Critical, Important, or Minor
-  issues and no mobile, schema, migration, or speculative feature scope.
-- Fresh API-04 branch gates: server type-check; backend 75/75 with zero skips;
-  root lint/type-check; 16/16 native-focused Jest suites with 67/67 tests; and
-  `git diff --check`.
-- `API-04` fast-forwarded into `dev` at `eca1533`. The merged result repeated
-  server type-check, backend 75/75 with zero skips, root lint/type-check, 16/16
-  native-focused Jest suites with 67/67 tests, and `git diff --check`. Its
-  feature branch/worktree were removed.
-- `API-05` started on `codex/mvp-typed-client` from clean `dev` at `7b42b67`.
-  The mobile project now owns an exact-version Hono runtime and a
-  type-only `@letyoucook/server` alias; `createTypedApiClient` constructs the
-  real `hc<AppType>` transport without changing current auth wrappers, refresh,
-  retries, route aliases, or rendered/native behavior.
-- API-05 RED failed because the wished-for typed client module did not exist.
-  Focused GREEN passed 1/1. Strict TypeScript then exposed two real integration
-  defects: separate Hono 4.11.1/4.12.27 package identities were incompatible,
-  and the generic validator hook leaked its environment into response types so
-  mounted auth/profile routes disappeared from `AppType`. Both packages are now
-  pinned to 4.12.27, and the hook declares the stable validation-error/400
-  response while preserving runtime behavior.
-- API-05 exact-range review of `7b42b67..cc047a2` found no Critical, Important,
-  or Minor issues. Fresh committed-head gates passed focused 1/1, server
-  type-check, backend 75/75 with zero skips, root lint/type-check, 17/17
-  native-focused Jest suites with 68/68 tests, and `git diff --check`. API-05 is
-  checked and authorized for a local fast-forward.
-- `API-05` fast-forwarded into `dev` at `d86a9d9`. Fresh merged-result
-  verification repeated focused 1/1, server type-check, backend 75/75 with zero
-  skips, root lint/type-check, 17/17 native-focused Jest suites with 68/68
-  tests, and `git diff --check`. Git removed the merged branch and worktree
-  registration; Windows left one empty locked
-  `.worktrees/mvp-typed-client` directory for later cleanup.
-- `API-06` started on `codex/mvp-query-client` from exact `dev` at `66244ab`.
-  Its approved design composes the API-05 Hono client with the existing
-  SecureStore-backed, single-flight refresh transport and gives TanStack Query
-  bounded transient-query retries while mutations and aborts never retry.
-- API-06 RED passed 4/9 and failed the intended five tests: Request inputs
-  crashed at `path.startsWith`, and the wished-for retry/delay exports did not
-  exist. Focused GREEN passes 11/11 after adding fetch-compatible replayable
-  requests, bearer injection, cancellation propagation, and QueryClient
-  defaults.
-- Fresh API-06 pre-review verification passes root lint/type-check, 18/18
-  native-focused Jest suites with 74/74 tests, server type-check, backend 75/75
-  with zero skips, and `git diff --check`. The isolated worktree required its
-  locked server dependencies and ignored development `.env`; no dependency,
-  schema, migration, database reset, Expo web, Metro, emulator, or rendered UI
-  change occurred. Exact-range review and closure remain pending.
-- API-06 review found one Important custom-origin refresh mismatch and two
-  Minors: an unbounded 5xx predicate and missing write-body replay coverage.
-  The fix wave keeps the factory raw/injectable while authenticating only the
-  configured singleton, bounds 5xx to 500–599, and proves POST method, headers,
-  and JSON body survive refresh replay. Focused RED rejected status 600; GREEN
-  passes 12/12. Re-review found no remaining Critical, Important, or Minor
-  findings.
-- Fresh API-06 closure gates pass root lint/type-check, 18/18 native-focused
-  Jest suites with 75/75 tests, server type-check, backend 75/75 with zero
-  skips, and `git diff --check`. API-06 is checked and authorized for a local
-  fast-forward into `dev`.
-- `API-06` fast-forwarded into `dev` at `43a0114`. Fresh merged-result
-  verification repeated focused 12/12, server type-check, backend 75/75 with
-  zero skips, root lint/type-check, 18/18 native-focused Jest suites with 75/75
-  tests, and `git diff --check`. Its feature branch and worktree were removed.
-- `API-07` started on `codex/mvp-error-mapping` from exact verified `dev` at
-  `cf93f19`. Its bounded design adds a framework-independent API error parser
-  and presentation union; it does not wire screens, navigation, session
-  clearing, auth routes, or server behavior.
-- API-07 RED failed because `@/lib/apiError` did not exist. Initial GREEN passed
-  10/10. An adversarial RED then failed two cases proving server prose reached
-  `Error.message` and an unsafe Retry-After integer was accepted; GREEN passes
-  10/10 after hardening server-copy, request-ID, and retry-delay handling.
-- Fresh API-07 pre-review gates pass root lint/type-check, 19/19 native-focused
-  Jest suites with 85/85 tests, server type-check, backend 75/75 with zero
-  skips, and `git diff --check`. Review and closure remain pending.
-- API-07 review found two Important hostile-field gaps and two Minors. The fix
-  wave accepts field errors only for `400 validation_failed`, rejects
-  `__proto__`, `constructor`, and `prototype` at any dotted path depth, trims
-  request-ID headers while keeping body-first precedence, and covers generic
-  conflicts. Adversarial RED failed 4/16; GREEN passes 16/16. Re-review found
-  no remaining Critical, Important, or Minor issues.
-- Fresh API-07 closure gates pass focused 16/16, root lint/type-check, 19/19
-  native-focused Jest suites with 91/91 tests, server type-check, backend 75/75
-  with zero skips, and `git diff --check`. API-07 is checked and authorized for
-  a local fast-forward into `dev`.
-- `API-07` fast-forwarded into `dev` at `91b47e9`. Fresh merged-result
-  verification repeated focused 16/16, server type-check, backend 75/75 with
-  zero skips, root lint/type-check, 19/19 native-focused Jest suites with 91/91
-  tests, and `git diff --check`. Its feature branch and worktree were removed.
-  The API contract track exit gate is complete; the next task is `AUTH-01`.
-- `04:00 HKT` stop checkpoint: implementation stopped cleanly on `dev` after
-  the API track at record HEAD `88fb5aa`. The continuation record is
-  `docs/mvp-handoff-2026-08-09-0400.md`. All sub-agents are finished; no
-  AUTH-01 branch/worktree or implementation started. The Goal remains active
-  because pause is user-controlled.
-- Previous `04:00 HKT` checkpoint: the July 30 continuation record is
-  `docs/mvp-handoff-2026-07-30-0400.md`; API-05 had not started at that earlier
-  checkpoint. The Goal subsequently resumed on 2026-08-09.
-- Next queued delivery item after the API contract track: `AUTH-01`, Move
-  current auth/profile wrappers to `/v1`.
-- Detailed task index: `docs/mvp-roadmap.md`.
-- Goal-mode execution brief: `docs/mvp-goal-prompt.md`.
-- Completed Foundation execution plan:
-  `docs/superpowers/plans/2026-07-26-foundation.md`.
-- Completed API-01 implementation plan:
-  `docs/superpowers/plans/2026-07-27-api-contract-versioning.md`.
-- Completed API-02 implementation plan:
-  `docs/superpowers/plans/2026-07-30-api-error-contract.md`.
-- Completed API-03 implementation plan:
-  `docs/superpowers/plans/2026-07-30-cursor-pagination.md`.
-- Completed API-04 implementation plan:
-  `docs/superpowers/plans/2026-07-30-zod-dto-contracts.md`.
-- Completed API-05 implementation plan:
-  `docs/superpowers/plans/2026-08-09-typed-mobile-client.md`.
-- API-03 design baseline commit: `2efdf1c`; its reviewed ordering clarification
-  is part of the API-03 closure documentation.
-- Foundation branch at exit: `codex/mvp-foundation`. The final application checkout
-  tested before the evidence-only documentation commit was
-  `34695fcd92ee2fec6587b6945de5a52c658ecee8`.
-- Fresh Foundation history/status gate: the worktree started clean, `dev`
-  resolved to `2dd839cff374b79794a27706e013db99e2841528`, and
-  `git log --oneline dev..HEAD` contained task-prefixed commits for every
-  `BASE-01` through `BASE-06` item.
-- Fresh Foundation automated exit gates at `34695fc`: `npm.cmd run check`
-  exited `0`; `npm.cmd test -- --runInBand` passed 16/16 suites and 67/67
-  tests; `npm.cmd run server:check` exited `0`; and
-  `npm.cmd run server:test` passed 14/14 tests with 0 failures and 0 skips.
-- Clean-volume reproduction removed only the revalidated
-  `letyoucook-dev_letyoucook-postgres-data` development volume plus its
-  `letyoucook-dev` containers/network. The documented up command recreated
-  those resources; runtime inspection reported both PostgreSQL and Mailpit
-  `running|healthy`, PostgreSQL accepted connections, Mailpit HTTP returned
-  `200`, and SMTP port `1025` was reachable.
-- Migrations applied successfully to the empty PostgreSQL volume. The guarded
-  development reset then recreated exactly two users and two profiles:
-  `verified@letyoucook.local` had verification present and
-  `unverified@letyoucook.local` did not. The post-seed backend suite again
-  passed 14/14 with 0 skips.
-- The final native subset passed on the existing additive `Codex_API_36`
-  emulator using `agent-device` `0.20.0`: Login, demo Login to Home, Home to
-  Recipe Detail to Reviews with both reverse routes, Add Recipe Basics through
-  Step 2 Images, Profile, and logout back to Login. The exact boundary between
-  the complete `1aededb` matrix and final `34695fc` subset is recorded in
-  `docs/verification/foundation-android-smoke.md`.
-- Broad Foundation review hardening now restricts destructive reset URLs to
-  `postgres:`/`postgresql:`, rejects query-string host, port, database, and
-  `db` addressing overrides, binds all local Postgres/Mailpit host ports to
-  `127.0.0.1`, and pins every Compose wrapper to project `letyoucook-dev`.
-  Under hostile `COMPOSE_PROJECT_NAME=hostile-project`, the reset removed and
-  recreated only the verified `letyoucook-dev` resources. Fresh verification
-  passed server type-check, 17/17 backend tests with no skips, root
-  lint/type-check, and 16/16 mobile suites with 67/67 tests.
-- Four broad-review minors remain deferred: reset plus seed is not atomic;
-  rejected `pool.end()` cleanup is not separately handled; the API base URL
-  accepts query/hash components; and the long-running server lacks explicit
-  signal-driven shared-pool shutdown. None affected the Foundation exit gate.
-- Full command-level exit evidence is in the ignored local report
-  `.superpowers/sdd/2026-07-26-foundation/foundation-exit-report.md`.
-- `git status --short --branch`: exit `0`; started on clean
-  `codex/mvp-foundation` worktree.
-- `git branch --show-current`: exit `0`; reported `codex/mvp-foundation`.
-- `node --version`: exit `0`; reported `v24.14.0`.
-- `npm.cmd --version`: exit `0`; reported `11.9.0`.
-- `npm.cmd ci`: initial sandbox attempt exited `124` after 60 seconds while
-  installing, with no npm error; the approved rerun exited `0`, installed root
-  dependencies, and applied `react-native-draggable-flatlist@4.0.3` cleanly.
-- `npm.cmd --prefix server ci`: exit `0`.
-- `npm.cmd run check`: exit `0` after adding the missing CSS side-effect
-  declaration required by TypeScript 6.
-- `npm.cmd test -- --runInBand`: exit `0`; 13 suites and 59 tests passed after
-  correcting the Windows-incompatible Jest discovery glob and one portable path
-  assertion.
-- `npm.cmd run server:check`: exit `0`.
-- `docker manifest inspect axllent/mailpit:v1.30.0 --verbose`: exit `0`; the
-  pinned official Mailpit image resolves for `amd64`.
-- `docker compose -f compose.dev.yaml config`: exit `0`; resolved
-  `letyoucook-postgres`, `letyoucook-mailpit`, and the
-  `letyoucook-dev_letyoucook-postgres-data` named volume.
-- `npm.cmd run dev:services:reset` then `npm.cmd run dev:services:up`: exit
-  `0`; reset only the documented `letyoucook-dev` local containers and volume,
-  then started healthy PostgreSQL and Mailpit containers.
-- `docker exec letyoucook-postgres pg_isready -U postgres -d letyoucook`:
-  exit `0`; PostgreSQL reported accepting connections. `Test-NetConnection
-  localhost -Port 1025` reported `TcpTestSucceeded: True`, and
-  `Invoke-WebRequest http://localhost:8025 -UseBasicParsing` returned `200 OK`.
-- `npm.cmd run server:db:migrate`: exit `0`; migrations applied successfully.
-- `npm.cmd run server:test`: exit `0`; all 5 tests passed with 0 failures and
-  0 skips, including the PostgreSQL auth/profile smoke test.
-- `BASE-02` corrected the obsolete `axllent/mailpit:v1` plan reference to the
-  verified pinned `axllent/mailpit:v1.30.0` release after the former returned
-  a Docker registry `not found` error.
-- `BASE-03` installed the API 36 Google APIs x86_64 system image without an SDK
-  license prompt, created the additive `Codex_API_36` AVD, and booted Android
-  API 36 as `emulator-5554`.
-- `npm.cmd run android`: exit `0`; Gradle reported `BUILD SUCCESSFUL in 3m 39s`,
-  installed `com.meh_chow.LetYouCook`, and Metro bundled 4,306 modules.
-- `BASE-03` exercised every documented auth/protected route with
-  `agent-device` `0.20.0`, including form input/keyboard dismissal, back
-  behavior, tab transitions, the six-step Add Recipe wizard/Preview, demo
-  login, and logout. The observed matrix is in
-  `docs/verification/foundation-android-smoke.md`.
-- Native smoke testing found two protected Recipe Detail/Reviews links that
-  omitted `/private` and opened Expo Router's sitemap. Both were reproduced,
-  fixed with focused RED/GREEN regression tests, and replayed successfully on
-  the emulator.
-- `BASE-04` adds validated `EXPO_PUBLIC_API_URL` configuration with the Android
-  emulator default (`http://10.0.2.2:8787`), shared by the auth and general API
-  clients. It trims trailing slashes and rejects malformed or non-HTTP URLs.
-- Current mobile verification: focused BASE-04 API/environment tests exited
-  `0` with 3 suites and 13 tests; `npm.cmd run check` exited `0`; and
-  `npm.cmd test -- --runInBand` exited `0` with 16 suites and 67 tests passed.
-- `BASE-06` guard TDD: the corrected rooted focused command first exited `1`
-  with `ERR_MODULE_NOT_FOUND` for `server/src/db/devData`, then exited `0` with
-  all 4 required guard tests passing. The plan's original
-  `npm --prefix server exec` paths were relative to the repository root on
-  PowerShell and could not find the test file, so the test and environment
-  paths were rooted at `server/`.
-- Self-review found Node serializes the IPv6 loopback hostname as `[::1]`; a
-  focused regression test failed before bracket normalization and then passed.
-  The focused guard suite now has 5 passing tests.
-- Before the destructive reset, ignored `server/.env` resolved to
-  `localhost:5432/letyoucook`; Compose and the running container both resolved
-  to project `letyoucook-dev`, service `postgres`, container
-  `letyoucook-postgres`, and PostgreSQL database `letyoucook`.
-- `npm.cmd run server:db:dev:reset`: exit `0`; destroyed current local app data
-  in the authorized development database and seeded
-  `verified@letyoucook.local` and `unverified@letyoucook.local`.
-- The post-reset PostgreSQL query returned exactly 2 users: the verified seed
-  with `email_verified_at` present and the unverified seed without it.
-- `BASE-06` review hardening added RED/GREEN regressions for query-string host
-  redirection, sanitized malformed URLs, password-free success output, and
-  fixed sanitized CLI errors. The reset now refuses query-string `host` or
-  `port` overrides, and runtime output contains only the two seed emails.
-- The hardened wrapper was rerun only after revalidating the ignored URL,
-  absence of addressing overrides, Compose/container identity, and live
-  database. Captured output contained both emails and no `coffee123` or
-  password field; the direct query again returned exactly 2 seed rows.
-- Current `BASE-06` verification: `npm.cmd run server:check` exited `0`;
-  `npm.cmd run server:test` exited `0` with 14 passed, 0 failed, 0 skipped;
-  `npm.cmd run check` exited `0`; and `npm.cmd test -- --runInBand` exited `0`
-  with 16 suites and 67 tests passed.
+## Resume now
 
-## Snapshot
+1. Start a new Codex task in this local project.
+2. Select Sol Medium and enable Goal mode.
+3. Use `docs/current-goal.md` as the complete Goal prompt.
+4. Verify current `dev` and worktree state before creating or reusing
+   `codex/mvp-auth-account`.
+5. Stop that Goal after `AUTH-03`; the next Goal will own `AUTH-04` through
+   `AUTH-06` on the same branch with Sol High.
 
-### Completed foundation
+Do not resume the historical whole-MVP Goal and do not use the obsolete
+`codex/mvp-auth-integration` branch name.
 
-- [x] Expo SDK 56 app with Expo Router, React Compiler, Uniwind/RNR UI system,
-  feature-oriented source structure, and Android native development setup.
-- [x] Primary screen UI for auth, Home, Search/filter, Favourites, Profile,
-  Recipe Detail/reviews, and the six-step Add Recipe wizard/preview.
-- [x] Centralized mock image imports in `src/data/images.ts`.
-- [x] Local stores and form schemas for the existing prototype flows.
-- [x] Node/Hono backend skeleton with app creation separated from process start.
-- [x] Docker/local PostgreSQL setup, Drizzle schema, and initial migration.
-- [x] Server sign-up, login, access-token authentication, opaque hashed refresh
-  tokens, refresh rotation/reuse revocation, and logout endpoints.
-- [x] Protected server current-profile read/update endpoints.
-- [x] Mobile SecureStore session/token wrappers and shared API client with one
-  refresh-and-retry attempt.
-- [x] Mobile Create Account wired to the real server sign-up endpoint.
-- [x] Lightweight Jest/Node tests around auth helpers, API/session behavior,
-  reset cooldown behavior, and backend auth/profile paths.
-- [x] Guarded local app-data reset plus deterministic verified and unverified
-  development accounts, documented with destructive-data warnings.
-- [x] Repository agent/product/API/AI/roadmap documentation refreshed from a
-  full source and screenshot audit.
-- [x] Owner confirmed the backend/runtime, recipe lifecycle, category/tag,
-  profile-heart, review, MVP social, AI nutrition, and beta-readiness product
-  decisions in `docs/brief.md`.
-- [x] Owner confirmed mandatory email verification, local Mailpit SMTP, disposable
-  development data, short function/API comments, physical-device pause rules,
-  and per-feature branch/subtask commit conventions.
+## Completed and verified
 
-### Partially complete
+- `BASE-01` through `BASE-06`: Foundation exit gate complete.
+- `API-01` through `API-07`: API contract/mobile data foundation exit gate
+  complete and merged into `dev`.
+- Latest delivery verification at API-07 closure:
+  - `npm.cmd run check`: passed;
+  - `npm.cmd test -- --runInBand`: 19 suites/91 tests passed;
+  - `npm.cmd run server:check`: passed;
+  - `npm.cmd run server:test`: 75/75 passed with zero skips;
+  - `git diff --check`: passed.
+- No `AUTH-01` implementation, Auth branch, or Auth worktree existed at the
+  handoff.
 
-- [~] **Authentication integration:** server endpoints exist, but mobile login
-  still accepts only the local demo credentials. App-start hydration does not
-  refresh an expired access token, mobile logout does not call server logout,
-  and email verification/password reset are simulations.
-- [~] **Profile:** UI and protected current-profile server routes exist, but the
-  screen still renders mock content and edit/avatar/public-profile flows are not
-  integrated.
-- [~] **Recipe backend:** initial recipe/image/ingredient/step/nutrition tables
-  and route groups exist, but recipe list returns an empty array and detail/create
-  remain stubs.
-- [~] **Recipe creation:** the six-step form, reorder behavior, validation,
-  manual nutrition UI, simulated AI state, and preview exist; no draft,
-  autosave, R2 upload, or final persistence exists.
-- [~] **Discovery/detail/social UI:** screens are complete enough to communicate
-  intent, but their data and mutations remain mocked/in-memory.
-- [~] **Favourites:** UI plus an in-memory Zustand map exists; no persistence or
-  backend wiring.
-- [~] **Reviews:** detail sheet can add a local review; there is no review table
-  or API yet.
+## Current implementation truth
 
-### Not implemented
+- The mobile app is a polished Android-first Expo prototype whose recipe,
+  discovery, favourite, review, and profile content is still mostly mocked or
+  in memory.
+- Sign-up reaches the backend. Mobile login is still the local demo flow.
+- Server login, refresh rotation/reuse revocation, logout, access-token auth,
+  and protected current-profile routes exist.
+- `/v1` mounts all current application route families. Temporary unversioned
+  auth/profile aliases remain until the coordinated `AUTH-01` migration.
+- The mobile project has a typed Hono client, SecureStore-backed auth transport,
+  single-flight refresh/replay support, bounded query retry defaults, and safe
+  API-error presentation mapping.
+- Recipe, media, favourite, report, and block routes remain mostly empty or
+  `501`; wizard save and AI nutrition remain simulations.
 
-- [ ] Email verification, real password reset, account deletion, and production
-  auth rate limiting/email delivery.
-- [ ] Revised recipe lifecycle/category/tag/review/media/analysis schema and
-  migrations described in `docs/api-and-data-model.md`.
-- [ ] Cloudflare R2 upload intents, direct uploads, verification, delivery, and
+## Blockers and local-state snapshot
+
+- No code-review or automated-verification blocker remains from the API track.
+- `dev` was local-only and 58 commits ahead of `origin/dev` before this workflow
+  documentation change. No push or pull request was created.
+- At the 04:00 HKT handoff, `letyoucook-postgres` and `letyoucook-mailpit` were
+  healthy; Android, Metro, and the backend development listener were stopped.
+  Recheck rather than assuming this process state is still current.
+- A registered historical Foundation worktree remains at
+  `.worktrees/mvp-foundation`.
+- An empty Windows-locked `.worktrees/mvp-typed-client` directory was not a
+  registered worktree. Recheck the exact path and locking process before any
   cleanup.
-- [ ] Recipe draft/autosave/publish/update/delete API and mobile integration.
-- [ ] Real feed, search/filter, recipe detail, author profile, and favourites.
-- [ ] Reviews/ratings, reports, blocks, and moderation workflow.
-- [ ] Loading/empty/error/offline/permission states across real-data screens.
-- [ ] Privacy policy, terms, crash reporting, backups, CI, release configuration,
-  and a public beta.
-- [ ] Real AI nutrition calculation or provider integration.
+- Existing dependency audit output reported 30 vulnerabilities. No automatic
+  audit fix was run because it may be breaking and is outside the current Goal.
 
-### Known product/implementation mismatches
+## Deferred Foundation debt
 
-- The current wizard has no category or tag controls, though recipe cards/search
-  and the target data model require them.
-- Profile "hearts" currently counts recipes saved by the current user in some
-  mock logic; the target meaning is favourites received on authored recipes.
-- Search's `newest` option cannot work correctly because mock recipes lack a
-  real publish timestamp.
-- The AI demo returns fixed nutrition after a timeout. Its fingerprint does not
-  cover every future analysis input.
-- The current database stores category as text, repeats ingredient group titles,
-  has no standalone verified media asset, and has no reviews/auth challenges.
-- Some existing UI code predates current style rules (for example an
-  `expo-image` layout class); treat these as scoped debt, not a reason for an
-  unrelated rewrite.
+- Development reset/seed is not atomic.
+- Rejected `pool.end()` cleanup is not independently handled.
+- API base URL validation still permits query/hash components.
+- The long-running backend lacks signal-driven shared-pool shutdown.
 
-### Verification history
+These items remain scoped debt unless a current task or measured failure makes
+one relevant.
 
-At the initial repository audit, the check commands could not start because
-workspace dependencies were absent. That historical observation was superseded
-by `BASE-01`, which installed root/server dependencies and established the
-automated baseline, and by `BASE-02`/`BASE-03`, which completed services and
-native verification.
+## Delivery track status
 
-Current foundation evidence:
+| Order | Track | Status | Next bounded work |
+| --- | --- | --- | --- |
+| 0 | Foundation | Complete | Deferred debt only |
+| 1 | API contracts | Complete | Do not redo |
+| 2 | Auth/account | Next | `AUTH-01`–`AUTH-03` |
+| 3 | Recipe data | Pending | After Auth exit |
+| 4 | R2 media | Pending | After Recipe data |
+| 5 | Profile | Pending | After Auth and Media |
+| 6 | Recipe authoring | Pending | After Recipe data and Media |
+| 7 | Recipe detail | Pending | After Recipe authoring |
+| 8 | Home | Pending | After Recipe detail |
+| 9 | Search | Pending | After Recipe detail and Home contract |
+| 10 | Favourites | Pending | After Recipe detail |
+| 11 | Reviews | Pending | After Recipe detail |
+| 12 | Safety/moderation | Pending | After Profile, Detail, and Reviews |
+| 13 | Operations/release | Pending | After core features |
+| 14 | AI nutrition | Pending, last | After operations launch gate |
 
-- `npm.cmd run check`: exit `0`.
-- `npm.cmd test -- --runInBand`: exit `0`; 16 suites and 67 tests passed.
-- `npm.cmd run server:check`: exit `0`.
-- `npm.cmd run server:test`: exit `0`; 14 tests passed, including the
-  PostgreSQL smoke test, 7 development-database guard tests, password-free
-  success formatting, and sanitized CLI failure coverage.
-- Local PostgreSQL and Mailpit started healthy, and migrations applied.
-- The guarded local reset completed and a direct PostgreSQL query found exactly
-  the 2 documented deterministic account rows.
-- `npm.cmd run android`: native build/install passed on Android API 36, and the
-  complete route matrix passed on application source tree `1aededb`.
+Use `docs/mvp-roadmap.md` for every task ID, dependency, branch, and exit gate.
 
----
+## Evidence and history
 
-# Delivery roadmap
-
-This roadmap supersedes `docs/upcomoing-task.md`, which is retained only as
-historical input. Check an item only when its code, persistence/integration,
-required states, proportional tests, and documentation are complete.
-
-## Phase 0 — Re-establish a trustworthy baseline
-
-- [x] Audit routes, features, stores, tests, server source/schema/docs, Git
-  history, and all UI screenshots.
-- [x] Document product behavior, confirmed decisions, API/data direction, AI
-  nutrition constraints, and current progress.
-- [x] Install root and server dependencies from the lockfiles.
-- [x] Run and fix the baseline:
-  - `npm run check`
-  - `npm test -- --runInBand`
-  - `npm run server:check`
-  - `npm run server:test`
-- [x] Start local PostgreSQL and Mailpit through Docker Compose, then apply the
-  existing migration from a clean database.
-- [x] Run the Android dev client and smoke-test every current route.
-- [ ] Add a short environment setup section/script if a fresh clone reveals
-  undocumented steps.
-
-Exit gate: a fresh clone can start the backend/database and Android app using
-documented commands, and all existing automated checks pass.
-
-## Phase 1 — Finish authentication and account lifecycle
-
-### Server
-
-- [ ] Introduce/alias `/v1` auth/profile routes and update the client in the same
-  change.
-- [ ] Add `EmailSender`, an SMTP adapter, Mailpit Docker service, and an
-  in-memory test fake.
-- [ ] Add hashed email-verification challenges, resend cooldown, attempt/expiry
-  limits, and non-enumerating responses.
-- [ ] Add hashed password-reset challenges, reset grants, password update, and
-  session revocation.
-- [ ] Add account deletion state/endpoint and decide content
-  deletion/anonymization/retention behavior.
-- [ ] Add auth rate limits and redacted structured request/error logging.
-- [ ] Test token rotation/reuse, expiry, revocation, concurrency, enumeration,
-  and challenge failure paths.
-
-### Mobile
-
-- [ ] Replace demo login with `POST /v1/auth/login`.
-- [ ] Refresh once during hydration when access has expired and refresh remains
-  valid.
-- [ ] Call server logout, then always clear local credentials.
-- [ ] Wire forgot-password request, OTP verification, new password, cooldown,
-  and resume behavior to real challenges.
-- [ ] Add email-verification UI/resend states as required.
-- [ ] Prevent sign-up/unverified login from entering private routes; issue the
-  first full session only after OTP confirmation.
-- [ ] Wire current profile read/update and avatar placeholder state.
-- [ ] Add offline/retry/session-expired states and integration tests.
-
-Exit gate: create, verify, sign in, restore/refresh, sign out, reset password,
-and delete account work against PostgreSQL from the Android app.
-
-## Phase 2 — Finalize recipe and media data foundations
-
-- [x] Confirm the product decisions in `docs/brief.md`.
-- [ ] Add curated categories and recipe tags.
-- [ ] Add recipe status/version/publish/archive/remove fields and indexes.
-- [ ] Normalize ingredient groups and structured ingredient amount/unit fields.
-- [ ] Add standalone `media_assets` and convert recipe gallery/step/avatar links.
-- [ ] Add reviews and rating constraints/indexes.
-- [ ] Add auth-challenge and moderation/audit structures not completed in Phase
-  1.
-- [ ] Expand nutrition source/provenance and analysis tables, but do not call AI.
-- [ ] Generate a forward Drizzle migration; backfill or obtain approval before
-  resetting development data.
-- [ ] Add database constraint and migration smoke tests.
-- [ ] Add DTO/Zod contracts and Hono `AppType` export boundaries.
-
-Exit gate: schema and contracts represent the documented product invariants and
-pass backend checks from a clean migration.
-
-## Phase 3 — Cloudflare R2 media
-
-- [ ] Provision development/staging R2 bucket, server credentials, custom-domain
-  delivery, and environment validation.
-- [ ] Define avatar/gallery/step MIME, byte, dimension, and count limits.
-- [ ] Implement authenticated upload-intent and short-lived signed `PUT`.
-- [ ] Upload from Expo FileSystem/`expo/fetch` with progress, cancellation, and
-  retry.
-- [ ] Implement completion with R2 `HEAD`/metadata verification and ready/reject
-  state.
-- [ ] Implement attach/reorder/detach/delete rules and cover-image ordering.
-- [ ] Add cleanup for abandoned pending/unattached assets.
-- [ ] Test spoofed type/size, wrong owner, expired URL, duplicate completion,
-  partial upload, deletion, and cleanup.
-
-Exit gate: an Android device can reliably upload, resume/retry, display, reorder,
-and remove owned media without exposing R2 credentials or proxying bytes through
-Hono.
-
-## Phase 4 — Recipe draft, wizard persistence, and publishing
-
-- [ ] Add category/tag controls to Basics.
-- [ ] Create a server draft early enough to support media and recovery.
-- [ ] Add debounced/manual autosave with explicit saving/saved/error/offline
-  states and optimistic `version`.
-- [ ] Implement aggregate recipe validation and transactional save.
-- [ ] Wire gallery, groups/ingredients, steps, optional step images, and notes.
-- [ ] Implement manual nutrition persistence and real-time chart.
-- [ ] Restore a draft after app termination and list owner drafts.
-- [ ] Implement preview from the persisted draft.
-- [ ] Implement publish validation/transition and owner archive/remove actions.
-- [ ] Add tests for ordering, limits, stale versions, partial failure, ownership,
-  draft visibility, publish invariants, and recovery.
-
-Exit gate: a user can create, leave, resume, preview, publish, edit, archive, and
-delete a recipe with durable media/data.
-
-## Phase 5 — Replace mocked read experiences
-
-### Recipe detail and profiles
-
-- [ ] Build published recipe detail DTO/query with gallery, groups, steps,
-  selected nutrition, author, rating counts, and actor-specific favourite state.
-- [ ] Wire Recipe Detail with loading, error, removed/private, block, and retry
-  states.
-- [ ] Build/wire public profile and authored recipe pagination.
-- [ ] Fix received-heart and average-rating semantics.
-
-### Home/search
-
-- [ ] Build cursor-paginated published feed and popular/newest ordering.
-- [ ] Implement PostgreSQL title/category/tag/ingredient search.
-- [ ] Implement all current filters/sorts with deterministic cursors.
-- [ ] Wire Home category handoff and Search query/filter state through TanStack
-  Query.
-- [ ] Add empty, offline, retry, pagination, and refresh behavior.
-- [ ] Measure list performance before considering LegendList v2.
-
-Exit gate: Home, Search, Recipe Detail, and public Profile use only backend data
-for normal signed-in operation.
-
-## Phase 6 — Favourites, reviews, and safety interactions
-
-- [ ] Add idempotent favourite endpoints and private favourites pagination.
-- [ ] Wire optimistic favourite/unfavourite with rollback and received-heart
-  updates.
-- [ ] Add one-review-per-user API, no-self-review rule, pagination, edit/delete,
-  and rating aggregates.
-- [ ] Wire the review sheet with current-user review state and mutation errors.
-- [ ] Add report recipe/review/user flow with reason codes.
-- [ ] Add block/unblock and enforce block policy on every relevant read/mutation.
-- [ ] Add a minimal protected moderation queue/action surface and append-only
-  audit entries.
-- [ ] Test uniqueness, concurrency, aggregates, authorization, concealment, and
-  moderation transitions.
-
-Exit gate: the MVP social/safety behaviors persist correctly and server rules
-cannot be bypassed by direct requests.
-
-## Phase 7 — Public Android beta readiness
-
-- [ ] Apply rate limits to auth, uploads, search, creation, reviews, reports, and
-  later AI.
-- [ ] Add request IDs, structured/redacted logging, crash reporting, and key
-  operational metrics.
-- [ ] Add database backups and a restore drill.
-- [ ] Add CI for app/server checks, tests, and clean migration validation.
-- [ ] Write Privacy Policy, Terms of Service, community/report guidance, and
-  data/account deletion policy.
-- [ ] Review runtime permissions, image privacy, secret handling, retention, and
-  dependency/security updates.
-- [ ] Add analytics only for a minimal consent-aware funnel: sign-up, search,
-  favourite, create/publish.
-- [ ] Create staging/production environments and document secret/config
-  ownership.
-- [ ] Configure a verified sender domain and transactional provider before
-  public beta; Mailpit remains development-only.
-- [ ] Complete Android accessibility, small/large screen, slow network, offline,
-  and release-build QA.
-- [ ] Prepare store listing, support contact, screenshots, and review/demo
-  account where required.
-
-Exit gate: a small external Android beta can be operated, moderated, recovered,
-and supported without relying on developer-only knowledge.
-
-## Phase 8 — AI nutrition experiment (last)
-
-Do not start this phase until recipes, structured ingredients, manual nutrition,
-media, and production telemetry are stable.
-
-- [ ] Create the representative reference evaluation set and approved
-  accuracy/latency/cost budget.
-- [ ] Implement deterministic FoodData Central lookup/conversion/calculation for
-  already-normalized ingredients.
-- [ ] Add model-provider adapter and structured ingredient normalization behind
-  a server feature flag.
-- [ ] Persist fingerprint, ingredient matches, provenance, confidence, warnings,
-  usage, and latency.
-- [ ] Implement eligibility, `needsInput`, stale, accept, rerun, manual switch,
-  and remove states.
-- [ ] Add optional image consistency check only if evaluation proves value.
-- [ ] Compare `gpt-5.6-terra` and `gpt-5.6-luna` (or then-current equivalents)
-  using the same versioned evaluation.
-- [ ] Pass every launch gate in `docs/ai-nutrition.md`.
-- [ ] Run an internal/developer-only Android pilot, then a small feature-flagged
-  beta.
-
-Exit gate: measured eligible-recipe accuracy, zero silent quantity invention,
-acceptable p95 latency/cost, clear advisory UX, and complete manual fallback. If
-the gate fails, keep manual nutrition and do not ship the AI button.
-
-## Later, only after evidence
-
-- [ ] Push reminders/notifications.
-- [ ] Follow/unfollow.
-- [ ] Comments.
-- [ ] Collections and meal planning.
-- [ ] Direct messages.
-- [ ] Advanced/personalized recommendations.
-- [ ] Creator monetization.
-- [ ] Dedicated search service.
-- [ ] Redis/cache infrastructure.
-- [ ] Background queue.
-- [ ] Microservices or multi-region database.
-- [ ] iOS release work and Apple-specific authentication/review requirements.
-
-Each item needs a measured user/product/operational reason before it moves into
-an active phase.
+- Latest exact handoff: `docs/mvp-handoff-2026-08-09-0400.md`
+- API-05 through API-07 ledgers: `.superpowers/sdd/2026-08-09-*/progress.md`
+- Approved MVP design: `docs/superpowers/specs/2026-07-26-mvp-delivery-design.md`
+- Current workflow design:
+  `docs/superpowers/specs/2026-08-09-codex-workflow-optimization-design.md`
+- Git history retains the prior detailed `docs/progress.md` execution stream.
 
 ## Progress maintenance rules
 
-When finishing a feature:
+After meaningful implementation:
 
-1. Update the top `Current progress` snapshot in this file.
-2. Check only tasks that meet their full exit criteria.
-3. Add newly discovered debt/blockers to the relevant phase.
-4. Update `server/docs/progress.md` for backend-specific state.
-5. Update product/API/AI docs when behavior or contracts changed.
-6. Record the verification commands and whether they actually ran.
-
-Do not erase incomplete history to make progress look cleaner. Move genuinely
-superseded work to a short note with the replacement decision.
+1. Keep this top snapshot compact; target fewer than 140 lines for the whole
+   file.
+2. Record current branch, completed range, next Goal, fresh verification, and
+   blockers—not step-by-step command narration.
+3. Check `docs/mvp-roadmap.md` only when a task meets its completion definition.
+4. Update `server/docs/progress.md` only for backend-specific current state.
+5. Put detailed RED/GREEN evidence in the commit, bounded plan, or dated
+   handoff when it materially helps later diagnosis.
+6. Never use chat history as the only record of an architectural decision or
+   resume point.

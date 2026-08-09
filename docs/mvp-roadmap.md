@@ -19,23 +19,23 @@ Do not check a feature merely because its UI or endpoint exists.
 Each feature track starts from `dev` on its dedicated branch. Each completed
 subtask receives a separate commit whose subject starts with the task ID.
 
-| Order | Track | Branch | Detailed plan |
+| Order | Track | Branch | Planning |
 | --- | --- | --- | --- |
 | 0 | Foundation | `codex/mvp-foundation` | `docs/superpowers/plans/2026-07-26-foundation.md` |
-| 1 | API contracts | `codex/mvp-api-contracts` | Created immediately before execution |
-| 2 | Auth/account | `codex/mvp-auth-account` | Created immediately before execution |
-| 3 | Recipe data | `codex/mvp-recipe-data` | Created immediately before execution |
-| 4 | R2 media | `codex/mvp-r2-media` | Created immediately before execution |
-| 5 | Profile | `codex/mvp-profile` | Created immediately before execution |
-| 6 | Recipe authoring | `codex/mvp-recipe-authoring` | Created immediately before execution |
-| 7 | Recipe detail | `codex/mvp-recipe-detail` | Created immediately before execution |
-| 8 | Home | `codex/mvp-home` | Created immediately before execution |
-| 9 | Search | `codex/mvp-search` | Created immediately before execution |
-| 10 | Favourites | `codex/mvp-favourites` | Created immediately before execution |
-| 11 | Reviews | `codex/mvp-reviews` | Created immediately before execution |
-| 12 | Safety/moderation | `codex/mvp-safety` | Created immediately before execution |
-| 13 | Operations/release | `codex/mvp-operations` | Created immediately before execution |
-| 14 | AI nutrition | `codex/mvp-ai-nutrition` | Created immediately before execution |
+| 1 | API contracts | `codex/mvp-api-contracts` | Historical bounded plans complete |
+| 2 | Auth/account | `codex/mvp-auth-account` | Bounded plan only when needed |
+| 3 | Recipe data | `codex/mvp-recipe-data` | Bounded plan only when needed |
+| 4 | R2 media | `codex/mvp-r2-media` | Bounded plan only when needed |
+| 5 | Profile | `codex/mvp-profile` | Bounded plan only when needed |
+| 6 | Recipe authoring | `codex/mvp-recipe-authoring` | Bounded plan only when needed |
+| 7 | Recipe detail | `codex/mvp-recipe-detail` | Bounded plan only when needed |
+| 8 | Home | `codex/mvp-home` | Bounded plan only when needed |
+| 9 | Search | `codex/mvp-search` | Bounded plan only when needed |
+| 10 | Favourites | `codex/mvp-favourites` | Bounded plan only when needed |
+| 11 | Reviews | `codex/mvp-reviews` | Bounded plan only when needed |
+| 12 | Safety/moderation | `codex/mvp-safety` | Bounded plan only when needed |
+| 13 | Operations/release | `codex/mvp-operations` | Bounded plan only when needed |
+| 14 | AI nutrition | `codex/mvp-ai-nutrition` | Bounded plan only when needed |
 
 ## 0. Foundation and Development Baseline
 

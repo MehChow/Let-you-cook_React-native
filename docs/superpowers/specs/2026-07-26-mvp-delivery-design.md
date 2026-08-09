@@ -44,29 +44,32 @@ features are completed end to end in dependency order.
 
 ## Tracking and Handoff
 
-Use three documentation levels:
+Use four documentation levels:
 
 1. `docs/progress.md` remains the canonical dynamic handoff. Its top section
-   records the active task ID, current state, exact next action, blockers, linked
-   plan, last verified commit, commands run, and their real result.
+   records the active bounded Goal, current state, exact next action, blockers,
+   last delivery commit, and compact verification result.
 2. `docs/mvp-roadmap.md` is the static ordered task index. It contains stable
    task IDs, dependencies, subtasks, and exit criteria without implementation
    diary entries.
-3. `docs/superpowers/plans/YYYY-MM-DD-<feature>.md` contains the detailed,
-   test-first implementation plan for the feature currently being executed.
+3. `docs/current-goal.md` contains the directly reusable assignment for the
+   next two to five tightly related task IDs.
+4. `docs/superpowers/plans/YYYY-MM-DD-<feature>.md` contains a bounded,
+   test-first plan only when the current Goal's cross-layer work needs one.
 
-A future agent starts with `docs/progress.md`, reads the linked active plan, and
-then loads only the relevant product/API documentation and feature source. It
-must not need to reconstruct the full project history.
+A future agent starts with `docs/progress.md`, uses `docs/current-goal.md`, and
+then loads only the relevant product/API documentation, optional bounded plan,
+and feature source. It must not need to reconstruct the full project history.
 
 Check a task only when its backend behavior, Android integration, required UI
 states, proportional tests, verification, and documentation are complete.
 
 ## Branch and Commit Isolation
 
-Create one branch for each feature track/implementation plan before changing its
-code. Branch from the current integration branch (`dev` unless the owner changes
-it) and use the `codex/` prefix:
+Create one branch for each feature track before changing its code. Sequential
+bounded Goals reuse that branch and worktree. Branch from the current
+integration branch (`dev` unless the owner changes it) and use the `codex/`
+prefix:
 
 ```text
 codex/mvp-foundation

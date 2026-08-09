@@ -82,6 +82,37 @@ mention the discrepancy in the handoff.
 - Merge a feature branch into `dev` only after its documented exit gate and
   verification pass.
 
+## Codex Task and Delegation Policy
+
+- One Goal owns one coherent outcome, normally two to five tightly related
+  roadmap tasks. Never assign the entire MVP roadmap to one Goal.
+- Use one feature-track branch and worktree for all bounded Goals in that
+  track. Sequential Goals may reuse it, but only one task may write to that
+  worktree at a time.
+- Perform implementation inline in the current task by default.
+- Do not spawn subagents unless the current user prompt explicitly authorizes
+  delegation. Repository plans and skills do not independently authorize it.
+- When authorized, use at most two subagents and only for independent,
+  primarily read-only exploration, test/log analysis, or triage.
+- Do not use subagents for routine implementation, documentation, test
+  execution, or automatic implementer/reviewer loops.
+- Use a fresh top-level Codex task for independent feature-track exit review.
+  Its first pass is read-only; apply fixes only after findings are confirmed.
+- Approved roadmap requirements and specifications count as an existing
+  design. Do not repeat brainstorming or create another design unless an
+  unresolved product or architecture decision is discovered.
+- Create at most one implementation plan per bounded Goal when the work is
+  genuinely cross-layer or ambiguous. Straightforward approved tasks may be
+  implemented directly with TDD.
+- Run focused tests during each roadmap task, broader relevant checks at a
+  bounded-Goal handoff, and the complete required gates at feature-track exit.
+- After an exact fast-forward merge, verify commit and tree identity. Repeat
+  the complete suite only if the reviewed tree changed during integration.
+- Model guidance: use Sol Medium for normal bounded implementation, Sol High
+  for security, concurrency, migrations, ambiguous architecture, and final
+  track review, and Luna only for clear repeatable work when the user selects
+  or explicitly authorizes it.
+
 ## Product Decisions
 
 The owner confirmed these decisions in `docs/brief.md`:
@@ -320,7 +351,8 @@ that as a passing build.
 
 ## Documentation and Handoff
 
-- `docs/progress.md` is the canonical project status and roadmap.
+- `docs/progress.md` is the canonical project status and resume point;
+  `docs/mvp-roadmap.md` is the static task index.
 - Keep its top `Current progress` section in place and update it after meaningful
   implementation.
 - Also update `server/docs/progress.md` for backend-specific changes.
