@@ -1,6 +1,5 @@
 import {
   createAuthSession,
-  createMockAuthSession,
   isAccessTokenExpired,
 } from "@/features/auth/session";
 
@@ -27,11 +26,14 @@ describe("auth session helpers", () => {
     });
   });
 
-  it("expires the mock access token after 15 minutes", () => {
-    const session = createMockAuthSession({
-      email: "cook@example.com",
-      now: 1_000,
-    });
+  it("falls back to a 15-minute expiry for opaque server access tokens", () => {
+    const session = createAuthSession(
+      {
+        user: { id: "user-1", email: "cook@example.com" },
+        tokens: { accessToken: "opaque-access", refreshToken: "refresh" },
+      },
+      1_000,
+    );
 
     expect(session.user.email).toBe("cook@example.com");
     expect(session.accessTokenExpiresAt).toBe(901_000);

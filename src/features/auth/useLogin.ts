@@ -1,23 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
 
-import type { AuthCredentials } from "./api";
+import { authApi, type AuthCredentials } from "./api";
 
-const DEMO_CREDENTIALS: AuthCredentials = {
-  email: "gg@gmail.com",
-  password: "coffee123",
-};
-
-const loginLocally = async (input: AuthCredentials): Promise<void> => {
-  if (
-    input.email !== DEMO_CREDENTIALS.email ||
-    input.password !== DEMO_CREDENTIALS.password
-  ) {
-    throw new Error("Invalid credentials.");
-  }
-};
-
+// Exposes real backend login state through a focused mutation hook.
 export function useLogin() {
-  const mutation = useMutation({ mutationFn: loginLocally });
+  const mutation = useMutation({
+    mutationFn: (input: AuthCredentials) => authApi.login(input),
+  });
 
   return {
     login: mutation.mutateAsync,

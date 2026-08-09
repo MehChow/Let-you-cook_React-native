@@ -5,8 +5,3 @@ export interface StoredAuthSession {
   tokens: AuthTokens;
   accessTokenExpiresAt: number;
 }
-
-export interface MockLoginInput {
-  email: string;
-  now?: number;
-}

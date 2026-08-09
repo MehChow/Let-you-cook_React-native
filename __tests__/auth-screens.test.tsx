@@ -7,7 +7,6 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react-nativ
 import { toast } from "sonner-native";
 import { ApiError } from "@/lib/apiError";
 
-const mockLogin = jest.fn();
 const mockEstablishSession = jest.fn();
 const mockValidateLogin = jest.fn();
 const mockCreateAccount = jest.fn();
@@ -122,7 +121,6 @@ jest.mock("expo-router", () => ({
 
 jest.mock("@/features/auth/useAuth", () => ({
   useAuth: () => ({
-    login: mockLogin,
     establishSession: mockEstablishSession,
     sendPasswordResetCode: mockSendPasswordResetCode,
     verifyOtp: mockVerifyOtp,
@@ -148,7 +146,6 @@ jest.mock("@/features/auth/useSendPasswordResetCode", () => ({
 
 describe("auth screens", () => {
   beforeEach(() => {
-    mockLogin.mockReset();
     mockEstablishSession.mockReset();
     mockValidateLogin.mockReset();
     mockCreateAccount.mockReset();
@@ -223,7 +220,6 @@ describe("auth screens", () => {
       }),
     );
     expect(mockEstablishSession).toHaveBeenCalledWith(authResponse);
-    expect(mockLogin).not.toHaveBeenCalled();
     expect(mockToastSuccess).toHaveBeenCalledWith("Account created.");
     expect(mockReplace).toHaveBeenCalledWith("/private/(tabs)");
   });
@@ -287,9 +283,9 @@ describe("auth screens", () => {
     expect(screen.queryByText("Invalid credentials.")).toBeNull();
   });
 
-  it("normalizes demo login values before creating a local session", async () => {
-    mockValidateLogin.mockResolvedValueOnce(undefined);
-    mockLogin.mockResolvedValueOnce(undefined);
+  it("normalizes login values before establishing the real server session", async () => {
+    mockValidateLogin.mockResolvedValueOnce(authResponse);
+    mockEstablishSession.mockResolvedValueOnce(undefined);
 
     render(<LoginScreen />);
     fireEvent.changeText(screen.getByPlaceholderText("name@example.com"), " GG@GMAIL.COM ");
@@ -302,8 +298,25 @@ describe("auth screens", () => {
         password: "coffee123",
       }),
     );
-    expect(mockLogin).toHaveBeenCalledWith({ email: "gg@gmail.com", password: "coffee123" });
+    expect(mockEstablishSession).toHaveBeenCalledWith(authResponse);
     expect(mockReplace).toHaveBeenCalledWith("/private/(tabs)");
+  });
+
+  it("shows safe invalid-credentials copy from the real login API", async () => {
+    mockValidateLogin.mockRejectedValueOnce(
+      new ApiError({ code: "invalid_credentials", status: 401 }),
+    );
+
+    render(<LoginScreen />);
+    fireEvent.changeText(screen.getByPlaceholderText("name@example.com"), "mei@example.com");
+    fireEvent.changeText(screen.getByPlaceholderText("Enter your password"), "wrong-pass");
+    fireEvent.press(screen.getByText("Log in"));
+
+    await waitFor(() =>
+      expect(mockToastError).toHaveBeenCalledWith("Email or password is incorrect."),
+    );
+    expect(mockEstablishSession).not.toHaveBeenCalled();
+    expect(mockReplace).not.toHaveBeenCalled();
   });
 
   it("shows password-reset failures as a toast instead of inline text", async () => {

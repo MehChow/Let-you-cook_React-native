@@ -4,6 +4,12 @@ import type { PropsWithChildren } from "react";
 
 import { useLogin } from "@/features/auth/useLogin";
 
+jest.mock("@/features/auth/api", () => ({
+  authApi: { login: jest.fn() },
+}));
+
+import { authApi } from "@/features/auth/api";
+
 const queryClients: QueryClient[] = [];
 
 const createWrapper = () => {
@@ -18,25 +24,42 @@ const createWrapper = () => {
 };
 
 describe("useLogin", () => {
+  beforeEach(() => {
+    jest.mocked(authApi.login).mockReset();
+  });
+
   afterEach(() => {
     cleanup();
     queryClients.forEach((client) => client.clear());
     queryClients.length = 0;
   });
 
-  it("accepts the local demo credentials", async () => {
+  it("returns the real auth response from the login API", async () => {
+    const response = {
+      user: { id: "user-1", email: "mei@example.com" },
+      tokens: { accessToken: "access", refreshToken: "refresh" },
+    };
+    jest.mocked(authApi.login).mockResolvedValueOnce(response);
     const { result } = renderHook(() => useLogin(), {
       wrapper: createWrapper(),
     });
 
     await act(async () => {
-      await result.current.login({ email: "gg@gmail.com", password: "coffee123" });
+      await expect(
+        result.current.login({ email: "mei@example.com", password: "cook1234" }),
+      ).resolves.toEqual(response);
     });
 
+    expect(authApi.login).toHaveBeenCalledWith({
+      email: "mei@example.com",
+      password: "cook1234",
+    });
     expect(result.current.isLoggingIn).toBe(false);
   });
 
-  it("rejects credentials that do not match the demo account", async () => {
+  it("propagates login API failures", async () => {
+    const failure = new Error("Request failed");
+    jest.mocked(authApi.login).mockRejectedValueOnce(failure);
     const { result } = renderHook(() => useLogin(), {
       wrapper: createWrapper(),
     });
@@ -44,7 +67,7 @@ describe("useLogin", () => {
     await act(async () => {
       await expect(
         result.current.login({ email: "wrong@example.com", password: "coffee123" }),
-      ).rejects.toThrow("Invalid credentials.");
+      ).rejects.toBe(failure);
     });
   });
 });

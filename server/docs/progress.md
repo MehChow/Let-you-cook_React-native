@@ -6,13 +6,13 @@ and schema contract remains `docs/api-and-data-model.md`.
 ## Current backend resume point
 
 - Active feature track: Authentication and account lifecycle
-- Next bounded Goal: `AUTH-01` through `AUTH-03`
+- Next bounded Goal: `AUTH-04` through `AUTH-06`
 - Feature branch: `codex/mvp-auth-account`
 - Goal prompt: `docs/current-goal.md`
 
-The API contract track and `AUTH-01` through `AUTH-02` are complete. Continue by
-wiring real mobile login. Do not begin hydration refresh, logout integration,
-email verification, password reset, or deletion in this Goal.
+The API contract track and `AUTH-01` through `AUTH-03` are complete. Continue
+with hydration refresh, concurrent expiry handling, and logout integration. Do
+not begin email delivery, verification, password reset, or deletion next.
 
 ## Current state
 
@@ -24,7 +24,8 @@ email verification, password reset, or deletion in this Goal.
   auth/profile DTO contracts exist.
 - Server signup, login, refresh rotation/reuse revocation, logout,
   access-token authentication, and protected current-profile read/update exist.
-- The mobile app uses real signup but still uses a demo login path.
+- The mobile app uses real signup and login through `/v1`; successful sessions
+  are stored through the existing SecureStore-backed boundary.
 - Recipe, image/media, favourite, report, and block routes remain mostly stubs
   or `501` responses.
 
@@ -43,13 +44,14 @@ email verification, password reset, or deletion in this Goal.
 - [x] `AUTH-01` Versioned auth/profile mobile integration and alias retirement.
 - [x] `AUTH-02` PostgreSQL signup persistence, duplicate, and validation
   reverification.
+- [x] `AUTH-03` Real mobile login and persisted session establishment.
 
-Latest delivery verification:
+Latest Auth branch verification:
 
 - server typecheck passed;
-- backend tests passed 75/75 with zero skips;
+- backend tests passed 74/74 with zero skips;
 - mobile/root checks passed;
-- native-focused mobile tests passed 19 suites/91 tests;
+- native-focused mobile tests passed 19 suites/95 tests;
 - diff check passed.
 
 See `docs/mvp-handoff-2026-08-09-0400.md` and the API task ledgers for exact
@@ -57,14 +59,10 @@ historical evidence.
 
 ## Next backend responsibilities
 
-Within the current Goal:
-
-- `AUTH-03`: support real mobile login through current stable DTOs and session
-  transport without stealing `AUTH-04` hydration behavior.
-
-Later Auth Goals own refresh-on-hydration, concurrent expiry navigation,
-server logout integration, email delivery/verification, reset, deletion, rate
-limits, redacted logging, and concurrency/failure hardening.
+Within the next Goal, `AUTH-04` through `AUTH-06` own refresh-on-hydration,
+concurrent expiry navigation, and server logout integration. Later Auth Goals
+own email delivery/verification, reset, deletion, rate limits, redacted logging,
+and concurrency/failure hardening.
 
 ## Do not redo or expand
 

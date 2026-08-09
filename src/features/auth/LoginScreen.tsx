@@ -1,6 +1,7 @@
 import { Text } from "@/components/ui/text";
 import { images } from "@/data/images";
 import { useAuth } from "@/features/auth/useAuth";
+import { toErrorPresentation } from "@/lib/apiError";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { LockIcon, MailIcon } from "lucide-react-native";
@@ -16,13 +17,19 @@ import { AuthTextField } from "./components/AuthTextField";
 import { loginSchema, toLoginInput, type LoginFormValues } from "./schema";
 import { useLogin } from "./useLogin";
 
-const getErrorMessage = (error: unknown) =>
-  error instanceof Error ? error.message : "Unable to log in right now.";
+// Maps login failures while preserving deliberate local validation messages.
+const getErrorMessage = (error: unknown) => {
+  const presentation = toErrorPresentation(error);
+  return presentation.kind === "unknown" && error instanceof Error
+    ? error.message
+    : presentation.message;
+};
 
+// Renders real credential login and establishes the returned session.
 export function LoginScreen() {
   const router = useRouter();
-  const { login } = useAuth();
-  const { login: validateLogin, isLoggingIn } = useLogin();
+  const { establishSession } = useAuth();
+  const { login: requestLogin, isLoggingIn } = useLogin();
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
@@ -30,12 +37,13 @@ export function LoginScreen() {
     reValidateMode: "onChange",
   });
 
+  // Submits normalized credentials and enters the private application.
   const handleSubmit = form.handleSubmit(
     async (values) => {
       const input = toLoginInput(values);
       try {
-        await validateLogin(input);
-        await login(input);
+        const response = await requestLogin(input);
+        await establishSession(response);
         router.replace("/private/(tabs)");
       } catch (error) {
         toast.error(getErrorMessage(error));

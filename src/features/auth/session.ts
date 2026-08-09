@@ -1,8 +1,9 @@
 import type { AuthResponse } from "./api";
-import type { MockLoginInput, StoredAuthSession } from "./authTypes";
+import type { StoredAuthSession } from "./authTypes";
 
 const ACCESS_TOKEN_TTL_MS = 15 * 60 * 1000;
 
+// Reads the expiry timestamp from a JWT-shaped access token.
 const readAccessTokenExpiry = (accessToken: string) => {
   const payload = accessToken.split(".")[1];
 
@@ -25,6 +26,7 @@ const readAccessTokenExpiry = (accessToken: string) => {
   }
 };
 
+// Maps a server authentication response into persisted mobile session state.
 export const createAuthSession = (
   response: AuthResponse,
   now = Date.now(),
@@ -35,21 +37,7 @@ export const createAuthSession = (
     readAccessTokenExpiry(response.tokens.accessToken) ?? now + ACCESS_TOKEN_TTL_MS,
 });
 
-export const createMockAuthSession = ({
-  email,
-  now = Date.now(),
-}: MockLoginInput): StoredAuthSession => ({
-  user: {
-    id: "mock-user",
-    email: email.trim() || "cook@example.com",
-  },
-  tokens: {
-    accessToken: `mock-access-${now}`,
-    refreshToken: `mock-refresh-${now}`,
-  },
-  accessTokenExpiresAt: now + ACCESS_TOKEN_TTL_MS,
-});
-
+// Reports whether session access has reached its expiry boundary.
 export const isAccessTokenExpired = (
   session: Pick<StoredAuthSession, "accessTokenExpiresAt"> | null,
   now = Date.now(),

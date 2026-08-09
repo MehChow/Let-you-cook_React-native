@@ -8,14 +8,13 @@ import {
 
 import type { StoredAuthSession } from "./authTypes";
 import { authApi, type AuthResponse } from "./api";
-import { createAuthSession, createMockAuthSession, isAccessTokenExpired } from "./session";
+import { createAuthSession, isAccessTokenExpired } from "./session";
 import { authTokenStorage } from "./tokenStorage";
 
 interface AuthContextValue {
   isHydrating: boolean;
   isLoggedIn: boolean;
   session: StoredAuthSession | null;
-  login(input: { email: string; password: string }): Promise<void>;
   establishSession(response: AuthResponse): Promise<void>;
   logout(): Promise<void>;
   sendPasswordResetCode(email: string): Promise<void>;
@@ -28,6 +27,7 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+// Provides persisted authentication state and current session operations.
 export function AuthProvider({ children }: PropsWithChildren) {
   const [isHydrating, setIsHydrating] = useState(true);
   const [session, setSession] = useState<StoredAuthSession | null>(null);
@@ -35,6 +35,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     let mounted = true;
 
+    // Restores a still-valid session from secure device storage.
     const hydrate = async () => {
       try {
         const storedSession = await authTokenStorage.getSession();
@@ -61,37 +62,32 @@ export function AuthProvider({ children }: PropsWithChildren) {
     };
   }, []);
 
-  const login: AuthContextValue["login"] = async ({ email, password }) => {
-    if (!email.trim() || !password.trim()) {
-      throw new Error("Enter your email and password.");
-    }
-
-    const nextSession = createMockAuthSession({ email });
-    await authTokenStorage.saveSession(nextSession);
-    setSession(nextSession);
-  };
-
+  // Clears the current session locally until server logout is integrated.
   const logout = async () => {
     await authTokenStorage.clearTokens();
     setSession(null);
   };
 
+  // Converts and persists a successful server authentication response.
   const establishSession = async (response: AuthResponse) => {
     const nextSession = createAuthSession(response);
     await authTokenStorage.saveSession(nextSession);
     setSession(nextSession);
   };
 
+  // Delegates password-reset requests to the current placeholder boundary.
   const sendPasswordResetCode = async (email: string) => {
     await authApi.sendPasswordResetCode({ email });
   };
 
+  // Validates the simulated six-digit password-reset code format.
   const verifyOtp = async (code: string) => {
     if (!/^\d{6}$/.test(code.trim())) {
       throw new Error("Enter the 6-digit code.");
     }
   };
 
+  // Validates the simulated password-reset completion input.
   const resetPassword: AuthContextValue["resetPassword"] = async ({
     password,
     confirmPassword,
@@ -110,7 +106,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
         isHydrating,
         isLoggedIn: !isAccessTokenExpired(session),
         session,
-        login,
         establishSession,
         logout,
         sendPasswordResetCode,
@@ -123,6 +118,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   );
 }
 
+// Reads authentication state from the required provider boundary.
 export const useAuth = () => {
   const value = useContext(AuthContext);
 
