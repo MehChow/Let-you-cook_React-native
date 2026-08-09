@@ -58,8 +58,9 @@ mention the discrepancy in the handoff.
 
 - Do not run, build, or test the app in a web browser. Native modules in this
   Expo 56 project make web an invalid test target.
-- Use an Android emulator/device or native-focused Jest tests for mobile
-  verification.
+- Use native-focused Jest tests and other applicable automated checks for
+  mobile verification. Android emulator and physical-device QA is user-owned
+  under the Verification rules below.
 - Use Node 20.19 or newer. Expo SDK 56 uses React Native 0.85 and React 19.2.
 - Use `npm.cmd` instead of `npm` in PowerShell environments where script
   execution policy blocks `npm.ps1`.
@@ -339,14 +340,16 @@ Run the smallest relevant checks, then broaden for cross-cutting changes:
 - Generate migration: `npm run server:db:generate`
 - Apply migration: `npm run server:db:migrate`
 
-For Android UI/native changes, also verify the affected flow on an Android
-emulator/device. Do not substitute Expo web. Mock native-heavy leaves locally in
+For Android UI/native changes, run the applicable automated checks and provide
+the user with a concise manual Android QA checklist. Label that checklist
+`user-owned; not agent-verified`. Do not operate an Android emulator or physical
+device, and do not substitute Expo web. Mock native-heavy leaves locally in
 screen tests.
 
-If adequate verification genuinely requires a physical Android device, tell the
-user exactly what to test and pause that task. Record the requested check in
-`docs/progress.md`; resume and complete it only after useful user feedback.
-Independent work may continue while that task remains incomplete.
+User-owned manual Android QA is non-blocking for Codex task completion unless
+the user's current prompt explicitly makes it a blocking gate. Never claim an
+unperformed native check passed. Treat user-reported failures as evidence for a
+focused diagnosis or follow-up fix.
 
 High-value tests cover:
 

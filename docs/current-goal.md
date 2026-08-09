@@ -1,156 +1,181 @@
-# Current Goal: Complete Authentication Native Exit Evidence
+# Current Goal: Establish Recipe Lifecycle and Taxonomy
 
 Use this document as the complete prompt in a new top-level Codex Goal-mode
 task with Sol High.
 
 ## Outcome
 
-Complete the remaining Android-native evidence for the independently reviewed
-`AUTH-01` through `AUTH-11` track. Resolve only confirmed native Auth defects,
-then close and integrate the Auth track if every currently reachable native
-check passes.
+Implement the first bounded Core Recipe Taxonomy and Database Model checkpoint:
 
-Stop after the Auth exit checkpoint is integrated into `dev` and a fresh
-Recipe Data Goal beginning at `DATA-01` is recorded. Do not execute Recipe Data
-or begin Profile UI.
+- `DATA-01` recipe lifecycle, aggregate version, and lifecycle timestamps;
+- `DATA-02` curated ordered categories and deterministic development seeds;
+- `DATA-03` normalized tags and the five-tag-per-recipe limit.
+
+Deliver schema, forward migrations, focused database/service tests, and current
+documentation. Stop after this verified checkpoint is fast-forwarded into
+`dev` and a fresh bounded Goal beginning at `DATA-04` is recorded. Do not
+implement `DATA-04` or later tasks, media, Recipe UI/routes, or Profile UI.
 
 ## Verified Starting State
 
 - Workspace: `C:\Let-you-cook_React-native`
 - Integration branch: `dev`
-- Feature branch: `codex/mvp-auth-account`
-- Preserved worktree:
-  `C:\Let-you-cook_React-native\.worktrees\mvp-auth-account`
-- The independent Auth review is complete. Its five confirmed findings were
-  fixed and re-reviewed in these checkpoints:
-  - `90c5a84` - authoritative validated mobile session rotation;
-  - `8abdcad` - refresh-token families, constraints/indexes, and family-scoped
-    reuse revocation;
-  - `14bd4bd` - bounded/expiring in-memory Auth rate-limit buckets;
-  - `11d91d1` - account-first password-reset/deletion lock ordering.
-- Fresh automated exit evidence at that checkpoint:
-  - `npm.cmd run check`: passed;
-  - `npm.cmd test -- --runInBand`: 21 suites/122 tests passed;
-  - `npm.cmd run server:check`: passed;
-  - `npm.cmd run server:test`: 104/104 passed with zero skips;
-  - `git diff --check`: passed.
-- Migration `server/drizzle/0004_common_krista_starr.sql` applied successfully
-  to the guarded local development database.
-- A real PostgreSQL/SMTP/Mailpit exit run passed signup/verification,
-  unverified-login denial, reset delivery/cooldown/rate limiting, password
-  replacement, refresh-family replay isolation, deletion, immediate old-token
-  denial, and email reuse. Its uniquely prefixed database and Mailpit records
-  were removed and verified at zero.
-- Android discovery returned no connected emulator/device, so Auth is not yet
-  marked complete and no Recipe Data Goal was created.
+- Feature branch to create: `codex/mvp-recipe-data`
+- Worktree to create: `C:\Let-you-cook_React-native\.worktrees\mvp-recipe-data`
+- `BASE-01` through `BASE-06`, `API-01` through `API-07`, and `AUTH-01`
+  through `AUTH-11` are complete and integrated.
+- The Auth independent review and all five confirmed fixes are complete. Do not
+  repeat them.
+- Latest Auth automated evidence passed mobile check, 21 suites/122 Jest tests,
+  server check, 104/104 backend tests with zero skips, and `git diff --check`.
+- Real guarded PostgreSQL/SMTP/Mailpit Auth verification passed and its exact QA
+  rows/messages were removed and verified at zero.
+- The manual Android Auth checklist is `user-owned; not agent-verified` and
+  non-blocking under `AGENTS.md`; no native pass is claimed.
+- Applied migrations currently end at
+  `server/drizzle/0004_common_krista_starr.sql`.
+- `server/src/db/schema.ts` still has a provisional recipe model using
+  `isPublished`, string `categoryId`, and JSON `tags`.
+- No `codex/mvp-recipe-data` branch or Recipe Data worktree existed at this
+  handoff.
+- The main checkout has unrelated `.idea` changes. Preserve them exactly.
 
-Verify refs, clean worktree state, local services, and device availability
-instead of assuming this snapshot is still current. Preserve unrelated user
-changes in the main checkout.
+Verify all refs, worktrees, files, dependencies, and local services rather than
+assuming this snapshot is still current.
 
 ## Read Before Acting
 
-Read only the context needed for this native exit continuation:
+Read only the context needed for `DATA-01` through `DATA-03`:
 
 1. `AGENTS.md`
 2. The top `Current progress` section of `docs/progress.md`
-3. The Auth exit definition in `docs/mvp-roadmap.md`
-4. Auth/account sections of `docs/brief.md`
-5. `docs/backend-integration/opt-setup.md`
-6. `server/docs/progress.md` and `server/docs/backend-token-auth.md`
-7. Mobile Auth provider/state/API/storage and the affected Auth screens/tests
-8. `docs/notes.md` only if native runtime or styling fails
+3. `DATA-01` through `DATA-03` and the Recipe Data exit in
+   `docs/mvp-roadmap.md`
+4. Recipe lifecycle, taxonomy, wizard, visibility, and deletion decisions in
+   `docs/brief.md`
+5. Contract conventions and Taxonomy/Recipes/PostgreSQL sections in
+   `docs/api-and-data-model.md`
+6. `server/docs/progress.md`
+7. `server/src/db/schema.ts`, current Drizzle migrations/meta, database config,
+   guarded reset helpers, and existing database test patterns
 
-Do not load Recipe Data plans, AI nutrition, media, Home, Search, or later-track
-documents unless a concrete Auth dependency requires it.
+Do not load Recipe UI, media, Profile UI, discovery, AI nutrition, or later
+Recipe Data plans unless a concrete `DATA-01` through `DATA-03` dependency
+requires a narrow read.
 
 ## Branch and Scope Rules
 
-- Reuse `codex/mvp-auth-account` and its existing worktree. Do not create a new
-  Auth branch or worktree.
-- Before any write, verify the feature branch contains current `dev`; fast-
-  forward only when refs have not diverged.
-- Do not repeat the completed independent code review or redo the five fixes.
-- Do not spawn subagents, push, open a pull request, or use Expo web.
-- Do not implement visible Profile deletion UI; `PROFILE-06` owns that entry
-  point.
+- Start from current `dev`. Create `codex/mvp-recipe-data` and its isolated
+  worktree; do not write Recipe Data changes in the main checkout or preserved
+  Auth worktree.
+- Verify the branch point and baseline before writing. Preserve all unrelated
+  changes and historical worktrees.
+- Create at most one bounded implementation plan if the migration/service
+  boundary remains ambiguous after reading the approved contracts.
+- Use TDD. Commit each completed task separately with its task ID prefix.
+- Do not edit migrations `0000` through `0004`; generate forward migrations.
+- Do not add recipe routes, mobile DTOs, screens, media storage, ingredient
+  normalization, or speculative abstractions.
+- A narrowly scoped tag-assignment service/transaction is allowed only to make
+  the five-tag invariant enforceable and testable for `DATA-03`.
+- Do not spawn subagents, push, open a pull request, use Expo web, or operate an
+  Android emulator/physical device.
 
-## Required Android Evidence
+## Required Task Order
 
-Run `agent-device.cmd devices --platform android` first.
+### `DATA-01` Recipe lifecycle and optimistic version
 
-If a target is available, use the native Android app and uniquely prefixed QA
-accounts/messages to verify every currently reachable check:
+Start with failing tests for the confirmed lifecycle values `draft`,
+`published`, `archived`, and `removed`; a default draft state; aggregate
+versioning; publication/archive/removal timestamps; and the target recipe
+indexes. Replace the provisional `isPublished` representation through a
+forward migration that handles existing development rows deliberately. Keep
+lifecycle timestamps server-controlled at future service boundaries.
 
-1. Signup stays outside private routes until confirmation, then confirmation
-   persists the first session and lands on Home.
-2. Resend cooldown and replaced challenge state remain correct across leaving
-   the screen and a full app relaunch.
-3. Unverified login cannot enter the private route tree.
-4. Password-reset completion exits an already live old session.
-5. The old password is denied, the replacement password logs in, and the new
-   session survives relaunch without replaying a consumed refresh token.
-6. If a visible deletion entry point already exists, successful deletion clears
-   SecureStore/Auth state, exits private routes, remains signed out after
-   relaunch, and both old refresh and still-live access tokens are denied. If
-   the entry point is still intentionally absent, record this exact conditional
-   check under `PROFILE-06`; do not create the UI or treat its absence as an
-   Auth defect.
+Run focused tests and `npm.cmd run server:check`, then commit:
 
-Use Mailpit only for the uniquely prefixed verification/reset messages and
-remove only those messages and exact QA database rows afterward. Never reset a
-broad database or mailbox for this Goal.
+```text
+DATA-01: Add recipe lifecycle and versioning
+```
 
-If native behavior fails, diagnose it systematically, report the exact defect,
-and obtain owner confirmation before editing. Add a regression test first,
-make one coherent `AUTH-EXIT` commit per confirmed fix, re-review the changed
-area, and rerun all affected native evidence.
+### `DATA-02` Curated categories
 
-If no Android target is available again, do not mark Auth complete and do not
-create the Recipe Data Goal. Keep the exact checks pending, update progress only
-when it adds truthful new evidence, integrate only a verified bounded
-checkpoint, and stop at the Auth boundary.
+Start with failing tests for stable category IDs/slugs, unique slugs, display
+names, deterministic order, and active state. Add the category table, make
+recipe category references relational, and provide idempotent ordered
+development seeds. Preserve one required category per recipe without building
+category APIs or UI.
 
-## Verification and Closure
+Run focused tests and `npm.cmd run server:check`, then commit:
 
-If code changes, run the complete gate before closure:
+```text
+DATA-02: Add curated recipe categories
+```
+
+### `DATA-03` Normalized tags
+
+Start with failing tests for normalized unique tag slugs/labels, unique
+recipe-tag pairs, cascading joins, and atomic rejection of a sixth tag. Replace
+the provisional JSON tag array with `tags` and `recipe_tags`. Enforce the
+five-tag maximum at the transaction/service boundary; do not rely on the mobile
+client or an unsafe count-then-insert race.
+
+Run focused tests and `npm.cmd run server:check`, then commit:
+
+```text
+DATA-03: Normalize recipe tags
+```
+
+## Migration and Verification Gate
+
+- Use the guarded local `letyoucook` development database only. Before any
+  destructive cleanup, prove the host/database target is exact and local.
+- Generate migrations with `npm.cmd run server:db:generate`.
+- Inspect generated SQL and Drizzle metadata before applying it.
+- Apply the forward migration with `npm.cmd run server:db:migrate` to the
+  existing local development database.
+- Do not perform `DATA-11` clean-database migration certification in this Goal.
+- Required final commands:
 
 ```powershell
-npm.cmd run check
-npm.cmd test -- --runInBand
 npm.cmd run server:check
 npm.cmd run server:test
 git diff --check
 ```
 
-If the verified code tree is unchanged, confirm the recorded automated
-checkpoint still matches the branch and run focused checks needed for the
-native evidence plus `git diff --check`; do not manufacture redundant evidence.
+Missing dependencies, an unavailable required database, skipped required tests,
+or unapplied generated migrations are not passing evidence.
 
-When and only when all currently reachable native Auth checks pass:
+## Review and Closure
 
-1. Update `docs/progress.md` and `server/docs/progress.md` with the native exit
-   evidence and cleanup result.
-2. Mark the Auth delivery track complete without changing completed roadmap
-   task definitions.
-3. Replace this file with one fresh bounded Recipe Data Goal beginning at
-   `DATA-01`, derived from `docs/mvp-roadmap.md` and approved contracts.
-4. Commit the final `AUTH-EXIT` handoff on `codex/mvp-auth-account`.
-5. Fast-forward the verified feature branch into the main `dev` checkout while
-   preserving unrelated main-checkout changes.
-6. Verify both refs and trees are identical and the next Goal is readable from
-   the main checkout.
+After `DATA-01` through `DATA-03` pass:
+
+1. Review the bounded diff against the roadmap and approved data contract.
+2. Fix only confirmed findings within this Goal and rerun affected checks.
+3. Update `docs/mvp-roadmap.md`, `docs/progress.md`, and
+   `server/docs/progress.md` with verified evidence.
+4. Replace this file with one fresh bounded Recipe Data Goal beginning at
+   `DATA-04`; do not execute it.
+5. Commit any final bounded handoff documentation with a `DATA-03` prefix.
+6. Fast-forward `codex/mvp-recipe-data` into the main `dev` checkout while
+   preserving unrelated changes.
+7. Verify the two refs and trees are identical and the next Goal is readable
+   from `dev`.
+8. Preserve the Recipe Data feature branch/worktree for the next bounded Goal.
 
 ## Done When
 
-- Every currently reachable Android Auth exit check passes on a native target.
-- Any confirmed defect is regression-tested, fixed, re-reviewed, and committed.
-- PostgreSQL/Mailpit QA records are removed by exact unique identifiers.
-- Auth documentation matches verified truth and the track is marked complete
-  only after the native exit requirement passes.
-- The Auth worktree is clean and preserved.
-- The verified feature branch is fast-forwarded into `dev`; refs and trees are
+- `DATA-01`, `DATA-02`, and `DATA-03` each have focused red/green evidence and a
+  separate task-ID commit.
+- PostgreSQL/Drizzle represents the approved lifecycle, curated categories, and
+  normalized tags, including the concurrency-safe five-tag limit.
+- Forward migration from the existing local development state succeeds.
+- Final server check/tests and `git diff --check` pass with no required skips.
+- Documentation matches verified truth; later roadmap tasks remain unchecked.
+- The feature worktree is clean and preserved.
+- The verified branch is fast-forwarded into `dev`; refs and trees are
   identical.
-- A fresh Recipe Data Goal is readable from `dev`, but has not been executed.
+- A fresh bounded Goal beginning at `DATA-04` is readable from `dev` but has not
+  been executed.
 
-Stop at this boundary. Do not continue into the next Goal.
+Stop at this boundary.

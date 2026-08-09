@@ -5,11 +5,11 @@
 
 - Last audited: 2026-08-09
 - Current integration branch: `dev`
-- Last integrated Goal checkpoint: `AUTH-11` implementation and independent
-  exit-review fixes (`90c5a84`, `8abdcad`, `14bd4bd`, and `11d91d1`)
-- Active feature track: Authentication and account lifecycle
-- Next bounded Goal: complete remaining Android-native Auth exit evidence
-- Feature branch: `codex/mvp-auth-account`
+- Last integrated Goal checkpoint: Authentication and account lifecycle through
+  `AUTH-11`, independent exit review, and all five confirmed fixes
+- Active feature track: Core Recipe Taxonomy and Database Model
+- Next bounded Goal: implement `DATA-01` through `DATA-03`
+- Feature branch: `codex/mvp-recipe-data`
 - Standalone Goal prompt: `docs/current-goal.md`
 - Confirmed account-deletion policy: immediate irreversible opaque tombstone;
   credentials/profile erased, published recipes retained as "Deleted cook,"
@@ -21,82 +21,76 @@
 1. Start a new Codex task in this local project.
 2. Select Sol High and enable Goal mode.
 3. Use `docs/current-goal.md` as the complete Goal prompt.
-4. Reuse `codex/mvp-auth-account` and its existing Auth worktree after verifying
-   it contains current `dev` and has no unpreserved changes.
-5. Discover an Android target and run the exact pending native Auth checks. Do
-   not repeat the completed review or begin Recipe Data/Profile UI.
-6. Before stopping, the Goal must fast-forward its verified checkpoint into
-   `dev` so the next Goal file is visible from this main checkout.
+4. Create `codex/mvp-recipe-data` from current `dev` in its own isolated
+   worktree; do not reuse or alter the preserved Auth worktree.
+5. Implement only `DATA-01` through `DATA-03` with TDD and task-ID commits.
+6. Stop after its verified checkpoint is fast-forwarded into `dev`; do not begin
+   later Recipe Data, media, Recipe UI, or Profile UI work.
 
-Do not resume the historical whole-MVP Goal and do not use the obsolete
-`codex/mvp-auth-integration` branch name.
+Do not resume the historical whole-MVP Goal or any completed Auth Goal.
 
 ## Completed and verified
 
 - `BASE-01` through `BASE-06`: Foundation exit gate complete.
-- `API-01` through `API-07`: API contract/mobile data foundation exit gate
-  complete and merged into `dev`.
-- `AUTH-01` through `AUTH-09`: `/v1` persistence, SecureStore sessions, refresh,
-  invalidation, logout, SMTP/Mailpit verification, and password reset exist.
-- `AUTH-10`: deletion tombstones identity, erases private data, immediately
-  denies sessions, retains required references, and permits email reuse.
-- `AUTH-11`: scoped keyed-HMAC limits, stable `429`/`Retry-After`, allowlisted
-  logs, and deterministic PostgreSQL Auth races are covered.
-- `AUTH-01` through `AUTH-11` are implemented. The independent Auth review and
-  all five confirmed fixes are complete; only native exit evidence remains.
-- Latest Auth branch verification after the exit-review fixes:
+- `API-01` through `API-07`: API contract/mobile data foundation complete.
+- `AUTH-01` through `AUTH-11`: authentication and account lifecycle complete.
+- The independent Auth review and all five confirmed fixes are complete across
+  `90c5a84`, `8abdcad`, `14bd4bd`, and `11d91d1`.
+- Latest Auth automated verification:
   - `npm.cmd run check`: passed;
   - `npm.cmd test -- --runInBand`: 21 suites/122 tests passed;
   - `npm.cmd run server:check`: passed;
   - `npm.cmd run server:test`: 104/104 passed with zero skips;
   - `git diff --check`: passed.
+- Real PostgreSQL/SMTP/Mailpit exit verification passed signup/verification,
+  unverified denial, password reset and replacement, rate limiting, refresh-
+  family replay isolation, deletion, old-token denial, and email reuse. Exact
+  QA rows/messages were removed and verified at zero.
 
 ## Current implementation truth
 
 - Recipe/discovery/profile content remains mostly mocked; recipe, media,
   favourite, report, and block server routes remain stubs or `501`.
-- Mobile Auth validates successful `/v1` payloads, persists one authoritative
-  SecureStore session through rotation/relaunch, performs hydration refresh and
-  single-flight invalidation, and retains best-effort logout/safe error mapping.
-- Account deletion is transactional; protected middleware denies deleted users,
-  and the mobile boundary clears persisted state only after server success.
-- Refresh locks account/token rows and scopes reuse to indexed token families;
-  Auth limits are bounded but single-process; password reset/deletion share
-  account-first lock ordering; logs remain strictly allowlisted.
+- The current recipe schema is a prototype: it uses `isPublished`, string
+  `categoryId`, and JSON tags instead of the approved lifecycle, curated
+  category, and normalized tag model.
+- Mobile Auth persists one authoritative SecureStore session through rotation
+  and relaunch, performs hydration refresh/single-flight invalidation, and uses
+  best-effort logout with safe error mapping.
+- Account deletion, refresh-family isolation, Auth limits, lock ordering, and
+  allowlisted logging are implemented and covered by automated tests.
 
-## Blockers and local-state snapshot
+## User-owned manual Android QA
 
-- Fresh real PostgreSQL/SMTP/Mailpit exit verification passed signup and
-  verification, unverified denial, reset completion, `202/202/202/429` rate
-  limiting with one reset delivery, password replacement, family-scoped replay,
-  deletion, immediate old-token denial, and email reuse. Exact QA rows/messages
-  were removed and verified at zero.
-- `agent-device` Android discovery again returned no connected emulator/device.
-  Pending native checks: signup confirmation lands on Home;
-  resend cooldown and challenge replacement survive relaunch; unverified login
-  remains outside private routes; reset completion exits an old live session;
-  the old password is denied and the new password logs in; and, once
-  `PROFILE-06` supplies the visible entry point, successful deletion clears
-  SecureStore/auth state, exits private routes, remains signed out after
-  relaunch, and both old refresh and still-live access tokens are denied.
+The following checklist was not executed by Codex and is
+`user-owned; not agent-verified`. Under the approved repository policy it is
+non-blocking unless a future prompt explicitly makes it a gate:
+
+1. Signup stays outside private routes until confirmation, then lands on Home.
+2. Resend cooldown and replacement survive navigation and full relaunch.
+3. Unverified login remains outside private routes.
+4. Password-reset completion exits an already live old session.
+5. The old password is denied; the new password logs in and survives relaunch.
+6. After `PROFILE-06` adds the visible entry point, deletion clears local Auth,
+   exits private routes, survives relaunch signed out, and both old refresh and
+   still-live access tokens are denied.
+
+No native pass is claimed. User-reported failures should become focused defect
+work with regression coverage.
+
+## Local-state snapshot and deferred debt
+
 - `dev` is local-only. No push or pull request was created.
-- Migration `0004_common_krista_starr.sql` applied successfully to the guarded
-  local database; it adds refresh-token families/usage time and the required
-  unique/active-family indexes while revoking legacy ungrouped active sessions.
-- A historical Foundation worktree remains; a Windows-locked typed-client
-  directory is not registered. Do not clean either without rechecking scope.
+- Migration `0004_common_krista_starr.sql` is applied to the guarded local
+  development database.
+- The Auth worktree remains preserved. A historical Foundation worktree and a
+  Windows-locked unregistered typed-client directory must not be cleaned
+  without rechecking scope.
 - Existing dependency audit output reported 30 vulnerabilities. No automatic
   audit fix was run because it may be breaking and is outside the current Goal.
-
-## Deferred Foundation debt
-
-- Development reset/seed is not atomic.
-- Rejected `pool.end()` cleanup is not independently handled.
-- API base URL validation still permits query/hash components.
-- The long-running backend lacks signal-driven shared-pool shutdown.
-
-These items remain scoped debt unless a current task or measured failure makes
-one relevant.
+- Deferred Foundation debt: non-atomic development reset/seed, independently
+  unhandled rejected `pool.end()`, permissive API base URL query/hash parsing,
+  and no signal-driven shared-pool shutdown.
 
 ## Delivery track status
 
@@ -104,8 +98,8 @@ one relevant.
 | --- | --- | --- | --- |
 | 0 | Foundation | Complete | Deferred debt only |
 | 1 | API contracts | Complete | Do not redo |
-| 2 | Auth/account | Review/fixes complete; native exit pending | Android-native exit evidence |
-| 3 | Recipe data | Pending | After Auth exit |
+| 2 | Auth/account | Complete | Manual Android checklist is user-owned |
+| 3 | Recipe data | Pending | `DATA-01` through `DATA-03` |
 | 4 | R2 media | Pending | After Recipe data |
 | 5 | Profile | Pending | After Auth and Media |
 | 6 | Recipe authoring | Pending | After Recipe data and Media |
@@ -118,12 +112,6 @@ one relevant.
 | 13 | Operations/release | Pending | After core features |
 | 14 | AI nutrition | Pending, last | After operations launch gate |
 
-Use `docs/mvp-roadmap.md` for every task ID, dependency, branch, and exit gate.
-
-## Progress maintenance rules
-
-- Keep this file below 140 lines; keep detailed evidence in Git or handoffs.
-- Check roadmap items only when complete and update the backend supplement only
-  for backend state.
-- Before stopping, integrate the verified branch into `dev` and confirm the
-  next Goal is readable from the main checkout.
+Use `docs/mvp-roadmap.md` for task IDs and dependencies. Keep this file below
+140 lines, update backend state in `server/docs/progress.md`, and integrate each
+verified bounded Goal into `dev` before stopping.

@@ -33,7 +33,7 @@
 - Consumes: the approved policy in `docs/superpowers/specs/2026-08-09-user-owned-native-qa-design.md` and completed Auth evidence recorded at `55a3818`.
 - Produces: one durable QA rule, one truthful Auth-complete status, and one standalone Recipe Data Goal covering only `DATA-01` through `DATA-03`.
 
-- [ ] **Step 1: Update the durable verification policy**
+- [x] **Step 1: Update the durable verification policy**
 
 Replace the emulator/device requirement in `AGENTS.md` with rules that require
 applicable automated checks, prohibit Codex-operated emulator/physical-device
@@ -41,7 +41,7 @@ QA, keep Expo web invalid, require a concise manual checklist for affected
 native flows, label the checklist `user-owned; not agent-verified`, and make it
 non-blocking unless the current prompt explicitly says otherwise.
 
-- [ ] **Step 2: Mark Auth complete without claiming native execution**
+- [x] **Step 2: Mark Auth complete without claiming native execution**
 
 Update `docs/progress.md` and `server/docs/progress.md` to record:
 
@@ -55,7 +55,7 @@ Update `docs/progress.md` and `server/docs/progress.md` to record:
 Keep the exact six-item manual Auth checklist available to the user and keep
 `docs/progress.md` below 140 lines.
 
-- [ ] **Step 3: Replace the completed Auth Goal with the next bounded contract**
+- [x] **Step 3: Replace the completed Auth Goal with the next bounded contract**
 
 Rewrite `docs/current-goal.md` as a standalone new-chat prompt for
 `DATA-01` through `DATA-03` only:
@@ -69,7 +69,7 @@ Rewrite `docs/current-goal.md` as a standalone new-chat prompt for
 - stop after the verified `DATA-01` through `DATA-03` checkpoint;
 - do not begin media, Recipe UI, Profile UI, later Recipe Data tasks, or native QA.
 
-- [ ] **Step 4: Verify documentation consistency**
+- [x] **Step 4: Verify documentation consistency**
 
 Run:
 
@@ -86,7 +86,7 @@ finds the durable policy, Auth handoff, and Recipe Data Goal; progress remains
 under 140 lines; diff check passes; only intended documentation files are
 modified.
 
-- [ ] **Step 5: Prove the verified code tree did not change**
+- [x] **Step 5: Prove the verified code tree did not change**
 
 Run:
 
