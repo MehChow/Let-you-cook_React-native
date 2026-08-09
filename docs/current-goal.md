@@ -1,135 +1,128 @@
-# Current Goal: Account Lifecycle Hardening
+# Current Goal: Independent Authentication Track Exit Review
 
-Use this document as the complete prompt in a new Codex Goal-mode task with
-Sol High.
+Use this document as the complete prompt in a new top-level Codex Goal-mode
+task with Sol High.
 
 ## Outcome
 
-Complete `AUTH-10` and `AUTH-11` on the existing Auth feature branch:
+Independently review the complete `AUTH-01` through `AUTH-11` track, resolve
+confirmed findings, and run the Authentication and account-lifecycle exit gate.
 
-1. Implement authenticated account deletion with an explicit, documented
-   retention/anonymization policy and immediate session invalidation.
-2. Harden Auth with scoped rate limits, redacted logging, and adversarial
-   concurrency/failure coverage.
+The first review pass is strictly read-only. Do not edit code or documentation,
+create commits, or reinterpret a finding as approved merely because it looks
+straightforward. Present a concise, severity-ordered findings report to the
+owner. If findings exist, wait for the owner to confirm which findings belong
+to this exit Goal before applying fixes. If no findings exist, say so explicitly
+and proceed to the exit gate.
 
-Stop after both tasks are separately committed, relevant verification passes,
-and a fresh independent Auth-track exit-review Goal is recorded. Do not begin
-the exit review, `DATA-01`, or any Profile-track UI work.
-
-## Required Product-Policy Gate
-
-`docs/brief.md` deliberately leaves account deletion, content retention, and
-moderation-evidence handling unresolved. Before changing implementation, ask
-the owner to confirm one concrete policy covering at least:
-
-- whether the identity row is retained as an opaque tombstone or erased;
-- when email, password credentials, profile fields, and media references are
-  erased or anonymized;
-- whether and how authored public content remains visible;
-- how reports and moderation evidence retain referential integrity;
-- whether the deleted email may register again and when;
-- whether deletion is immediate or has a reversible pending period.
-
-Do not infer approval from this handoff. Record the confirmed policy in
-`docs/brief.md`, `docs/api-and-data-model.md`, and `docs/progress.md` before
-implementing it. If the owner does not decide, stop at this gate without
-marking `AUTH-10` complete.
+Stop after the Auth track is independently reviewed, its required verification
+is complete, its final checkpoint is integrated into `dev`, and a fresh Recipe
+Data Goal is recorded. Do not execute that Recipe Data Goal or begin Profile UI.
 
 ## Verified Starting State
 
 - Workspace: `C:\Let-you-cook_React-native`
 - Integration branch: `dev`
 - Feature branch: `codex/mvp-auth-account`
-- Worktree: `C:\Let-you-cook_React-native\.worktrees\mvp-auth-account`
-- Latest Auth code checkpoint: `83dfefa` (`AUTH-09`); verify the later Goal
-  handoff commit and current refs rather than assuming this code hash is HEAD.
+- Preserved worktree:
+  `C:\Let-you-cook_React-native\.worktrees\mvp-auth-account`
+- Auth implementation code checkpoints:
+  - `8347d84` — `AUTH-10: Implement account deletion policy`
+  - `8fe1641` — `AUTH-11: Harden authentication operations`
 - Completed roadmap range: `BASE-01` through `BASE-06`, `API-01` through
-  `API-07`, and `AUTH-01` through `AUTH-09`.
-- Signup, verification, verified login, hydration refresh, single-flight
-  invalidation, logout, and password reset use `/v1` and real PostgreSQL state.
-- Latest automated verification: mobile 21 suites/114 tests; backend 89/89
-  tests with zero skips; root and server checks passed.
-- Real SMTP/Mailpit verification passed for verification and reset delivery,
-  first-session issuance, old-refresh revocation, old-password denial, and
-  new-password login. The temporary QA account was removed afterward.
-- No Android emulator/device was available for the exact native verification
-  listed in `docs/progress.md`; preserve or resolve those pending checks.
+  `API-07`, and `AUTH-01` through `AUTH-11`.
+- Latest implementation verification: mobile 21 suites/115 tests; backend
+  102/102 tests with zero skips; root and server checks passed.
+- Real PostgreSQL and Mailpit verification passed for deletion policy,
+  immediate session denial, email reuse, rate-limit responses, and delivery
+  control. Temporary QA database and Mailpit records were removed.
+- Android discovery returned no connected emulator/device. The exact native
+  exit checks remain listed in `docs/progress.md` and are not waived.
 
-Verify the current clean Auth branch and integrated handoff state rather than
-assuming historical hashes, processes, containers, or device availability.
+Verify current refs, clean worktree state, local services, test counts, and
+device availability instead of assuming this snapshot is still current.
 
-## Read Before Acting
+## Read Before Reviewing
 
-Read only the context required for this bounded Goal:
+Read only the context needed to evaluate the Auth track:
 
 1. `AGENTS.md`
 2. The top `Current progress` section of `docs/progress.md`
-3. `docs/mvp-roadmap.md`, especially `AUTH-10`, `AUTH-11`, and the Auth exit
-4. Account/auth/privacy sections of `docs/brief.md` and
+3. The Auth section and exit definition in `docs/mvp-roadmap.md`
+4. Auth/account/privacy sections of `docs/brief.md` and
    `docs/api-and-data-model.md`
 5. `docs/backend-integration/opt-setup.md`
 6. `server/docs/progress.md` and `server/docs/backend-token-auth.md`
-7. Current auth middleware, routes, services, schema, migrations, logging,
-   request IDs, error mapping, configuration, and PostgreSQL tests
-8. Current mobile Auth provider, API wrappers, session invalidation, token
-   storage, and any existing profile account/logout entry points
-9. `compose.dev.yaml` and local PostgreSQL/Mailpit configuration
+7. Auth-related schema and forward migrations
+8. Auth middleware, routes, services, email delivery, rate limiting,
+   operational logging, request IDs, errors, and PostgreSQL tests
+9. Mobile Auth provider, state machine, API operations, token storage,
+   invalid-session handling, and Auth screens/tests
+10. `compose.dev.yaml` and guarded local PostgreSQL/Mailpit configuration
 
-Do not load AI nutrition, recipe/media implementation plans, Home, Search, or
-later-track documents unless a concrete dependency requires them.
+Do not load AI nutrition, Recipe Data implementation plans, media plans, Home,
+Search, or later-track documents unless a concrete Auth dependency requires it.
 
 ## Branch and Worktree
 
-Reuse `codex/mvp-auth-account` and the existing Auth worktree. Do not create a
-second Auth branch or worktree. Before writing, verify the feature branch
-contains current `dev`; fast-forward it from `dev` if the refs have not
-diverged. If either checkout is not clean, inspect and preserve unrelated user
-changes before acting.
+Reuse `codex/mvp-auth-account` and its existing worktree. Do not create a
+second Auth branch or worktree. Before any post-review fix, verify the feature
+branch contains current `dev`; fast-forward it from `dev` only when the refs
+have not diverged. Inspect and preserve unrelated user changes in either
+checkout.
 
-## Execution Rules
+## Read-Only First-Pass Review
 
-- Work inline in this task. Do not spawn subagents.
-- Treat approved product/API decisions as settled; only the deletion-policy
-  gate above requires a new product decision.
-- Use TDD for every behavior change and commit each roadmap item separately:
-  - `AUTH-10: Implement account deletion policy`
-  - `AUTH-11: Harden authentication operations`
-- Keep `DELETE /v1/users/me` authenticated and service-backed. Derive identity
-  only from the access token and enforce the confirmed deletion policy in one
-  transaction.
-- Ensure deletion immediately revokes refresh sessions and prevents still-live
-  access tokens from using protected routes. Preserve current error envelopes,
-  request IDs, `/v1` contracts, and non-enumerating auth behavior.
-- Evolve the schema only through forward Drizzle migrations. Preserve future
-  recipe/profile/moderation relationships according to the confirmed policy;
-  do not make unrelated recipe-data migrations.
-- Add only Auth-scoped rate limiting here. Return stable `429` errors with a
-  safe delta-seconds `Retry-After`; keep known and unknown account responses
-  indistinguishable where enumeration resistance requires it.
-- Keep limiter/time/key behavior injectable and deterministic in tests. Do not
-  add Redis or another service; document any single-process limitation for the
-  later operations track.
-- Never log request bodies, raw emails, passwords, OTPs, challenge IDs, tokens,
-  reset grants, signed URLs, or secrets. Test the redaction boundary and retain
-  safe request IDs and operational error classification.
-- Add deterministic concurrency/failure tests for at least duplicate signup,
-  OTP single consumption/replacement, refresh rotation/reuse, password-reset
-  grant single consumption, deletion versus session use, limiter boundaries,
-  and injected email/database failures. Do not call a skipped database test a
-  pass.
-- Keep SecureStore-only token storage, cancellation, bounded retries, typed
-  Hono client boundaries, and invalid-session navigation intact.
-- `PROFILE-06` owns the eventual visible Profile deletion/logout entry points.
-  Add the typed mobile deletion operation and session cleanup boundary needed
-  by that task, but do not redesign or expand Profile UI in this Goal.
-- Preserve unrelated user changes; do not push or open a pull request.
-- Do not run Expo web.
+Review the complete Auth implementation and its tests for at least:
 
-## Verification
+- `/v1` request/response contracts, stable error envelopes, request IDs, and
+  safe mobile DTO mapping;
+- signup, verification, resend replacement/cooldown, login, hydration refresh,
+  invalid-session exit, logout, password reset, and account deletion;
+- verified-account gating and the guarantee that no unverified or deleted user
+  can enter or remain in private routes;
+- SecureStore-only credentials, refresh single-flight behavior, rotation/reuse
+  revocation, logout failure handling, and deletion cleanup ordering;
+- immediate irreversible tombstoning, email reuse, published-content author
+  anonymization, private media/profile cleanup, and 24-month resolved
+  moderation-evidence retention;
+- transaction boundaries, row-lock ordering, uniqueness handling, and tested
+  races for signup, OTP replacement/consumption, reset grants, refresh reuse,
+  and deletion versus session use;
+- non-enumerating responses, purpose-bound challenges/grants, expiry,
+  attempts, cooldowns, revocation, and replay resistance;
+- scoped HMAC-keyed rate-limit identities, exact boundary/reset behavior,
+  positive delta-seconds `Retry-After`, failure isolation, and the documented
+  single-process limitation;
+- operational logs that retain useful safe classification/request IDs without
+  request bodies, raw emails, passwords, OTPs, challenge IDs, grants, tokens,
+  signed URLs, provider details, or database exception prose;
+- forward-only schema/migration correctness, guarded development database
+  commands, no skipped required coverage, and truthful progress/contracts.
 
-During each task, run focused RED/GREEN tests and the smallest relevant type
-check. Generate and apply every forward migration against only the guarded
-local development database. Before this Goal stops, run at least:
+Use evidence from code, tests, migration SQL, and focused read-only commands.
+Do not make implementation or documentation changes during this pass.
+
+## Finding Gate and Fix Rules
+
+- Report findings first, ordered by severity, with exact file/line evidence,
+  impact, and the missing or incorrect invariant.
+- Distinguish actionable defects from later-track scope, optional hardening,
+  and unavailable native evidence.
+- If findings exist, pause for owner confirmation before editing. Apply only
+  confirmed Auth-exit findings and add a regression test first for every
+  behavior fix.
+- Keep fixes on `codex/mvp-auth-account`; use focused TDD and one intentional
+  task-ID or `AUTH-EXIT` commit per coherent fix.
+- Re-review every changed area against the confirmed finding before closing it.
+- Do not spawn subagents, push, open a pull request, or run Expo web.
+- Do not implement `DATA-01`, recipe/media behavior, visible Profile deletion
+  UI, or unrelated cleanup.
+
+## Exit Verification
+
+After a clean review or confirmed fixes, run focused tests and then the full
+required gate from the Auth worktree:
 
 ```powershell
 npm.cmd run check
@@ -139,31 +132,54 @@ npm.cmd run server:test
 git diff --check
 ```
 
-Use real local PostgreSQL to verify deletion, immediate refresh revocation,
-still-live access-token denial, and policy-prescribed anonymization/retention.
-Use Mailpit for rate-limit and failure regressions where delivery matters. Use
-an Android emulator/device for the affected Auth session-clear and pending
-verification flows; if no device is available, record every exact pending
-native check in `docs/progress.md` and never substitute web.
+Use the guarded local PostgreSQL database for representative end-to-end Auth
+state transitions and concurrency. Use Mailpit for verification/reset delivery
+and rate-limit behavior, and remove only uniquely identified QA records.
+
+Re-run Android discovery. If an emulator/device is available, verify every
+currently reachable pending Auth-screen flow in `docs/progress.md` with the
+native app. Never use Expo web. `PROFILE-06` still owns the visible deletion
+entry point, so preserve that conditional device check without treating its
+intentionally absent UI as an Auth defect. If no target is available, keep each
+exact reachable check pending and state that the Auth track cannot pass its
+native exit evidence yet; do not mark the track complete or invent substitute
+evidence.
+
+## Documentation, Integration, and Next Goal
+
+When and only when the full Auth exit gate passes:
+
+1. Update `docs/progress.md`, `server/docs/progress.md`, and any corrected Auth
+   contract documents with the independently verified state.
+2. Mark the Auth delivery track complete without changing completed roadmap
+   task definitions.
+3. Replace this file with one fresh bounded Recipe Data Goal beginning at
+   `DATA-01`, derived from `docs/mvp-roadmap.md` and current approved contracts.
+4. Commit the final Auth exit-review handoff on `codex/mvp-auth-account`.
+5. Fast-forward the verified feature branch into the main `dev` checkout while
+   preserving unrelated main-checkout changes.
+6. Verify branch refs and trees are identical and the next Goal is readable
+   from the main checkout.
+
+If native evidence or a confirmed defect remains unresolved, do not create the
+Recipe Data Goal and do not mark Auth complete. Instead, leave this file as an
+exact continuation Goal for the remaining Auth exit work, commit only truthful
+progress if appropriate, integrate only a verified bounded checkpoint, and
+stop at that Auth boundary.
 
 ## Done When
 
-- The deletion policy is owner-confirmed and documented consistently.
-- `AUTH-10` and `AUTH-11` satisfy their roadmap definitions and are separately
-  committed on `codex/mvp-auth-account`.
-- Relevant automated checks pass without skipped required coverage, and exact
-  unavailable native checks are recorded.
-- `docs/progress.md`, `server/docs/progress.md`, `docs/mvp-roadmap.md`, and all
-  policy/contract docs describe the verified state.
-- `docs/current-goal.md` is replaced with a fresh independent Auth-track exit
-  review assignment. Its first pass must be read-only; do not perform that
-  review in the implementation task.
+- A strict read-only first pass is reported before any fix is made.
+- Every confirmed in-scope finding is regression-tested, fixed, re-reviewed,
+  and committed.
+- All automated, PostgreSQL, Mailpit, and required native exit evidence passes
+  with no skipped required coverage.
+- Auth documentation and progress match verified implementation truth.
+- The Auth track is marked complete only if its full exit definition passes.
 - The Auth worktree is clean and preserved.
-- The verified Auth branch is fast-forwarded into the main `dev` checkout.
-- `git rev-parse dev` and `git rev-parse codex/mvp-auth-account` return the same
-  commit, their trees are identical, and the next Goal is readable from the
-  main checkout.
+- The verified feature branch is fast-forwarded into `dev`; both refs and trees
+  are identical.
+- A fresh next Goal is readable from `dev`, but no Recipe Data or Profile work
+  has begun.
 
-Do not mark the Auth track complete, delete its feature branch/worktree, or
-start Recipe Data. Stop only after this bounded checkpoint is integrated into
-`dev`.
+Stop at this boundary. Do not continue into the next Goal.

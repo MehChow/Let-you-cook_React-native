@@ -6,14 +6,15 @@ and schema contract remains `docs/api-and-data-model.md`.
 ## Current backend resume point
 
 - Active feature track: Authentication and account lifecycle
-- Next bounded Goal: `AUTH-10` through `AUTH-11`
+- Next bounded Goal: independent `AUTH-01` through `AUTH-11` exit review
 - Feature branch: `codex/mvp-auth-account`
-- Last integrated Goal checkpoint: `83dfefa` (`AUTH-09` code checkpoint; the
-  later docs handoff commit is the current branch tip)
+- Last integrated Goal checkpoint: `AUTH-11` implementation and exit-review
+  handoff (`8347d84` and `8fe1641` are the latest code checkpoints)
 - Goal prompt: `docs/current-goal.md`
 
-The API contract track and `AUTH-01` through `AUTH-09` are complete. Continue
-with the deletion-policy gate and Auth hardening; do not begin exit review.
+The API contract track and `AUTH-01` through `AUTH-11` are implemented and
+verified. Continue with the independent read-only-first Auth exit review; do
+not begin Recipe Data or Profile UI.
 
 ## Current state
 
@@ -21,14 +22,11 @@ with the deletion-policy gate and Auth hardening; do not begin exit review.
 - `/health` is unversioned; `/v1` mounts all current application route families.
 - Auth/profile routes and mobile callers use `/v1`; temporary unversioned
   auth/profile aliases are retired.
-- Stable request IDs, error envelopes, pagination primitives, and current
-  auth/profile DTO contracts exist.
+- Stable request IDs, error envelopes, pagination, and auth/profile DTOs exist.
 - Server signup, verification, login, refresh rotation/reuse revocation,
   logout, password reset, access-token authentication, and protected
   current-profile read/update exist.
-- The mobile app uses real signup and login through `/v1`; successful sessions
-  are stored through the SecureStore-backed boundary, expired access refreshes
-  once during hydration, and logout revokes before unconditional local clear.
+- Mobile sessions use `/v1`, SecureStore, hydration refresh, and revoking logout.
 - Recipe, image/media, favourite, report, and block routes remain mostly stubs
   or `501` responses.
 
@@ -77,8 +75,8 @@ session issuance, reset revocation, password replacement, and subsequent login.
 AUTH-11 Mailpit verification also proved three accepted reset requests produce
 one cooldown-controlled delivery and the fourth returns `429` with a positive
 `Retry-After`; its QA row and message were removed.
-No Android device was available for the exact native checks in
-`docs/progress.md`; the exact QA account was removed before handoff.
+Android discovery returned no connected target. The exact pending native checks
+remain in `docs/progress.md`; the exact QA account was removed before handoff.
 
 ## Next backend responsibilities
 
@@ -91,8 +89,7 @@ read-only-first review and its complete exit gate pass.
 - Do not recreate the backend package, migrations, contract primitives, or
   typed client, and do not add another service/database architecture.
 - Do not import mobile runtime code into `server/`.
-- Do not implement recipe, media, Profile UI, or Auth exit-review fixes inside
-  the next bounded Goal.
+- Do not implement recipe, media, Profile UI, or unconfirmed review findings.
 - Do not expose secrets, tokens, signed URLs, or personal data in logs.
 
 ## Local database
@@ -120,9 +117,3 @@ npm.cmd run server:test
 At the full Auth track exit, also run every project-wide command required by
 `AGENTS.md`. Missing dependencies, unavailable PostgreSQL, or skipped required
 tests are not passing evidence.
-
-## Maintenance
-
-Keep this file under roughly 120 lines; detailed history belongs in Git. Before
-each Goal stops, integrate its verified checkpoint into `dev` so the next Goal
-is available from the main checkout.
