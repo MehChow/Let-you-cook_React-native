@@ -1,7 +1,15 @@
-import type { AuthResponse } from "./api";
+import type { AuthResponse, AuthTokens, RefreshTokenInput } from "./api";
 import type { StoredAuthSession } from "./authTypes";
 
 const ACCESS_TOKEN_TTL_MS = 15 * 60 * 1000;
+
+interface AuthSessionRestoration {
+  getSession(): Promise<StoredAuthSession | null>;
+  refresh(input: RefreshTokenInput): Promise<AuthTokens>;
+  saveSession(session: StoredAuthSession): Promise<void>;
+  clearTokens(): Promise<void>;
+  now?(): number;
+}
 
 // Reads the expiry timestamp from a JWT-shaped access token.
 const readAccessTokenExpiry = (accessToken: string) => {
@@ -42,3 +50,39 @@ export const isAccessTokenExpired = (
   session: Pick<StoredAuthSession, "accessTokenExpiresAt"> | null,
   now = Date.now(),
 ) => !session || session.accessTokenExpiresAt <= now;
+
+// Restores valid credentials or rotates one expired access token.
+export const restoreAuthSession = async ({
+  getSession,
+  refresh,
+  saveSession,
+  clearTokens,
+  now = Date.now,
+}: AuthSessionRestoration) => {
+  const storedSession = await getSession();
+
+  if (!storedSession) {
+    await clearTokens();
+    return null;
+  }
+
+  if (!isAccessTokenExpired(storedSession, now())) {
+    return storedSession;
+  }
+
+  try {
+    const tokens = await refresh({
+      refreshToken: storedSession.tokens.refreshToken,
+    });
+    const restoredSession = createAuthSession(
+      { user: storedSession.user, tokens },
+      now(),
+    );
+    await saveSession(restoredSession);
+
+    return restoredSession;
+  } catch {
+    await clearTokens();
+    return null;
+  }
+};

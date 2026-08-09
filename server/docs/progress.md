@@ -46,6 +46,7 @@ not begin email delivery, verification, password reset, or deletion next.
 - [x] `AUTH-02` PostgreSQL signup persistence, duplicate, and validation
   reverification.
 - [x] `AUTH-03` Real mobile login and persisted session establishment.
+- [x] `AUTH-04` Mobile hydration refresh and rotated-session persistence.
 
 Latest Auth branch verification:
 

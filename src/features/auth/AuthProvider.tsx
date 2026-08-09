@@ -8,7 +8,11 @@ import {
 
 import type { StoredAuthSession } from "./authTypes";
 import { authApi, type AuthResponse } from "./api";
-import { createAuthSession, isAccessTokenExpired } from "./session";
+import {
+  createAuthSession,
+  isAccessTokenExpired,
+  restoreAuthSession,
+} from "./session";
 import { authTokenStorage } from "./tokenStorage";
 
 interface AuthContextValue {
@@ -35,15 +39,15 @@ export function AuthProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     let mounted = true;
 
-    // Restores a still-valid session from secure device storage.
+    // Restores valid credentials and refreshes expired access once.
     const hydrate = async () => {
       try {
-        const storedSession = await authTokenStorage.getSession();
-        const nextSession = isAccessTokenExpired(storedSession) ? null : storedSession;
-
-        if (!nextSession) {
-          await authTokenStorage.clearTokens();
-        }
+        const nextSession = await restoreAuthSession({
+          getSession: authTokenStorage.getSession,
+          refresh: authApi.refresh,
+          saveSession: authTokenStorage.saveSession,
+          clearTokens: authTokenStorage.clearTokens,
+        });
 
         if (mounted) {
           setSession(nextSession);

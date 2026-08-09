@@ -75,7 +75,7 @@ Dependencies: API contracts.
 - [x] `AUTH-01` Move auth routes and mobile wrappers to `/v1`.
 - [x] `AUTH-02` Reverify sign-up persistence, duplicate handling, and validation.
 - [x] `AUTH-03` Replace hard-coded mobile login with the real API.
-- [ ] `AUTH-04` Refresh expired access during app hydration.
+- [x] `AUTH-04` Refresh expired access during app hydration.
 - [ ] `AUTH-05` Handle concurrent refresh and session-expired navigation.
 - [ ] `AUTH-06` Revoke refresh on logout and clear local credentials.
 - [ ] `AUTH-07` Add `EmailSender`, SMTP/Mailpit, and the test fake.

@@ -37,6 +37,9 @@ Do not resume the historical whole-MVP Goal and do not use the obsolete
   structured API metadata for mobile presentation.
 - `AUTH-03`: Mobile login calls the real `/v1/auth/login` API and stores the
   returned session through the existing SecureStore-backed session boundary.
+- `AUTH-04`: App hydration restores a valid session or makes one refresh
+  attempt for expired access, persists rotated credentials, and clears a
+  rejected or incomplete stored session.
 - `AUTH-01` through `AUTH-03` are integrated into `dev` at `dbf887d`.
 - Latest integrated Auth verification:
   - `npm.cmd run check`: passed;

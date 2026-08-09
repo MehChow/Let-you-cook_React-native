@@ -1,6 +1,7 @@
 import {
   createAuthSession,
   isAccessTokenExpired,
+  restoreAuthSession,
 } from "@/features/auth/session";
 
 const serverAccessToken = [
@@ -39,5 +40,70 @@ describe("auth session helpers", () => {
     expect(session.accessTokenExpiresAt).toBe(901_000);
     expect(isAccessTokenExpired(session, 900_999)).toBe(false);
     expect(isAccessTokenExpired(session, 901_000)).toBe(true);
+  });
+
+  it("refreshes one expired stored session and persists the rotated tokens", async () => {
+    const expiredSession = {
+      user: { id: "user-1", email: "cook@example.com" },
+      tokens: { accessToken: "expired-access", refreshToken: "old-refresh" },
+      accessTokenExpiresAt: 999,
+    };
+    const refresh = jest.fn().mockResolvedValue({
+      accessToken: "new-access",
+      refreshToken: "new-refresh",
+    });
+    const saveSession = jest.fn().mockResolvedValue(undefined);
+
+    const restored = await restoreAuthSession({
+      getSession: async () => expiredSession,
+      refresh,
+      saveSession,
+      clearTokens: jest.fn(),
+      now: () => 1_000,
+    });
+
+    expect(refresh).toHaveBeenCalledTimes(1);
+    expect(refresh).toHaveBeenCalledWith({ refreshToken: "old-refresh" });
+    expect(restored).toEqual({
+      user: expiredSession.user,
+      tokens: { accessToken: "new-access", refreshToken: "new-refresh" },
+      accessTokenExpiresAt: 901_000,
+    });
+    expect(saveSession).toHaveBeenCalledWith(restored);
+  });
+
+  it("clears an expired stored session when its hydration refresh fails", async () => {
+    const clearTokens = jest.fn().mockResolvedValue(undefined);
+
+    const restored = await restoreAuthSession({
+      getSession: async () => ({
+        user: { id: "user-1", email: "cook@example.com" },
+        tokens: { accessToken: "expired-access", refreshToken: "invalid-refresh" },
+        accessTokenExpiresAt: 999,
+      }),
+      refresh: async () => {
+        throw new Error("refresh rejected");
+      },
+      saveSession: jest.fn(),
+      clearTokens,
+      now: () => 1_000,
+    });
+
+    expect(restored).toBeNull();
+    expect(clearTokens).toHaveBeenCalledTimes(1);
+  });
+
+  it("clears partial token state when no stored session can be restored", async () => {
+    const clearTokens = jest.fn().mockResolvedValue(undefined);
+
+    const restored = await restoreAuthSession({
+      getSession: async () => null,
+      refresh: jest.fn(),
+      saveSession: jest.fn(),
+      clearTokens,
+    });
+
+    expect(restored).toBeNull();
+    expect(clearTokens).toHaveBeenCalledTimes(1);
   });
 });
