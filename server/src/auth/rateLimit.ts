@@ -29,6 +29,7 @@ interface AuthRateLimitPolicy {
 
 export interface AuthRateLimitOptions {
   now?: () => number;
+  maxBuckets?: number;
   keyForRequest?: (
     context: Context<RequestIdEnv>,
     scope: AuthRateLimitScope,
@@ -53,6 +54,8 @@ const DEFAULT_POLICIES: Record<AuthRateLimitScope, AuthRateLimitPolicy> = {
   password_reset_verification: { limit: 10, windowMs: 10 * 60_000 },
   password_reset_completion: { limit: 5, windowMs: 10 * 60_000 },
 };
+
+const DEFAULT_MAX_BUCKETS = 10_000;
 
 const PATH_SCOPES = new Map<string, AuthRateLimitScope>([
   ["/v1/auth/signup", "signup"],
@@ -113,13 +116,44 @@ const safeKeyForRequest = async (
     .digest("base64url");
 };
 
+// Returns the stable limited response and records safe operational context.
+const rateLimitResponse = (
+  context: Context<RequestIdEnv>,
+  retryAt: number,
+  currentTime: number,
+  logger: OperationalLogger,
+) => {
+  context.header(
+    "Retry-After",
+    String(Math.max(1, Math.ceil((retryAt - currentTime) / 1_000))),
+  );
+  try {
+    logger.write({
+      classification: "rate_limited",
+      level: "warn",
+      method: context.req.method,
+      requestId: context.get("requestId"),
+      routeScope: operationalRouteScope(context.req.path),
+      status: 429,
+    });
+  } catch {
+    // Logging must not alter the stable rate-limit response.
+  }
+  return errorResponse(context, "rate_limited");
+};
+
 // Applies deterministic in-memory buckets to only versioned Auth operations.
 export const createAuthRateLimitMiddleware = ({
   now = Date.now,
+  maxBuckets = DEFAULT_MAX_BUCKETS,
   keyForRequest = safeKeyForRequest,
   policies = {},
   logger = noopOperationalLogger,
 }: AuthRateLimitOptions = {}): MiddlewareHandler<RequestIdEnv> => {
+  if (!Number.isSafeInteger(maxBuckets) || maxBuckets < 1) {
+    throw new Error("Auth rate-limit bucket capacity must be a positive integer.");
+  }
+
   const buckets = new Map<string, RateLimitBucket>();
   const effectivePolicies = { ...DEFAULT_POLICIES, ...policies };
 
@@ -132,30 +166,31 @@ export const createAuthRateLimitMiddleware = ({
     const policy = effectivePolicies[scope];
     const key = `${scope}:${await keyForRequest(context, scope)}`;
     const currentTime = now();
-    const currentBucket = buckets.get(key);
-    const bucket =
-      !currentBucket || currentBucket.resetAt <= currentTime
-        ? { count: 0, resetAt: currentTime + policy.windowMs }
-        : currentBucket;
+    let bucket = buckets.get(key);
+    if (bucket && bucket.resetAt <= currentTime) {
+      buckets.delete(key);
+      bucket = undefined;
+    }
+
+    if (!bucket) {
+      for (const [bucketKey, candidate] of buckets) {
+        if (candidate.resetAt <= currentTime) {
+          buckets.delete(bucketKey);
+        }
+      }
+
+      if (buckets.size >= maxBuckets) {
+        const retryAt = Math.min(
+          ...Array.from(buckets.values(), ({ resetAt }) => resetAt),
+        );
+        return rateLimitResponse(context, retryAt, currentTime, logger);
+      }
+
+      bucket = { count: 0, resetAt: currentTime + policy.windowMs };
+    }
 
     if (bucket.count >= policy.limit) {
-      context.header(
-        "Retry-After",
-        String(Math.max(1, Math.ceil((bucket.resetAt - currentTime) / 1_000))),
-      );
-      try {
-        logger.write({
-          classification: "rate_limited",
-          level: "warn",
-          method: context.req.method,
-          requestId: context.get("requestId"),
-          routeScope: operationalRouteScope(context.req.path),
-          status: 429,
-        });
-      } catch {
-        // Logging must not alter the stable rate-limit response.
-      }
-      return errorResponse(context, "rate_limited");
+      return rateLimitResponse(context, bucket.resetAt, currentTime, logger);
     }
 
     bucket.count += 1;

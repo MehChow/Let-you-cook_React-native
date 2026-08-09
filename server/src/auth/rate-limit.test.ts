@@ -159,3 +159,42 @@ test("case-sensitive refresh secrets use distinct limiter keys", async () => {
   assert.equal(upper.status, 401);
   assert.equal(lower.status, 401);
 });
+
+test("auth rate limiter bounds attacker-controlled buckets and recovers", async () => {
+  let now = 20_000;
+  const app = createApp({
+    emailSender: new InMemoryEmailSender(),
+    authRateLimit: {
+      now: () => now,
+      keyForRequest: async (context) => {
+        const body = (await context.req.json()) as { email: string };
+        return body.email;
+      },
+      maxBuckets: 2,
+      policies: {
+        password_reset_request: { limit: 1, windowMs: 60_000 },
+      },
+    },
+  });
+
+  const first = await postJson(app, "/v1/auth/password-reset/requests", {
+    email: "capacity-a@example.com",
+  });
+  const second = await postJson(app, "/v1/auth/password-reset/requests", {
+    email: "capacity-b@example.com",
+  });
+  const limited = await postJson(app, "/v1/auth/password-reset/requests", {
+    email: "capacity-c@example.com",
+  });
+
+  assert.equal(first.status, 202);
+  assert.equal(second.status, 202);
+  assert.equal(limited.status, 429);
+  assert.equal(limited.headers.get("Retry-After"), "60");
+
+  now += 60_000;
+  const recovered = await postJson(app, "/v1/auth/password-reset/requests", {
+    email: "capacity-c@example.com",
+  });
+  assert.equal(recovered.status, 202);
+});
