@@ -91,9 +91,9 @@ work end to end; unverified users cannot enter Home.
 
 Dependencies: Auth/account.
 
-- [ ] `DATA-01` Add recipe lifecycle, version, and publication timestamps.
-- [ ] `DATA-02` Add curated categories and ordered development seeds.
-- [ ] `DATA-03` Add normalized tags and the five-tag limit.
+- [x] `DATA-01` Add recipe lifecycle, version, and publication timestamps.
+- [x] `DATA-02` Add curated categories and ordered development seeds.
+- [x] `DATA-03` Add normalized tags and the five-tag limit.
 - [ ] `DATA-04` Normalize ingredient groups.
 - [ ] `DATA-05` Store structured ingredient amounts, units, and preparation.
 - [ ] `DATA-06` Add standalone owned media assets.

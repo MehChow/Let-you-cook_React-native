@@ -5,10 +5,10 @@
 
 - Last audited: 2026-08-09
 - Current integration branch: `dev`
-- Last integrated Goal checkpoint: Authentication and account lifecycle through
-  `AUTH-11`, independent exit review, and all five confirmed fixes
+- Last integrated Goal checkpoint: Recipe lifecycle and taxonomy through
+  `DATA-03`
 - Active feature track: Core Recipe Taxonomy and Database Model
-- Next bounded Goal: implement `DATA-01` through `DATA-03`
+- Next bounded Goal: implement `DATA-04` and `DATA-05`
 - Feature branch: `codex/mvp-recipe-data`
 - Standalone Goal prompt: `docs/current-goal.md`
 - Confirmed account-deletion policy: immediate irreversible opaque tombstone;
@@ -21,11 +21,11 @@
 1. Start a new Codex task in this local project.
 2. Select Sol High and enable Goal mode.
 3. Use `docs/current-goal.md` as the complete Goal prompt.
-4. Create `codex/mvp-recipe-data` from current `dev` in its own isolated
-   worktree; do not reuse or alter the preserved Auth worktree.
-5. Implement only `DATA-01` through `DATA-03` with TDD and task-ID commits.
+4. Reuse `codex/mvp-recipe-data` in `.worktrees/mvp-recipe-data` after verifying
+   it contains current `dev`; do not alter the preserved Auth worktree.
+5. Implement only `DATA-04` and `DATA-05` with TDD and task-ID commits.
 6. Stop after its verified checkpoint is fast-forwarded into `dev`; do not begin
-   later Recipe Data, media, Recipe UI, or Profile UI work.
+   `DATA-06`, media, Recipe UI/routes, or Profile UI work.
 
 Do not resume the historical whole-MVP Goal or any completed Auth Goal.
 
@@ -34,6 +34,8 @@ Do not resume the historical whole-MVP Goal or any completed Auth Goal.
 - `BASE-01` through `BASE-06`: Foundation exit gate complete.
 - `API-01` through `API-07`: API contract/mobile data foundation complete.
 - `AUTH-01` through `AUTH-11`: authentication and account lifecycle complete.
+- `DATA-01` through `DATA-03`: lifecycle/version fields, relational curated
+  categories, normalized tags, and the transaction-safe five-tag limit.
 - The independent Auth review and all five confirmed fixes are complete across
   `90c5a84`, `8abdcad`, `14bd4bd`, and `11d91d1`.
 - Latest Auth automated verification:
@@ -46,14 +48,19 @@ Do not resume the historical whole-MVP Goal or any completed Auth Goal.
   unverified denial, password reset and replacement, rate limiting, refresh-
   family replay isolation, deletion, old-token denial, and email reuse. Exact
   QA rows/messages were removed and verified at zero.
+- Recipe Data verification passed `server:check`, 120/120 backend tests with
+  zero skips, schema generation with no pending changes, forward migration
+  application through `0008`, and `git diff --check`.
 
 ## Current implementation truth
 
 - Recipe/discovery/profile content remains mostly mocked; recipe, media,
   favourite, report, and block server routes remain stubs or `501`.
-- The current recipe schema is a prototype: it uses `isPublished`, string
-  `categoryId`, and JSON tags instead of the approved lifecycle, curated
-  category, and normalized tag model.
+- Recipes now use `draft`, `published`, `archived`, and `removed` states,
+  aggregate versioning, lifecycle timestamps, relational curated categories,
+  normalized tags, and a recipe-row lock for atomic five-tag enforcement.
+- Ingredients remain provisional: one table still combines `groupTitle`, name,
+  quantity text, and sort order. `DATA-04` and `DATA-05` replace this shape.
 - Mobile Auth persists one authoritative SecureStore session through rotation
   and relaunch, performs hydration refresh/single-flight invalidation, and uses
   best-effort logout with safe error mapping.
@@ -81,8 +88,9 @@ work with regression coverage.
 ## Local-state snapshot and deferred debt
 
 - `dev` is local-only. No push or pull request was created.
-- Migration `0004_common_krista_starr.sql` is applied to the guarded local
-  development database.
+- Migrations through `0008_aromatic_alice.sql` are applied to the guarded local
+  development database. Seven ordered curated categories remain as intended;
+  Recipe Data test recipe/tag/user rows were verified at zero.
 - The Auth worktree remains preserved. A historical Foundation worktree and a
   Windows-locked unregistered typed-client directory must not be cleaned
   without rechecking scope.
@@ -99,7 +107,7 @@ work with regression coverage.
 | 0 | Foundation | Complete | Deferred debt only |
 | 1 | API contracts | Complete | Do not redo |
 | 2 | Auth/account | Complete | Manual Android checklist is user-owned |
-| 3 | Recipe data | Pending | `DATA-01` through `DATA-03` |
+| 3 | Recipe data | In progress | `DATA-04` and `DATA-05` |
 | 4 | R2 media | Pending | After Recipe data |
 | 5 | Profile | Pending | After Auth and Media |
 | 6 | Recipe authoring | Pending | After Recipe data and Media |

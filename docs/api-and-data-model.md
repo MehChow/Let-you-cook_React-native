@@ -455,10 +455,13 @@ last-sent time, optional reset-grant hash/expiry/consumed time, created time.
 
 `id`, unique slug, display name, sort order, active flag.
 
+The initial curated order is Breakfast, Lunch, Dinner, Dessert, Drinks, Vegan,
+and Other. IDs are fixed opaque UUIDs; slugs are stable filter keys.
+
 #### `recipes`
 
 `id`, author user ID, category ID, status, title, description, cook time minutes,
-servings, chef notes, version, created/updated/published/archived/deleted times.
+servings, chef notes, version, created/updated/published/archived/removed times.
 
 - Check positive cook time/servings when present.
 - Index `(status, publishedAt, id)`, `(categoryId, status, publishedAt)`, and
