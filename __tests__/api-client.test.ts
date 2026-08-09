@@ -1,5 +1,9 @@
 import { createApiClient } from "@/lib/apiClientCore";
 import type { AuthTokens } from "@/features/auth/api";
+import {
+  createAuthTokenStorage,
+  type AuthTokenStore,
+} from "@/features/auth/tokenStorageCore";
 
 interface FetchCall {
   request: Request;
@@ -31,6 +35,21 @@ const createMemoryTokenStorage = (initialTokens: AuthTokens | null) => {
     clearTokens: async () => {
       tokens = null;
       cleared = true;
+    },
+  };
+};
+
+// Creates a SecureStore-shaped in-memory boundary for integration coverage.
+const createMemorySecureStore = (): AuthTokenStore => {
+  const values = new Map<string, string>();
+
+  return {
+    getItemAsync: async (key) => values.get(key) ?? null,
+    setItemAsync: async (key, value) => {
+      values.set(key, value);
+    },
+    deleteItemAsync: async (key) => {
+      values.delete(key);
     },
   };
 };
@@ -107,6 +126,7 @@ describe("createApiClient", () => {
 
   it("retries one protected request after refreshing tokens", async () => {
     const calls: FetchCall[] = [];
+    const onTokensRefreshed = jest.fn();
     const tokenStorage = createMemoryTokenStorage({
       accessToken: "old-access",
       refreshToken: "old-refresh",
@@ -114,6 +134,7 @@ describe("createApiClient", () => {
     const apiClient = createApiClient({
       baseUrl: "http://api.test",
       tokenStorage,
+      onTokensRefreshed,
       fetch: async (url, init) => {
         const request = new Request(url, init);
         calls.push({ request });
@@ -145,9 +166,49 @@ describe("createApiClient", () => {
       accessToken: "new-access",
       refreshToken: "new-refresh",
     });
+    expect(onTokensRefreshed).toHaveBeenCalledWith({
+      accessToken: "new-access",
+      refreshToken: "new-refresh",
+    });
     expect(calls[2]?.request.headers.get("Authorization")).toBe(
       "Bearer new-access",
     );
+  });
+
+  it("persists rotated tokens in the session restored after relaunch", async () => {
+    const tokenStorage = createAuthTokenStorage(createMemorySecureStore());
+    await tokenStorage.saveSession({
+      user: { id: "user-1", email: "cook@example.com" },
+      tokens: { accessToken: "old-access", refreshToken: "old-refresh" },
+      accessTokenExpiresAt: 0,
+    });
+    let protectedCalls = 0;
+    const apiClient = createApiClient({
+      baseUrl: "http://api.test",
+      tokenStorage,
+      fetch: async (input, init) => {
+        const request = new Request(input, init);
+        if (request.url.endsWith("/v1/auth/refresh")) {
+          return jsonResponse({
+            accessToken: "new-access",
+            refreshToken: "new-refresh",
+          });
+        }
+
+        protectedCalls += 1;
+        return protectedCalls === 1
+          ? jsonResponse({ message: "Expired" }, 401)
+          : jsonResponse({ ok: true });
+      },
+    });
+
+    const response = await apiClient.request("/v1/profiles/me");
+
+    expect(response.status).toBe(200);
+    expect((await tokenStorage.getSession())?.tokens).toEqual({
+      accessToken: "new-access",
+      refreshToken: "new-refresh",
+    });
   });
 
   it("replays a protected request method, headers, and body after refresh", async () => {
@@ -207,6 +268,27 @@ describe("createApiClient", () => {
     expect(response.status).toBe(401);
     expect(tokenStorage.cleared).toBe(true);
     expect(tokenStorage.savedTokens).toBeNull();
+  });
+
+  it("rejects malformed successful refresh responses before persistence", async () => {
+    const tokenStorage = createMemoryTokenStorage({
+      accessToken: "old-access",
+      refreshToken: "old-refresh",
+    });
+    const apiClient = createApiClient({
+      baseUrl: "http://api.test",
+      tokenStorage,
+      fetch: async (input, init) =>
+        new Request(input, init).url.endsWith("/v1/auth/refresh")
+          ? jsonResponse({ accessToken: "", refreshToken: "new-refresh" })
+          : jsonResponse({ message: "Expired" }, 401),
+    });
+
+    await expect(apiClient.request("/v1/profiles/me")).rejects.toThrow();
+    expect(tokenStorage.savedTokens).toEqual({
+      accessToken: "old-access",
+      refreshToken: "old-refresh",
+    });
   });
 
   it("shares one refresh across concurrent expired requests", async () => {

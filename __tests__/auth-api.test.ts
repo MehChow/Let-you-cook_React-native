@@ -143,6 +143,21 @@ describe("createAuthApi", () => {
     );
   });
 
+  it("rejects malformed successful authentication responses", async () => {
+    const api = createAuthApi({
+      baseUrl: "http://api.test",
+      fetch: async () =>
+        jsonResponse({
+          user: { id: "user-1", email: "not-an-email" },
+          tokens: { accessToken: "", refreshToken: "refresh" },
+        }),
+    });
+
+    await expect(
+      api.login({ email: "cook@example.com", password: "password123" }),
+    ).rejects.toThrow();
+  });
+
   it("preserves signup validation metadata from the shared error envelope", async () => {
     const api = createAuthApi({
       baseUrl: "http://api.test",

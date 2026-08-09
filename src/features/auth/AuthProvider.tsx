@@ -15,6 +15,7 @@ import {
 } from "./api";
 import {
   authSessionInvalidation,
+  authSessionRotation,
   createAuthSession,
   isAccessTokenExpired,
   restoreAuthSession,
@@ -48,6 +49,18 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   useEffect(
     () => authSessionInvalidation.subscribe(() => setSession(null)),
+    [],
+  );
+
+  useEffect(
+    () =>
+      authSessionRotation.subscribe((tokens) => {
+        setSession((currentSession) =>
+          currentSession
+            ? createAuthSession({ user: currentSession.user, tokens })
+            : null,
+        );
+      }),
     [],
   );
 

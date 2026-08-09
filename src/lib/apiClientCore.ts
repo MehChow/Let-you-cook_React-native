@@ -1,4 +1,5 @@
 import type { AuthTokens } from "@/features/auth/api";
+import { authTokensResponseSchema } from "@/features/auth/responseSchemas";
 import { appEnv } from "@/config/env";
 
 interface ApiTokenStorage {
@@ -12,6 +13,7 @@ interface ApiClientOptions {
   fetch?: typeof fetch;
   tokenStorage: ApiTokenStorage;
   onSessionExpired?(): void | Promise<void>;
+  onTokensRefreshed?(tokens: AuthTokens): void | Promise<void>;
 }
 
 const AUTH_PATHS = new Set([
@@ -69,8 +71,9 @@ export const createApiClient = (options: ApiClientOptions) => {
           return null;
         }
 
-        const tokens = (await response.json()) as AuthTokens;
+        const tokens = authTokensResponseSchema.parse(await response.json());
         await options.tokenStorage.saveTokens(tokens);
+        await options.onTokensRefreshed?.(tokens);
         return tokens;
       })
       .finally(() => {

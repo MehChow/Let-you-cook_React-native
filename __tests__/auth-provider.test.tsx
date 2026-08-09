@@ -3,7 +3,10 @@ import type { PropsWithChildren } from "react";
 
 import { AuthProvider, useAuth } from "@/features/auth/AuthProvider";
 import { authApi } from "@/features/auth/api";
-import { authSessionInvalidation } from "@/features/auth/session";
+import {
+  authSessionInvalidation,
+  authSessionRotation,
+} from "@/features/auth/session";
 import { authTokenStorage } from "@/features/auth/tokenStorage";
 
 const expiredSession = {
@@ -204,6 +207,27 @@ describe("AuthProvider", () => {
     expect(mockClearTokens).toHaveBeenCalledTimes(1);
     expect(result.current.session).toBeNull();
     expect(result.current.isLoggedIn).toBe(false);
+  });
+
+  it("updates the mounted session after transport token rotation", async () => {
+    mockGetSession.mockResolvedValue({
+      ...expiredSession,
+      accessTokenExpiresAt: Number.MAX_SAFE_INTEGER,
+    });
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await waitFor(() => expect(result.current.isHydrating).toBe(false));
+
+    act(() => {
+      authSessionRotation.notify({
+        accessToken: "rotated-access",
+        refreshToken: "rotated-refresh",
+      });
+    });
+
+    expect(result.current.session?.tokens).toEqual({
+      accessToken: "rotated-access",
+      refreshToken: "rotated-refresh",
+    });
   });
 
   it("holds the reset grant in memory through password completion", async () => {

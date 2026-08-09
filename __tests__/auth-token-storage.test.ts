@@ -18,21 +18,14 @@ const createMemoryStore = (): AuthTokenStore => {
 };
 
 describe("auth token storage", () => {
-  it("saves, reads, and clears both tokens", async () => {
+  it("rejects token-only state without an established session", async () => {
     const storage = createAuthTokenStorage(createMemoryStore());
 
     expect(await storage.getTokens()).toBeNull();
 
-    await storage.saveTokens({ accessToken: "access", refreshToken: "refresh" });
-
-    expect(await storage.getTokens()).toEqual({
-      accessToken: "access",
-      refreshToken: "refresh",
-    });
-
-    await storage.clearTokens();
-
-    expect(await storage.getTokens()).toBeNull();
+    await expect(
+      storage.saveTokens({ accessToken: "access", refreshToken: "refresh" }),
+    ).rejects.toThrow("Cannot rotate tokens without a valid stored session.");
   });
 
   it("saves, reads, and clears the stored session", async () => {
@@ -54,4 +47,32 @@ describe("auth token storage", () => {
 
     expect(await storage.getSession()).toBeNull();
   });
+
+  it("uses the validated session as the authoritative token source", async () => {
+    const store = createMemoryStore();
+    const storage = createAuthTokenStorage(store);
+    await storage.saveSession({
+      user: { id: "user-1", email: "cook@example.com" },
+      tokens: { accessToken: "session-access", refreshToken: "session-refresh" },
+      accessTokenExpiresAt: 123,
+    });
+    await store.setItemAsync("letyoucook.auth.access-token", "stale-access");
+    await store.setItemAsync("letyoucook.auth.refresh-token", "stale-refresh");
+
+    await expect(storage.getTokens()).resolves.toEqual({
+      accessToken: "session-access",
+      refreshToken: "session-refresh",
+    });
+  });
+
+  it.each(["not-json", JSON.stringify({})])(
+    "rejects malformed persisted session data: %s",
+    async (storedValue) => {
+      const store = createMemoryStore();
+      const storage = createAuthTokenStorage(store);
+      await store.setItemAsync("letyoucook.auth.session", storedValue);
+
+      await expect(storage.getSession()).resolves.toBeNull();
+    },
+  );
 });

@@ -1,6 +1,17 @@
 import { appEnv } from "@/config/env";
 import { apiClient } from "@/lib/apiClient";
 import { apiErrorFromResponse } from "@/lib/apiError";
+import type { ZodType } from "zod";
+
+import {
+  accountDeletionResponseSchema,
+  authChallengeResponseSchema,
+  authResponseSchema,
+  authTokensResponseSchema,
+  logoutResponseSchema,
+  passwordResetCompletionResponseSchema,
+  passwordResetGrantResponseSchema,
+} from "./responseSchemas";
 
 export interface AuthUser {
   id: string;
@@ -80,6 +91,7 @@ const postJson = async <Result>(
   baseUrl: string,
   path: string,
   body: unknown,
+  responseSchema: ZodType<Result>,
 ): Promise<Result> => {
   const response = await fetchImpl(`${baseUrl}${path}`, {
     method: "POST",
@@ -91,7 +103,7 @@ const postJson = async <Result>(
     throw await apiErrorFromResponse(response);
   }
 
-  return (await response.json()) as Result;
+  return responseSchema.parse(await response.json());
 };
 
 // Deletes the authenticated account through the shared token-aware transport.
@@ -104,7 +116,7 @@ const deleteAccount = async (
     throw await apiErrorFromResponse(response);
   }
 
-  return (await response.json()) as AccountDeletionResponse;
+  return accountDeletionResponseSchema.parse(await response.json());
 };
 
 // Creates authentication operations against the configured backend URL.
@@ -115,19 +127,44 @@ export const createAuthApi = (options: AuthApiOptions = {}) => {
 
   return {
     signUp: (body: SignUpInput) =>
-      postJson<AuthChallengeResponse>(fetchImpl, baseUrl, "/v1/auth/signup", body),
+      postJson<AuthChallengeResponse>(
+        fetchImpl,
+        baseUrl,
+        "/v1/auth/signup",
+        body,
+        authChallengeResponseSchema,
+      ),
     login: (body: AuthCredentials) =>
-      postJson<AuthResponse>(fetchImpl, baseUrl, "/v1/auth/login", body),
+      postJson<AuthResponse>(
+        fetchImpl,
+        baseUrl,
+        "/v1/auth/login",
+        body,
+        authResponseSchema,
+      ),
     refresh: (body: RefreshTokenInput) =>
-      postJson<AuthTokens>(fetchImpl, baseUrl, "/v1/auth/refresh", body),
+      postJson<AuthTokens>(
+        fetchImpl,
+        baseUrl,
+        "/v1/auth/refresh",
+        body,
+        authTokensResponseSchema,
+      ),
     logout: (body: RefreshTokenInput) =>
-      postJson<LogoutResponse>(fetchImpl, baseUrl, "/v1/auth/logout", body),
+      postJson<LogoutResponse>(
+        fetchImpl,
+        baseUrl,
+        "/v1/auth/logout",
+        body,
+        logoutResponseSchema,
+      ),
     requestEmailVerification: (body: AuthChallengeRequest) =>
       postJson<AuthChallengeResponse>(
         fetchImpl,
         baseUrl,
         "/v1/auth/email-verification/requests",
         body,
+        authChallengeResponseSchema,
       ),
     confirmEmailVerification: (body: AuthChallengeConfirmation) =>
       postJson<AuthResponse>(
@@ -135,6 +172,7 @@ export const createAuthApi = (options: AuthApiOptions = {}) => {
         baseUrl,
         "/v1/auth/email-verification/confirmations",
         body,
+        authResponseSchema,
       ),
     requestPasswordReset: (body: AuthChallengeRequest) =>
       postJson<AuthChallengeResponse>(
@@ -142,6 +180,7 @@ export const createAuthApi = (options: AuthApiOptions = {}) => {
         baseUrl,
         "/v1/auth/password-reset/requests",
         body,
+        authChallengeResponseSchema,
       ),
     verifyPasswordReset: (body: AuthChallengeConfirmation) =>
       postJson<PasswordResetGrantResponse>(
@@ -149,6 +188,7 @@ export const createAuthApi = (options: AuthApiOptions = {}) => {
         baseUrl,
         "/v1/auth/password-reset/verifications",
         body,
+        passwordResetGrantResponseSchema,
       ),
     completePasswordReset: (body: PasswordResetCompletionInput) =>
       postJson<PasswordResetCompletionResponse>(
@@ -156,6 +196,7 @@ export const createAuthApi = (options: AuthApiOptions = {}) => {
         baseUrl,
         "/v1/auth/password-reset/completions",
         body,
+        passwordResetCompletionResponseSchema,
       ),
     deleteAccount: () => deleteAccount(request),
   };

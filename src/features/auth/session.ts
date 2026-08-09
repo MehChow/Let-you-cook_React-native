@@ -12,6 +12,7 @@ interface AuthSessionRestoration {
 }
 
 type SessionInvalidationListener = () => void;
+type SessionRotationListener = (tokens: AuthTokens) => void;
 
 // Reads the expiry timestamp from a JWT-shaped access token.
 const readAccessTokenExpiry = (accessToken: string) => {
@@ -86,6 +87,27 @@ export const createSessionInvalidation = () => {
 };
 
 export const authSessionInvalidation = createSessionInvalidation();
+
+// Broadcasts successful transport rotations to mounted Auth state.
+export const createSessionRotation = () => {
+  const listeners = new Set<SessionRotationListener>();
+
+  return {
+    // Registers a token-rotation listener until its caller unsubscribes.
+    subscribe(listener: SessionRotationListener) {
+      listeners.add(listener);
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+    // Delivers the newest token pair to every mounted session consumer.
+    notify(tokens: AuthTokens) {
+      listeners.forEach((listener) => listener(tokens));
+    },
+  };
+};
+
+export const authSessionRotation = createSessionRotation();
 
 // Restores valid credentials or rotates one expired access token.
 export const restoreAuthSession = async ({
