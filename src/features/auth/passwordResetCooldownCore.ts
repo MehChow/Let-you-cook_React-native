@@ -1,3 +1,5 @@
+import type { AuthChallengeResponse } from "./api";
+
 export interface CooldownStorage {
   getNumber(key: string): number | undefined;
   getString(key: string): string | undefined;
@@ -9,6 +11,8 @@ export interface CooldownStorage {
 export const PASSWORD_RESET_COOLDOWN_MS = 60_000;
 export const PASSWORD_RESET_COOLDOWN_KEY = "auth.password-reset.available-at";
 export const PASSWORD_RESET_EMAIL_KEY = "auth.password-reset.email";
+export const PASSWORD_RESET_CHALLENGE_ID_KEY = "auth.password-reset.challenge-id";
+export const PASSWORD_RESET_EXPIRES_AT_KEY = "auth.password-reset.expires-at";
 
 export function readPasswordResetAvailableAt(storage: CooldownStorage): number | null {
   const availableAt = storage.getNumber(PASSWORD_RESET_COOLDOWN_KEY);
@@ -43,18 +47,42 @@ export function readPasswordResetEmail(storage: CooldownStorage): string | null 
 export function startPasswordResetFlow(
   storage: CooldownStorage,
   email: string,
-  now: number,
+  response: AuthChallengeResponse,
 ): number {
-  const availableAt = startPasswordResetCooldown(storage, now);
+  const availableAt = Date.parse(response.resendAvailableAt);
+  const expiresAt = Date.parse(response.expiresAt);
+  if (!Number.isFinite(availableAt) || !Number.isFinite(expiresAt)) {
+    throw new Error("The password reset challenge timestamps are invalid.");
+  }
+
+  storage.set(PASSWORD_RESET_COOLDOWN_KEY, availableAt);
+  storage.set(PASSWORD_RESET_EXPIRES_AT_KEY, expiresAt);
   storage.setString(PASSWORD_RESET_EMAIL_KEY, email.trim());
+  storage.setString(PASSWORD_RESET_CHALLENGE_ID_KEY, response.challengeId);
   return availableAt;
 }
 
 export function clearPasswordResetFlow(storage: CooldownStorage): void {
   storage.remove(PASSWORD_RESET_COOLDOWN_KEY);
+  storage.remove(PASSWORD_RESET_EXPIRES_AT_KEY);
+  storage.remove(PASSWORD_RESET_CHALLENGE_ID_KEY);
   clearPasswordResetEmail(storage);
 }
 
 export function clearPasswordResetEmail(storage: CooldownStorage): void {
   storage.remove(PASSWORD_RESET_EMAIL_KEY);
+}
+
+// Reads the opaque challenge identifier required for verification.
+export function readPasswordResetChallengeId(storage: CooldownStorage): string | null {
+  const challengeId = storage.getString(PASSWORD_RESET_CHALLENGE_ID_KEY)?.trim();
+  return challengeId ? challengeId : null;
+}
+
+// Reads the absolute server challenge expiry timestamp.
+export function readPasswordResetExpiresAt(storage: CooldownStorage): number | null {
+  const expiresAt = storage.getNumber(PASSWORD_RESET_EXPIRES_AT_KEY);
+  return typeof expiresAt === "number" && Number.isFinite(expiresAt)
+    ? expiresAt
+    : null;
 }

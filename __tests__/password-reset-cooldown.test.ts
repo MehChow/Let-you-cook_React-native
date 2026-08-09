@@ -7,11 +7,19 @@ import {
   clearPasswordResetEmail,
   clearPasswordResetFlow,
   readPasswordResetAvailableAt,
+  readPasswordResetChallengeId,
   readPasswordResetEmail,
   startPasswordResetFlow,
   startPasswordResetCooldown,
   type CooldownStorage,
 } from "@/features/auth/passwordResetCooldownCore";
+
+const challenge = {
+  ok: true as const,
+  challengeId: "f6822e40-7c3a-40ec-a77f-c3291888dc0c",
+  expiresAt: "2026-08-09T10:10:00.000Z",
+  resendAvailableAt: "2026-08-09T10:01:00.000Z",
+};
 
 class MemoryStorage implements CooldownStorage {
   private readonly values = new Map<string, number>();
@@ -72,13 +80,16 @@ describe("password reset cooldown core", () => {
     expect(canSendPasswordResetCode(storage, 60_001)).toBe(true);
   });
 
-  it("persists the email with a new password reset flow", () => {
+  it("persists the email and opaque challenge with a new password reset flow", () => {
     const storage = new MemoryStorage();
 
-    startPasswordResetFlow(storage, "gg@gmail.com", 10_000);
+    startPasswordResetFlow(storage, "gg@gmail.com", challenge);
 
     expect(readPasswordResetEmail(storage)).toBe("gg@gmail.com");
-    expect(readPasswordResetAvailableAt(storage)).toBe(70_000);
+    expect(readPasswordResetChallengeId(storage)).toBe(challenge.challengeId);
+    expect(readPasswordResetAvailableAt(storage)).toBe(
+      Date.parse(challenge.resendAvailableAt),
+    );
   });
 
   it("clears the email and cooldown when the flow is abandoned or completed", () => {

@@ -67,6 +67,9 @@ For protected requests:
 
 Use one shared API client wrapper so screens and feature hooks never implement refresh logic directly.
 
+Password-reset completion revokes all refresh-token rows for the account.
+Already-issued access JWTs remain bounded by their normal short lifetime.
+
 ## Retry Rules
 
 - Retry the original request once after refresh.

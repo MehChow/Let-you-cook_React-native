@@ -31,34 +31,22 @@ Do not resume the historical whole-MVP Goal and do not use the obsolete
 - `BASE-01` through `BASE-06`: Foundation exit gate complete.
 - `API-01` through `API-07`: API contract/mobile data foundation exit gate
   complete and merged into `dev`.
-- `AUTH-01`: Auth/profile mobile wrappers and refresh transport now use `/v1`;
-  the server's temporary unversioned auth/profile aliases are retired.
-- `AUTH-02`: Real PostgreSQL coverage verifies persisted user/profile/session
-  rows, duplicate isolation, and `/v1` validation; signup failures retain safe
-  structured API metadata for mobile presentation.
-- `AUTH-03`: Mobile login calls the real `/v1/auth/login` API and stores the
-  returned session through the existing SecureStore-backed session boundary.
-- `AUTH-04`: App hydration restores a valid session or makes one refresh
-  attempt for expired access, persists rotated credentials, and clears a
-  rejected or incomplete stored session.
-- `AUTH-05`: Concurrent protected-request failures share one refresh; a
-  rejected refresh clears credentials and invalidates private navigation once
-  per established session, including subscription races.
-- `AUTH-06`: Logout presents the stored refresh token for server revocation,
-  then clears SecureStore and private session state even when revocation is
-  unreachable.
+- `AUTH-01` through `AUTH-06`: `/v1` auth/profile contracts, real PostgreSQL
+  persistence, SecureStore login/restore, single-flight refresh and invalidation,
+  and best-effort server logout are implemented and integrated.
 - `AUTH-07`: Server email delivery is application-owned, local development uses
   SMTP/Mailpit, and automated auth tests can inject an in-memory sender.
 - `AUTH-08`: Signup creates an unverified account and resumable email challenge;
   login blocks unverified users, resend rotates after the server cooldown, and
   confirmation issues and persists the first full session.
-- `AUTH-01` through `AUTH-06` are integrated into `dev`; the latest Auth code
-  checkpoint is `5bd56d9`.
-- Latest integrated Auth verification:
+- `AUTH-09`: Password recovery uses a generic request, purpose-bound OTP,
+  in-memory short-lived reset grant, atomic password completion, and refresh
+  session revocation.
+- Latest AUTH-09 worktree verification:
   - `npm.cmd run check`: passed;
-  - `npm.cmd test -- --runInBand`: 20 suites/105 tests passed;
+  - `npm.cmd test -- --runInBand`: 21 suites/114 tests passed;
   - `npm.cmd run server:check`: passed;
-  - `npm.cmd run server:test`: 74/74 passed with zero skips;
+  - `npm.cmd run server:test`: 89/89 passed with zero skips;
   - `git diff --check`: passed.
 
 ## Current implementation truth
@@ -70,7 +58,7 @@ Do not resume the historical whole-MVP Goal and do not use the obsolete
   no tokens; confirmed verification and verified login persist sessions through
   the SecureStore boundary.
 - Server login, refresh rotation/reuse revocation, logout, access-token auth,
-  and protected current-profile routes exist.
+  protected current-profile routes, verified signup, and password reset exist.
 - Auth/profile callers are canonicalized to `/v1`; unrelated legacy aliases
   remain outside the completed Goal.
 - The mobile project has a typed Hono client, SecureStore-backed auth transport,
@@ -82,13 +70,17 @@ Do not resume the historical whole-MVP Goal and do not use the obsolete
 
 ## Blockers and local-state snapshot
 
-- Android verification passed on `Codex API 36`: real login reached Home, a
-  valid SecureStore session survived relaunch, a temporary three-second local
-  QA token expired and rotated once during hydration, and logout returned to
-  login. The token lifetime was restored and the exact QA account was removed.
+- Real SMTP/Mailpit verification passed for verification and reset delivery;
+  confirmation issued the first session, reset revoked the old refresh token,
+  the old password failed, and the new password logged in. The QA user was
+  removed afterward.
+- No Android emulator/device is installed or connected in this environment.
+  Pending native checks: signup confirmation to Home; resend/cooldown and
+  relaunch resume; unverified-login denial; reset completion; old-session exit;
+  old-password denial; and new-password login.
 - `dev` is local-only. No push or pull request was created.
-- PostgreSQL was healthy for the AUTH-06 exit suite. The Android QA session,
-  Metro, and backend development listener were stopped before handoff.
+- PostgreSQL and Mailpit were healthy for AUTH-09 verification; the temporary
+  backend development listener was stopped afterward.
 - A registered historical Foundation worktree remains at
   `.worktrees/mvp-foundation`.
 - An empty Windows-locked `.worktrees/mvp-typed-client` directory was not a
@@ -113,7 +105,7 @@ one relevant.
 | --- | --- | --- | --- |
 | 0 | Foundation | Complete | Deferred debt only |
 | 1 | API contracts | Complete | Do not redo |
-| 2 | Auth/account | In progress | `AUTH-07`–`AUTH-09` |
+| 2 | Auth/account | In progress | `AUTH-10` through `AUTH-11` |
 | 3 | Recipe data | Pending | After Auth exit |
 | 4 | R2 media | Pending | After Recipe data |
 | 5 | Profile | Pending | After Auth and Media |

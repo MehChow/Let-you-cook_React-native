@@ -26,7 +26,9 @@ jest.mock("@/features/auth/api", () => ({
     logout: jest.fn(),
     requestEmailVerification: jest.fn(),
     confirmEmailVerification: jest.fn(),
-    sendPasswordResetCode: jest.fn(),
+    requestPasswordReset: jest.fn(),
+    verifyPasswordReset: jest.fn(),
+    completePasswordReset: jest.fn(),
   },
 }));
 
@@ -37,6 +39,9 @@ const mockRefresh = authApi.refresh as jest.Mock;
 const mockLogout = authApi.logout as jest.Mock;
 const mockRequestEmailVerification = authApi.requestEmailVerification as jest.Mock;
 const mockConfirmEmailVerification = authApi.confirmEmailVerification as jest.Mock;
+const mockRequestPasswordReset = authApi.requestPasswordReset as jest.Mock;
+const mockVerifyPasswordReset = authApi.verifyPasswordReset as jest.Mock;
+const mockCompletePasswordReset = authApi.completePasswordReset as jest.Mock;
 
 // Supplies the authentication provider to hook tests.
 const wrapper = ({ children }: PropsWithChildren) => (
@@ -61,6 +66,17 @@ describe("AuthProvider", () => {
       expiresAt: "2026-08-09T10:10:00.000Z",
       resendAvailableAt: "2026-08-09T10:01:00.000Z",
     });
+    mockRequestPasswordReset.mockResolvedValue({
+      ok: true,
+      challengeId: "challenge-1",
+      expiresAt: "2026-08-09T10:10:00.000Z",
+      resendAvailableAt: "2026-08-09T10:01:00.000Z",
+    });
+    mockVerifyPasswordReset.mockResolvedValue({
+      resetGrant: "reset-grant",
+      expiresAt: "2026-08-09T10:10:00.000Z",
+    });
+    mockCompletePasswordReset.mockResolvedValue({ ok: true });
   });
 
   it("hydrates an expired session through the refresh boundary", async () => {
@@ -167,5 +183,37 @@ describe("AuthProvider", () => {
     });
     expect(mockSaveSession).toHaveBeenCalledTimes(1);
     expect(result.current.session?.user.email).toBe("cook@example.com");
+  });
+
+  it("holds the reset grant in memory through password completion", async () => {
+    mockGetSession.mockResolvedValue(null);
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await waitFor(() => expect(result.current.isHydrating).toBe(false));
+
+    await act(async () => {
+      await result.current.sendPasswordResetCode("cook@example.com");
+      await result.current.verifyOtp({
+        challengeId: "challenge-1",
+        code: "123456",
+      });
+    });
+    await act(async () => {
+      await result.current.resetPassword({
+        password: "new-password-123",
+        confirmPassword: "new-password-123",
+      });
+    });
+
+    expect(mockRequestPasswordReset).toHaveBeenCalledWith({
+      email: "cook@example.com",
+    });
+    expect(mockVerifyPasswordReset).toHaveBeenCalledWith({
+      challengeId: "challenge-1",
+      code: "123456",
+    });
+    expect(mockCompletePasswordReset).toHaveBeenCalledWith({
+      resetGrant: "reset-grant",
+      password: "new-password-123",
+    });
   });
 });

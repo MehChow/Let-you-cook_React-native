@@ -45,6 +45,10 @@ export const errorDefinitions = {
     status: 400,
     message: "The verification code is invalid or expired.",
   },
+  invalid_password_reset_grant: {
+    status: 400,
+    message: "The password reset session is invalid or expired.",
+  },
   invalid_refresh_token: { status: 401, message: "Refresh token is invalid." },
   refresh_token_expired: { status: 401, message: "Refresh token has expired." },
   refresh_token_reuse_detected: {

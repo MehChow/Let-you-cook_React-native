@@ -29,8 +29,8 @@ interface AuthContextValue {
   requestEmailVerification(email: string): Promise<AuthChallengeResponse>;
   confirmEmailVerification(input: AuthChallengeConfirmation): Promise<void>;
   logout(): Promise<void>;
-  sendPasswordResetCode(email: string): Promise<void>;
-  verifyOtp(code: string): Promise<void>;
+  sendPasswordResetCode(email: string): Promise<AuthChallengeResponse>;
+  verifyOtp(input: AuthChallengeConfirmation): Promise<void>;
   resetPassword(input: {
     password: string;
     confirmPassword: string;
@@ -43,6 +43,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: PropsWithChildren) {
   const [isHydrating, setIsHydrating] = useState(true);
   const [session, setSession] = useState<StoredAuthSession | null>(null);
+  const [passwordResetGrant, setPasswordResetGrant] = useState<string | null>(null);
 
   useEffect(
     () => authSessionInvalidation.subscribe(() => setSession(null)),
@@ -117,19 +118,20 @@ export function AuthProvider({ children }: PropsWithChildren) {
     await establishSession(response);
   };
 
-  // Delegates password-reset requests to the current placeholder boundary.
-  const sendPasswordResetCode = async (email: string) => {
-    await authApi.sendPasswordResetCode({ email });
-  };
+  // Requests a generic resumable password-reset challenge.
+  const sendPasswordResetCode = (email: string) =>
+    authApi.requestPasswordReset({ email });
 
-  // Validates the simulated six-digit password-reset code format.
-  const verifyOtp = async (code: string) => {
-    if (!/^\d{6}$/.test(code.trim())) {
+  // Exchanges one valid reset OTP for an in-memory short-lived grant.
+  const verifyOtp = async (input: AuthChallengeConfirmation) => {
+    if (!/^\d{6}$/.test(input.code.trim())) {
       throw new Error("Enter the 6-digit code.");
     }
+    const response = await authApi.verifyPasswordReset(input);
+    setPasswordResetGrant(response.resetGrant);
   };
 
-  // Validates the simulated password-reset completion input.
+  // Completes password replacement using the in-memory reset grant.
   const resetPassword: AuthContextValue["resetPassword"] = async ({
     password,
     confirmPassword,
@@ -137,9 +139,21 @@ export function AuthProvider({ children }: PropsWithChildren) {
     if (!password.trim()) {
       throw new Error("Enter a new password.");
     }
+    if (password.length < 8 || password.length > 20) {
+      throw new Error("Use a password between 8 and 20 characters.");
+    }
     if (password !== confirmPassword) {
       throw new Error("Passwords do not match.");
     }
+    if (!passwordResetGrant) {
+      throw new Error("Verify a new password reset code.");
+    }
+
+    await authApi.completePasswordReset({
+      resetGrant: passwordResetGrant,
+      password,
+    });
+    setPasswordResetGrant(null);
   };
 
   return (

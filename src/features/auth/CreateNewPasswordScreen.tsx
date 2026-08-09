@@ -3,6 +3,7 @@ import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
 import { images } from "@/data/images";
 import { useAuth } from "@/features/auth/useAuth";
+import { toErrorPresentation } from "@/lib/apiError";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { LockIcon } from "lucide-react-native";
@@ -16,11 +17,15 @@ import { AuthPrimaryButton } from "./components/AuthPrimaryButton";
 import { AuthShell } from "./components/AuthShell";
 import { AuthTextField } from "./components/AuthTextField";
 import { getPasswordStrength } from "./presentation";
+import { clearPasswordResetFlow } from "./useSendPasswordResetCode";
 
-const getErrorMessage = (error: unknown) =>
-  error instanceof Error
+// Maps password-reset failures through the shared safe presentation policy.
+const getErrorMessage = (error: unknown) => {
+  const presentation = toErrorPresentation(error);
+  return presentation.kind === "unknown" && error instanceof Error
     ? error.message
-    : "Unable to update your password right now.";
+    : presentation.message;
+};
 
 export function CreateNewPasswordScreen() {
   const router = useRouter();
@@ -34,6 +39,7 @@ export function CreateNewPasswordScreen() {
     try {
       setIsSubmitting(true);
       await resetPassword({ password, confirmPassword });
+      clearPasswordResetFlow();
       router.replace("/auth/login");
     } catch (error) {
       toast.error(getErrorMessage(error));

@@ -20,6 +20,11 @@ export const authChallengeConfirmationSchema = z.object({
   code: z.string().regex(/^\d{6}$/),
 });
 
+export const passwordResetCompletionSchema = z.object({
+  resetGrant: z.string().min(1),
+  password: z.string().min(8).max(20),
+});
+
 export const refreshTokenInputSchema = z.object({
   refreshToken: z.string().min(1),
 });
@@ -46,6 +51,15 @@ export const authChallengeResponseSchema = z.strictObject({
   resendAvailableAt: isoTimestampSchema,
 });
 
+export const passwordResetGrantResponseSchema = z.strictObject({
+  resetGrant: z.string().min(1),
+  expiresAt: isoTimestampSchema,
+});
+
+export const passwordResetCompletionResponseSchema = z.strictObject({
+  ok: z.literal(true),
+});
+
 export const logoutResponseSchema = z.strictObject({
   ok: z.literal(true),
 });
@@ -56,6 +70,9 @@ export type AuthChallengeRequest = z.infer<typeof authChallengeRequestSchema>;
 export type AuthChallengeConfirmation = z.infer<
   typeof authChallengeConfirmationSchema
 >;
+export type PasswordResetCompletion = z.infer<
+  typeof passwordResetCompletionSchema
+>;
 export type RefreshTokenInput = z.infer<typeof refreshTokenInputSchema>;
 export type AuthUser = z.infer<typeof authUserSchema>;
 export type AuthTokens = z.infer<typeof authTokensSchema>;
@@ -64,5 +81,11 @@ export type AuthSessionResponse = z.infer<
 >;
 export type AuthChallengeResponse = z.infer<
   typeof authChallengeResponseSchema
+>;
+export type PasswordResetGrantResponse = z.infer<
+  typeof passwordResetGrantResponseSchema
+>;
+export type PasswordResetCompletionResponse = z.infer<
+  typeof passwordResetCompletionResponseSchema
 >;
 export type LogoutResponse = z.infer<typeof logoutResponseSchema>;

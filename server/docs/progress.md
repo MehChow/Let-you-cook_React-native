@@ -54,6 +54,8 @@ account deletion or rate-limit hardening next.
   in-memory automated-test fake.
 - [x] `AUTH-08` Mandatory email verification, resend cooldown/replacement,
   unverified-login denial, and first-session issuance on confirmation.
+- [x] `AUTH-09` Generic password-reset request, OTP verification, short-lived
+  grant, atomic password replacement, and refresh-session revocation.
 
 Latest Auth branch verification:
 

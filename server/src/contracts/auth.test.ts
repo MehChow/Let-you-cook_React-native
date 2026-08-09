@@ -9,6 +9,8 @@ import {
   authSessionResponseSchema,
   authTokensSchema,
   logoutResponseSchema,
+  passwordResetCompletionSchema,
+  passwordResetGrantResponseSchema,
   refreshTokenInputSchema,
   signUpInputSchema,
 } from "./auth";
@@ -148,6 +150,36 @@ test("challenge responses expose only resumable public state", () => {
   assert.deepEqual(authChallengeResponseSchema.parse(response), response);
   assert.equal(
     authChallengeResponseSchema.safeParse({ ...response, code: "123456" }).success,
+    false,
+  );
+});
+
+test("password-reset contracts keep grants purpose-bound and passwords bounded", () => {
+  const grantResponse = {
+    resetGrant: "opaque-reset-grant",
+    expiresAt: "2026-08-09T10:10:00.000Z",
+  };
+
+  assert.deepEqual(passwordResetGrantResponseSchema.parse(grantResponse), grantResponse);
+  assert.deepEqual(
+    passwordResetCompletionSchema.parse({
+      resetGrant: "opaque-reset-grant",
+      password: "new-password-123",
+    }),
+    { resetGrant: "opaque-reset-grant", password: "new-password-123" },
+  );
+  assert.equal(
+    passwordResetCompletionSchema.safeParse({
+      resetGrant: "opaque-reset-grant",
+      password: "short",
+    }).success,
+    false,
+  );
+  assert.equal(
+    passwordResetGrantResponseSchema.safeParse({
+      ...grantResponse,
+      accessToken: "must-not-leak",
+    }).success,
     false,
   );
 });

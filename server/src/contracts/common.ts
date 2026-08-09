@@ -10,6 +10,7 @@ export const nonValidationErrorCodes = [
   "invalid_credentials",
   "email_verification_required",
   "invalid_auth_challenge",
+  "invalid_password_reset_grant",
   "invalid_refresh_token",
   "refresh_token_expired",
   "refresh_token_reuse_detected",

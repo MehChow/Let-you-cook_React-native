@@ -8,6 +8,12 @@ const mockValues = new Map<string, number>();
 const mockStrings = new Map<string, string>();
 const mockSendPasswordResetCode = jest.fn();
 const mockQueryClients: QueryClient[] = [];
+const challengeResponse = {
+  ok: true as const,
+  challengeId: "f6822e40-7c3a-40ec-a77f-c3291888dc0c",
+  expiresAt: new Date(Date.now() + 10 * 60_000).toISOString(),
+  resendAvailableAt: new Date(Date.now() + 60_000).toISOString(),
+};
 
 jest.mock("react-native-mmkv", () => ({
   createMMKV: () => ({
@@ -89,25 +95,33 @@ describe("password reset send hooks", () => {
   });
 
   it("starts the cooldown only after a successful send", async () => {
-    mockSendPasswordResetCode.mockResolvedValue({ ok: true });
+    const response = {
+      ...challengeResponse,
+      resendAvailableAt: new Date(Date.now() + 60_000).toISOString(),
+    };
+    mockSendPasswordResetCode.mockResolvedValue(response);
     const { result } = renderHook(() => useSendPasswordResetCode(), {
       wrapper: createWrapper(),
     });
 
-    const before = Date.now();
     await act(async () => {
       await result.current.sendCode("cook@example.com");
     });
 
-    expect(mockValues.get(PASSWORD_RESET_COOLDOWN_KEY)).toBeGreaterThanOrEqual(before + 60_000);
+    expect(mockValues.get(PASSWORD_RESET_COOLDOWN_KEY)).toBe(
+      Date.parse(response.resendAvailableAt),
+    );
+    expect(mockStrings.get("auth.password-reset.challenge-id")).toBe(
+      response.challengeId,
+    );
     expect(mockSendPasswordResetCode).toHaveBeenCalledWith("cook@example.com");
   });
 
-  it("starts the cooldown immediately while the send request is pending", async () => {
+  it("persists server cooldown only after the send request resolves", async () => {
     let resolveRequest: (() => void) | undefined;
     mockSendPasswordResetCode.mockImplementation(
-      () => new Promise<{ ok: true }>((resolve) => {
-        resolveRequest = () => resolve({ ok: true });
+      () => new Promise<typeof challengeResponse>((resolve) => {
+        resolveRequest = () => resolve(challengeResponse);
       }),
     );
     const { result } = renderHook(() => useSendPasswordResetCode(), {
@@ -116,12 +130,11 @@ describe("password reset send hooks", () => {
 
     const request = result.current.sendCode("cook@example.com");
     await waitFor(() => expect(mockSendPasswordResetCode).toHaveBeenCalled());
-    expect(mockValues.get(PASSWORD_RESET_COOLDOWN_KEY)).toBeGreaterThanOrEqual(
-      Date.now() + 59_000,
-    );
+    expect(mockValues.has(PASSWORD_RESET_COOLDOWN_KEY)).toBe(false);
 
     resolveRequest?.();
     await request;
+    expect(mockValues.has(PASSWORD_RESET_COOLDOWN_KEY)).toBe(true);
   });
 
   it("does not start the cooldown when sending fails", async () => {
@@ -139,8 +152,8 @@ describe("password reset send hooks", () => {
   it("allows only one concurrent send", async () => {
     let resolveRequest: (() => void) | undefined;
     mockSendPasswordResetCode.mockImplementation(
-      () => new Promise<{ ok: true }>((resolve) => {
-        resolveRequest = () => resolve({ ok: true });
+      () => new Promise<typeof challengeResponse>((resolve) => {
+        resolveRequest = () => resolve(challengeResponse);
       }),
     );
     const { result } = renderHook(() => useSendPasswordResetCode(), {
@@ -177,7 +190,11 @@ describe("password reset send hooks", () => {
   it("restarts the visible cooldown when resending after expiry", async () => {
     jest.useFakeTimers();
     jest.setSystemTime(1_000_000);
-    mockSendPasswordResetCode.mockResolvedValue({ ok: true });
+    mockSendPasswordResetCode.mockImplementation(async () => ({
+      ...challengeResponse,
+      expiresAt: new Date(Date.now() + 10 * 60_000).toISOString(),
+      resendAvailableAt: new Date(Date.now() + 60_000).toISOString(),
+    }));
 
     const { result } = renderHook(
       () => ({

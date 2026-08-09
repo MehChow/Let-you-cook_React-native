@@ -21,8 +21,8 @@ import {
   useEmailVerificationFlow,
 } from "./emailVerificationState";
 import {
-  clearPasswordResetFlow,
   usePasswordResetCooldown,
+  usePasswordResetResume,
   useSendPasswordResetCode,
 } from "./useSendPasswordResetCode";
 
@@ -57,10 +57,11 @@ export function EmailOtpScreen() {
   } = useAuth();
   const { sendCode, isSending } = useSendPasswordResetCode();
   const passwordResetCooldown = usePasswordResetCooldown();
+  const passwordResetFlow = usePasswordResetResume();
   const emailVerification = useEmailVerificationFlow();
   const activeEmail = isEmailVerification
     ? emailVerification.flow?.email
-    : email;
+    : email ?? passwordResetFlow.pendingEmail ?? undefined;
   const remainingSeconds = isEmailVerification
     ? emailVerification.remainingSeconds
     : passwordResetCooldown.remainingSeconds;
@@ -119,8 +120,11 @@ export function EmailOtpScreen() {
         clearEmailVerificationFlow();
         router.replace("/private/(tabs)");
       } else {
-        await verifyOtp(code);
-        clearPasswordResetFlow();
+        const challengeId = passwordResetFlow.pendingChallengeId;
+        if (!challengeId) {
+          throw new Error("Request a new password reset code.");
+        }
+        await verifyOtp({ challengeId, code });
         router.push({
           pathname: "/auth/create-new-password",
           params: email ? { email } : undefined,

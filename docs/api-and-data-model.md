@@ -404,7 +404,7 @@ created time, optional device metadata.
 #### `auth_challenges`
 
 `id`, user ID when known, purpose, code hash, attempts, expiry, consumed time,
-last-sent time, created time.
+last-sent time, optional reset-grant hash/expiry/consumed time, created time.
 
 - Purpose distinguishes email verification and password reset.
 - Store hashes, never OTP plaintext.

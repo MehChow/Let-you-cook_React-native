@@ -9,7 +9,9 @@ import {
   clearPasswordResetFlow as clearPasswordResetFlowFromStorage,
   getPasswordResetRemainingSeconds,
   readPasswordResetAvailableAt,
+  readPasswordResetChallengeId,
   readPasswordResetEmail,
+  readPasswordResetExpiresAt,
   startPasswordResetFlow,
 } from "./passwordResetCooldownCore";
 
@@ -44,14 +46,12 @@ export function useSendPasswordResetCode() {
       }
 
       sendInFlight = true;
-      startPasswordResetFlow(passwordResetCooldownStorage, email, Date.now());
-      notifyPasswordResetCooldownChanged();
 
       try {
-        await sendPasswordResetCode(email);
-      } catch (error) {
-        clearPasswordResetFlowFromStorage(passwordResetCooldownStorage);
+        const response = await sendPasswordResetCode(email);
+        startPasswordResetFlow(passwordResetCooldownStorage, email, response);
         notifyPasswordResetCooldownChanged();
+      } catch (error) {
         throw error;
       } finally {
         sendInFlight = false;
@@ -115,9 +115,10 @@ export function usePasswordResetResume() {
   const [now, setNow] = useState(() => Date.now());
   const [, setRefreshVersion] = useState(0);
   const email = readPasswordResetEmail(passwordResetCooldownStorage);
-  const remainingSeconds = getPasswordResetRemainingSeconds(
-    readPasswordResetAvailableAt(passwordResetCooldownStorage),
-    now,
+  const challengeId = readPasswordResetChallengeId(passwordResetCooldownStorage);
+  const expiresAt = readPasswordResetExpiresAt(passwordResetCooldownStorage);
+  const shouldResume = Boolean(
+    email && challengeId && expiresAt !== null && expiresAt > now,
   );
 
   useEffect(() => {
@@ -128,8 +129,8 @@ export function usePasswordResetResume() {
   }, []);
 
   useEffect(() => {
-    if (remainingSeconds === 0) {
-      if (email) {
+    if (!shouldResume) {
+      if (email || challengeId || expiresAt !== null) {
         clearPasswordResetFlow();
       }
       return undefined;
@@ -140,10 +141,11 @@ export function usePasswordResetResume() {
       setRefreshVersion((version) => version + 1);
     }, 1_000);
     return () => clearInterval(interval);
-  }, [email, remainingSeconds]);
+  }, [challengeId, email, expiresAt, shouldResume]);
 
   return {
     pendingEmail: email,
-    shouldResume: Boolean(email && remainingSeconds > 0),
+    pendingChallengeId: challengeId,
+    shouldResume,
   };
 }

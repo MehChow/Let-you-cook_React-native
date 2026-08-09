@@ -25,9 +25,19 @@ describe("createAuthApi", () => {
         if (String(url).endsWith("/logout")) {
           return jsonResponse({ ok: true });
         }
+        if (String(url).endsWith("/password-reset/verifications")) {
+          return jsonResponse({
+            resetGrant: "reset-grant",
+            expiresAt: "2026-08-09T10:10:00.000Z",
+          });
+        }
+        if (String(url).endsWith("/password-reset/completions")) {
+          return jsonResponse({ ok: true });
+        }
         if (
           String(url).endsWith("/signup") ||
-          String(url).endsWith("/email-verification/requests")
+          String(url).endsWith("/email-verification/requests") ||
+          String(url).endsWith("/password-reset/requests")
         ) {
           return jsonResponse({
             ok: true,
@@ -56,6 +66,15 @@ describe("createAuthApi", () => {
       challengeId: "f6822e40-7c3a-40ec-a77f-c3291888dc0c",
       code: "123456",
     });
+    await api.requestPasswordReset({ email: "cook@example.com" });
+    await api.verifyPasswordReset({
+      challengeId: "f6822e40-7c3a-40ec-a77f-c3291888dc0c",
+      code: "123456",
+    });
+    await api.completePasswordReset({
+      resetGrant: "reset-grant",
+      password: "new-password-123",
+    });
 
     expect(calls.map((call) => call.url)).toEqual([
       "http://api.test/v1/auth/signup",
@@ -64,6 +83,9 @@ describe("createAuthApi", () => {
       "http://api.test/v1/auth/logout",
       "http://api.test/v1/auth/email-verification/requests",
       "http://api.test/v1/auth/email-verification/confirmations",
+      "http://api.test/v1/auth/password-reset/requests",
+      "http://api.test/v1/auth/password-reset/verifications",
+      "http://api.test/v1/auth/password-reset/completions",
     ]);
   });
 
@@ -83,22 +105,6 @@ describe("createAuthApi", () => {
 
     expect(calls).toHaveLength(1);
     expect(calls[0]?.url).toBe("http://10.0.2.2:8787/v1/auth/login");
-  });
-
-  it("accepts a password reset email through the placeholder API", async () => {
-    const api = createAuthApi();
-
-    await expect(api.sendPasswordResetCode({ email: "cook@example.com" })).resolves.toEqual({
-      ok: true,
-    });
-  });
-
-  it("rejects a blank password reset email", async () => {
-    const api = createAuthApi();
-
-    await expect(api.sendPasswordResetCode({ email: "  " })).rejects.toThrow(
-      "Enter your email address.",
-    );
   });
 
   it("posts credentials and returns the auth response", async () => {

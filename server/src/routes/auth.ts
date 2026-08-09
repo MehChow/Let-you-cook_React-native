@@ -3,6 +3,7 @@ import { and, eq, gt, isNull } from "drizzle-orm";
 import { Hono } from "hono";
 
 import { createEmailVerificationService } from "../auth/emailVerification";
+import { createPasswordResetService } from "../auth/passwordReset";
 import { verifyPassword } from "../auth/password";
 import {
   createAccessToken,
@@ -17,6 +18,7 @@ import {
   authSessionResponseSchema,
   authTokensSchema,
   logoutResponseSchema,
+  passwordResetCompletionSchema,
   refreshTokenInputSchema,
   signUpInputSchema,
 } from "../contracts/auth";
@@ -76,6 +78,7 @@ const toAuthTokens = (
 // Creates auth routes with application-owned email delivery injected.
 export const createAuthRoutes = (emailSender: EmailSender) => {
   const emailVerification = createEmailVerificationService({ emailSender });
+  const passwordReset = createPasswordResetService({ emailSender });
 
   return new Hono<RequestIdEnv>()
   .post(
@@ -148,6 +151,36 @@ export const createAuthRoutes = (emailSender: EmailSender) => {
       return result.ok && result.session
         ? c.json(result.session, 200)
         : errorResponse(c, "invalid_auth_challenge");
+    },
+  )
+  .post(
+    "/password-reset/requests",
+    zValidator("json", authChallengeRequestSchema, validationErrorHook),
+    async (c) => {
+      const challenge = await passwordReset.request(c.req.valid("json").email);
+      return c.json(challenge, 202);
+    },
+  )
+  .post(
+    "/password-reset/verifications",
+    zValidator("json", authChallengeConfirmationSchema, validationErrorHook),
+    async (c) => {
+      const { challengeId, code } = c.req.valid("json");
+      const grant = await passwordReset.verify(challengeId, code);
+      return grant
+        ? c.json(grant, 200)
+        : errorResponse(c, "invalid_auth_challenge");
+    },
+  )
+  .post(
+    "/password-reset/completions",
+    zValidator("json", passwordResetCompletionSchema, validationErrorHook),
+    async (c) => {
+      const { resetGrant, password } = c.req.valid("json");
+      const completion = await passwordReset.complete(resetGrant, password);
+      return completion
+        ? c.json(completion, 200)
+        : errorResponse(c, "invalid_password_reset_grant");
     },
   )
   .post(

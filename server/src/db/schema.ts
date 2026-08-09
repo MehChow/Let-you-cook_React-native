@@ -37,6 +37,9 @@ export const authChallenges = pgTable(
     attemptCount: integer("attempt_count").default(0).notNull(),
     expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
     consumedAt: timestamp("consumed_at", { withTimezone: true }),
+    grantHash: text("grant_hash"),
+    grantExpiresAt: timestamp("grant_expires_at", { withTimezone: true }),
+    grantConsumedAt: timestamp("grant_consumed_at", { withTimezone: true }),
     lastSentAt: timestamp("last_sent_at", { withTimezone: true }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
@@ -54,6 +57,7 @@ export const authChallenges = pgTable(
       "auth_challenges_attempt_count_check",
       sql`${table.attemptCount} between 0 and 5`,
     ),
+    uniqueIndex("auth_challenges_grant_hash_unique").on(table.grantHash),
   ],
 );
 

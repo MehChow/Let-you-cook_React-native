@@ -45,7 +45,11 @@ const mockSendCode = jest.fn();
 const mockClearPasswordResetFlow = jest.fn();
 const mockClearPasswordResetForAnotherEmail = jest.fn();
 const mockCooldown = { remainingSeconds: 45, isCoolingDown: true };
-const mockResume = { pendingEmail: null as string | null, shouldResume: false };
+const mockResume = {
+  pendingEmail: null as string | null,
+  pendingChallengeId: null as string | null,
+  shouldResume: false,
+};
 const mockUsePasswordResetResume = jest.fn(() => mockResume);
 
 jest.mock("sonner-native", () => ({
@@ -198,6 +202,7 @@ describe("auth screens", () => {
     mockCooldown.remainingSeconds = 45;
     mockCooldown.isCoolingDown = true;
     mockResume.pendingEmail = null;
+    mockResume.pendingChallengeId = null;
     mockResume.shouldResume = false;
     mockUsePasswordResetResume.mockReturnValue(mockResume);
     mockToastError.mockReset();
@@ -418,6 +423,7 @@ describe("auth screens", () => {
   });
 
   it("shows verification failures as a toast instead of inline text", async () => {
+    mockResume.pendingChallengeId = challengeResponse.challengeId;
     mockVerifyOtp.mockRejectedValueOnce(new Error("Enter the 6-digit code."));
 
     render(<EmailOtpScreen />);
@@ -524,13 +530,21 @@ describe("auth screens", () => {
     });
   });
 
-  it("clears the pending reset flow after OTP verification succeeds", async () => {
+  it("verifies the pending reset challenge without persisting its grant", async () => {
+    mockResume.pendingChallengeId = challengeResponse.challengeId;
     mockVerifyOtp.mockResolvedValue(undefined);
 
     render(<EmailOtpScreen />);
+    fireEvent.changeText(screen.getByPlaceholderText("123456"), "123456");
     fireEvent.press(screen.getByText("Verify"));
 
-    await waitFor(() => expect(mockClearPasswordResetFlow).toHaveBeenCalledTimes(1));
+    await waitFor(() =>
+      expect(mockVerifyOtp).toHaveBeenCalledWith({
+        challengeId: challengeResponse.challengeId,
+        code: "123456",
+      }),
+    );
+    expect(mockClearPasswordResetFlow).not.toHaveBeenCalled();
   });
 
   it("renders password guidance on the reset password screen", () => {
@@ -540,5 +554,23 @@ describe("auth screens", () => {
     expect(
       screen.getByText("Use 8+ characters with a mix of letters, numbers and symbols."),
     ).toBeTruthy();
+  });
+
+  it("clears the reset flow only after password completion succeeds", async () => {
+    mockResetPassword.mockResolvedValueOnce(undefined);
+
+    render(<CreateNewPasswordScreen />);
+    fireEvent.changeText(screen.getByPlaceholderText("Enter new password"), "new-password-123");
+    fireEvent.changeText(screen.getByPlaceholderText("Confirm new password"), "new-password-123");
+    fireEvent.press(screen.getByText("Update password"));
+
+    await waitFor(() =>
+      expect(mockResetPassword).toHaveBeenCalledWith({
+        password: "new-password-123",
+        confirmPassword: "new-password-123",
+      }),
+    );
+    expect(mockClearPasswordResetFlow).toHaveBeenCalledTimes(1);
+    expect(mockReplace).toHaveBeenCalledWith("/auth/login");
   });
 });

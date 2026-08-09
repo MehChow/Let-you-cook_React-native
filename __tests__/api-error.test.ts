@@ -186,6 +186,14 @@ describe("toErrorPresentation", () => {
       message: "That code is invalid or expired. Request a new one.",
       retryable: false,
     });
+    expect(toErrorPresentation(new ApiError({
+      code: "invalid_password_reset_grant",
+      status: 400,
+    }))).toMatchObject({
+      kind: "authentication",
+      message: "That password reset session expired. Request a new code.",
+      retryable: false,
+    });
   });
 
   it.each([

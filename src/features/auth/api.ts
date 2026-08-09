@@ -49,8 +49,18 @@ export interface LogoutResponse {
   ok: boolean;
 }
 
-export interface PasswordResetCodeInput {
-  email: string;
+export interface PasswordResetGrantResponse {
+  resetGrant: string;
+  expiresAt: string;
+}
+
+export interface PasswordResetCompletionInput {
+  resetGrant: string;
+  password: string;
+}
+
+export interface PasswordResetCompletionResponse {
+  ok: true;
 }
 
 interface AuthApiOptions {
@@ -106,13 +116,27 @@ export const createAuthApi = (options: AuthApiOptions = {}) => {
         "/v1/auth/email-verification/confirmations",
         body,
       ),
-    sendPasswordResetCode: async (body: PasswordResetCodeInput) => {
-      if (!body.email.trim()) {
-        throw new Error("Enter your email address.");
-      }
-
-      return { ok: true as const };
-    },
+    requestPasswordReset: (body: AuthChallengeRequest) =>
+      postJson<AuthChallengeResponse>(
+        fetchImpl,
+        baseUrl,
+        "/v1/auth/password-reset/requests",
+        body,
+      ),
+    verifyPasswordReset: (body: AuthChallengeConfirmation) =>
+      postJson<PasswordResetGrantResponse>(
+        fetchImpl,
+        baseUrl,
+        "/v1/auth/password-reset/verifications",
+        body,
+      ),
+    completePasswordReset: (body: PasswordResetCompletionInput) =>
+      postJson<PasswordResetCompletionResponse>(
+        fetchImpl,
+        baseUrl,
+        "/v1/auth/password-reset/completions",
+        body,
+      ),
   };
 };
 

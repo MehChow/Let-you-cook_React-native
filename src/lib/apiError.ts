@@ -161,6 +161,8 @@ export const toErrorPresentation = (error: unknown): ErrorPresentation => {
     presentation = { kind: "authentication", message: "Verify your email to continue.", retryable: false, shouldToast: true };
   } else if (error.code === "invalid_auth_challenge") {
     presentation = { kind: "authentication", message: "That code is invalid or expired. Request a new one.", retryable: false, shouldToast: true };
+  } else if (error.code === "invalid_password_reset_grant") {
+    presentation = { kind: "authentication", message: "That password reset session expired. Request a new code.", retryable: false, shouldToast: true };
   } else if (SESSION_ERROR_CODES.has(error.code)) {
     presentation = { kind: "authentication", message: "Your session has expired. Please sign in again.", retryable: false, shouldToast: true };
   } else if (error.code === "email_already_registered") {
