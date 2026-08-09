@@ -1,7 +1,7 @@
 import { Text } from "@/components/ui/text";
 import { images } from "@/data/images";
 import { useAuth } from "@/features/auth/useAuth";
-import { toErrorPresentation } from "@/lib/apiError";
+import { ApiError, toErrorPresentation } from "@/lib/apiError";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { LockIcon, MailIcon } from "lucide-react-native";
@@ -16,6 +16,7 @@ import { AuthShell } from "./components/AuthShell";
 import { AuthTextField } from "./components/AuthTextField";
 import { loginSchema, toLoginInput, type LoginFormValues } from "./schema";
 import { useLogin } from "./useLogin";
+import { saveEmailVerificationFlow } from "./emailVerificationState";
 
 // Maps login failures while preserving deliberate local validation messages.
 const getErrorMessage = (error: unknown) => {
@@ -28,7 +29,7 @@ const getErrorMessage = (error: unknown) => {
 // Renders real credential login and establishes the returned session.
 export function LoginScreen() {
   const router = useRouter();
-  const { establishSession } = useAuth();
+  const { establishSession, requestEmailVerification } = useAuth();
   const { login: requestLogin, isLoggingIn } = useLogin();
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -46,6 +47,23 @@ export function LoginScreen() {
         await establishSession(response);
         router.replace("/private/(tabs)");
       } catch (error) {
+        if (
+          error instanceof ApiError &&
+          error.code === "email_verification_required"
+        ) {
+          try {
+            const challenge = await requestEmailVerification(input.email);
+            saveEmailVerificationFlow(input.email, challenge);
+            router.replace({
+              pathname: "/auth/email-otp",
+              params: { purpose: "email-verification" },
+            });
+            return;
+          } catch (requestError) {
+            toast.error(getErrorMessage(requestError));
+            return;
+          }
+        }
         toast.error(getErrorMessage(error));
       }
     },

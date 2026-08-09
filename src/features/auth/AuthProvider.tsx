@@ -7,7 +7,12 @@ import {
 } from "react";
 
 import type { StoredAuthSession } from "./authTypes";
-import { authApi, type AuthResponse } from "./api";
+import {
+  authApi,
+  type AuthChallengeConfirmation,
+  type AuthChallengeResponse,
+  type AuthResponse,
+} from "./api";
 import {
   authSessionInvalidation,
   createAuthSession,
@@ -21,6 +26,8 @@ interface AuthContextValue {
   isLoggedIn: boolean;
   session: StoredAuthSession | null;
   establishSession(response: AuthResponse): Promise<void>;
+  requestEmailVerification(email: string): Promise<AuthChallengeResponse>;
+  confirmEmailVerification(input: AuthChallengeConfirmation): Promise<void>;
   logout(): Promise<void>;
   sendPasswordResetCode(email: string): Promise<void>;
   verifyOtp(code: string): Promise<void>;
@@ -100,6 +107,16 @@ export function AuthProvider({ children }: PropsWithChildren) {
     setSession(nextSession);
   };
 
+  // Requests a generic resumable verification challenge for one email.
+  const requestEmailVerification = (email: string) =>
+    authApi.requestEmailVerification({ email });
+
+  // Confirms email ownership and persists the first issued full session.
+  const confirmEmailVerification = async (input: AuthChallengeConfirmation) => {
+    const response = await authApi.confirmEmailVerification(input);
+    await establishSession(response);
+  };
+
   // Delegates password-reset requests to the current placeholder boundary.
   const sendPasswordResetCode = async (email: string) => {
     await authApi.sendPasswordResetCode({ email });
@@ -132,6 +149,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
         isLoggedIn: !isAccessTokenExpired(session),
         session,
         establishSession,
+        requestEmailVerification,
+        confirmEmailVerification,
         logout,
         sendPasswordResetCode,
         verifyOtp,

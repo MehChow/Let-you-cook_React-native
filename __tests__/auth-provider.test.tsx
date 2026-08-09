@@ -24,6 +24,8 @@ jest.mock("@/features/auth/api", () => ({
   authApi: {
     refresh: jest.fn(),
     logout: jest.fn(),
+    requestEmailVerification: jest.fn(),
+    confirmEmailVerification: jest.fn(),
     sendPasswordResetCode: jest.fn(),
   },
 }));
@@ -33,6 +35,8 @@ const mockSaveSession = authTokenStorage.saveSession as jest.Mock;
 const mockClearTokens = authTokenStorage.clearTokens as jest.Mock;
 const mockRefresh = authApi.refresh as jest.Mock;
 const mockLogout = authApi.logout as jest.Mock;
+const mockRequestEmailVerification = authApi.requestEmailVerification as jest.Mock;
+const mockConfirmEmailVerification = authApi.confirmEmailVerification as jest.Mock;
 
 // Supplies the authentication provider to hook tests.
 const wrapper = ({ children }: PropsWithChildren) => (
@@ -51,6 +55,12 @@ describe("AuthProvider", () => {
     mockSaveSession.mockResolvedValue(undefined);
     mockClearTokens.mockResolvedValue(undefined);
     mockLogout.mockResolvedValue({ ok: true });
+    mockRequestEmailVerification.mockResolvedValue({
+      ok: true,
+      challengeId: "challenge-1",
+      expiresAt: "2026-08-09T10:10:00.000Z",
+      resendAvailableAt: "2026-08-09T10:01:00.000Z",
+    });
   });
 
   it("hydrates an expired session through the refresh boundary", async () => {
@@ -119,5 +129,43 @@ describe("AuthProvider", () => {
     expect(mockClearTokens).toHaveBeenCalledTimes(1);
     expect(result.current.session).toBeNull();
     expect(result.current.isLoggedIn).toBe(false);
+  });
+
+  it("requests a resumable email-verification challenge", async () => {
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await waitFor(() => expect(result.current.isHydrating).toBe(false));
+
+    await act(async () => {
+      await result.current.requestEmailVerification("cook@example.com");
+    });
+
+    expect(mockRequestEmailVerification).toHaveBeenCalledWith({
+      email: "cook@example.com",
+    });
+  });
+
+  it("establishes the first session only after email confirmation", async () => {
+    const response = {
+      user: { id: "user-1", email: "cook@example.com" },
+      tokens: { accessToken: "access", refreshToken: "refresh" },
+    };
+    mockGetSession.mockResolvedValue(null);
+    mockConfirmEmailVerification.mockResolvedValue(response);
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await waitFor(() => expect(result.current.isHydrating).toBe(false));
+
+    await act(async () => {
+      await result.current.confirmEmailVerification({
+        challengeId: "challenge-1",
+        code: "123456",
+      });
+    });
+
+    expect(mockConfirmEmailVerification).toHaveBeenCalledWith({
+      challengeId: "challenge-1",
+      code: "123456",
+    });
+    expect(mockSaveSession).toHaveBeenCalledTimes(1);
+    expect(result.current.session?.user.email).toBe("cook@example.com");
   });
 });

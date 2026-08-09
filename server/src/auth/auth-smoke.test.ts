@@ -3,9 +3,10 @@ import { after, test } from "node:test";
 
 import { eq } from "drizzle-orm";
 
-import { app } from "../app";
+import { createApp } from "../app";
 import { hashRefreshToken } from "../auth/tokens";
 import type {
+  AuthChallengeResponse,
   AuthSessionResponse as AuthResponse,
   AuthTokens,
 } from "../contracts/auth";
@@ -14,6 +15,7 @@ import type {
   UpdateProfileResponse,
 } from "../contracts/profiles";
 import { db, pool } from "../db/client";
+import { InMemoryEmailSender } from "../email/emailSender";
 import { profiles, refreshTokens, users } from "../db/schema";
 import {
   type ApiErrorEnvelope,
@@ -23,6 +25,9 @@ import { REQUEST_ID_HEADER } from "../http/requestId";
 import { isUsersEmailUniqueViolation } from "../routes/auth";
 
 process.env.JWT_SECRET ??= "test-secret";
+
+const emailSender = new InMemoryEmailSender();
+const app = createApp({ emailSender });
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -41,6 +46,27 @@ const postJson = async <T>(path: string, body: object, expectedStatus: number) =
 
   assert.equal(response.status, expectedStatus);
   return (await response.json()) as T;
+};
+
+// Registers and confirms a user through the mandatory email challenge.
+const signUpAndVerify = async (input: {
+  email: string;
+  password: string;
+  displayName?: string;
+}) => {
+  const challenge = await postJson<AuthChallengeResponse>(
+    "/v1/auth/signup",
+    input,
+    201,
+  );
+  const code = emailSender.messages.at(-1)?.text.match(/\b\d{6}\b/)?.[0];
+  assert.ok(code);
+
+  return postJson<AuthResponse>(
+    "/v1/auth/email-verification/confirmations",
+    { challengeId: challenge.challengeId, code },
+    200,
+  );
 };
 
 // Parses one authenticated JSON response after checking its status.
@@ -94,11 +120,11 @@ test("auth and profile endpoints work against local Postgres", async (t) => {
   await db.delete(users).where(eq(users.email, email));
 
   try {
-    const signup = await postJson<AuthResponse>(
-      "/v1/auth/signup",
-      { email, password, displayName: "Smoke Tester" },
-      201,
-    );
+    const signup = await signUpAndVerify({
+      email,
+      password,
+      displayName: "Smoke Tester",
+    });
 
     assert.equal(signup.user.email, email);
     assert.ok(signup.tokens.accessToken);
@@ -198,11 +224,7 @@ test("duplicate signup returns the registered-email error envelope", async () =>
   const password = "correct-horse-batter";
 
   try {
-    await postJson<AuthResponse>(
-      "/v1/auth/signup",
-      { email, password, displayName: "Duplicate Tester" },
-      201,
-    );
+    await signUpAndVerify({ email, password, displayName: "Duplicate Tester" });
 
     const response = await postJsonResponse("/v1/auth/signup", {
       email,
@@ -245,11 +267,11 @@ test("database classifier accepts only the users email constraint", async () => 
   const password = "correct-horse-batter";
 
   try {
-    const signup = await postJson<AuthResponse>(
-      "/v1/auth/signup",
-      { email, password, displayName: "Constraint Tester" },
-      201,
-    );
+    const signup = await signUpAndVerify({
+      email,
+      password,
+      displayName: "Constraint Tester",
+    });
 
     let emailConflict: unknown;
     try {
@@ -284,11 +306,7 @@ test("wrong-password login returns the invalid-credentials envelope", async () =
   const password = "correct-horse-batter";
 
   try {
-    await postJson<AuthResponse>(
-      "/v1/auth/signup",
-      { email, password, displayName: "Password Tester" },
-      201,
-    );
+    await signUpAndVerify({ email, password, displayName: "Password Tester" });
 
     const response = await postJsonResponse("/v1/auth/login", {
       email,
@@ -322,11 +340,11 @@ test("expired refresh token returns the expired-token envelope", async () => {
   const password = "correct-horse-batter";
 
   try {
-    const signup = await postJson<AuthResponse>(
-      "/v1/auth/signup",
-      { email, password, displayName: "Expired Tester" },
-      201,
-    );
+    const signup = await signUpAndVerify({
+      email,
+      password,
+      displayName: "Expired Tester",
+    });
 
     await db
       .update(refreshTokens)
@@ -357,11 +375,11 @@ test("reused refresh token returns the reuse-detected envelope", async () => {
   const password = "correct-horse-batter";
 
   try {
-    const signup = await postJson<AuthResponse>(
-      "/v1/auth/signup",
-      { email, password, displayName: "Reuse Tester" },
-      201,
-    );
+    const signup = await signUpAndVerify({
+      email,
+      password,
+      displayName: "Reuse Tester",
+    });
 
     await postJson<AuthTokens>(
       "/v1/auth/refresh",
@@ -387,11 +405,11 @@ test("logout-revoked refresh detects reuse and invalidates active sessions", asy
   const password = "correct-horse-batter";
 
   try {
-    const signup = await postJson<AuthResponse>(
-      "/v1/auth/signup",
-      { email, password, displayName: "Logout Reuse Tester" },
-      201,
-    );
+    const signup = await signUpAndVerify({
+      email,
+      password,
+      displayName: "Logout Reuse Tester",
+    });
     const activeSession = await postJson<AuthResponse>(
       "/v1/auth/login",
       { email, password },
@@ -443,11 +461,11 @@ test("valid access token for a deleted profile returns not found", async () => {
   const password = "correct-horse-batter";
 
   try {
-    const signup = await postJson<AuthResponse>(
-      "/v1/auth/signup",
-      { email, password, displayName: "Profile Tester" },
-      201,
-    );
+    const signup = await signUpAndVerify({
+      email,
+      password,
+      displayName: "Profile Tester",
+    });
 
     await getJson<ProfileResponse>(
       "/v1/profiles/me",

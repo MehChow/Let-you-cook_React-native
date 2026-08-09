@@ -25,6 +25,17 @@ describe("createAuthApi", () => {
         if (String(url).endsWith("/logout")) {
           return jsonResponse({ ok: true });
         }
+        if (
+          String(url).endsWith("/signup") ||
+          String(url).endsWith("/email-verification/requests")
+        ) {
+          return jsonResponse({
+            ok: true,
+            challengeId: "f6822e40-7c3a-40ec-a77f-c3291888dc0c",
+            expiresAt: "2026-08-09T10:10:00.000Z",
+            resendAvailableAt: "2026-08-09T10:01:00.000Z",
+          });
+        }
         return jsonResponse({
           user: { id: "user-1", email: "cook@example.com" },
           tokens: { accessToken: "access", refreshToken: "refresh" },
@@ -40,12 +51,19 @@ describe("createAuthApi", () => {
     await api.login({ email: "cook@example.com", password: "password123" });
     await api.refresh({ refreshToken: "refresh" });
     await api.logout({ refreshToken: "refresh" });
+    await api.requestEmailVerification({ email: "cook@example.com" });
+    await api.confirmEmailVerification({
+      challengeId: "f6822e40-7c3a-40ec-a77f-c3291888dc0c",
+      code: "123456",
+    });
 
     expect(calls.map((call) => call.url)).toEqual([
       "http://api.test/v1/auth/signup",
       "http://api.test/v1/auth/login",
       "http://api.test/v1/auth/refresh",
       "http://api.test/v1/auth/logout",
+      "http://api.test/v1/auth/email-verification/requests",
+      "http://api.test/v1/auth/email-verification/confirmations",
     ]);
   });
 

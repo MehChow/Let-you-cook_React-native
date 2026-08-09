@@ -1,11 +1,11 @@
 import { Text } from "@/components/ui/text";
 import { images } from "@/data/images";
-import { useAuth } from "@/features/auth/useAuth";
 import { toErrorPresentation } from "@/lib/apiError";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { LockIcon, MailIcon, UserIcon } from "lucide-react-native";
 import { View } from "react-native";
+import { useEffect } from "react";
 
 import { AuthBackButton } from "./components/AuthBackButton";
 import { AuthFooterLink } from "./components/AuthFooterLink";
@@ -14,6 +14,10 @@ import { AuthShell } from "./components/AuthShell";
 import { AuthTextField } from "./components/AuthTextField";
 import { createAccountSchema, toSignUpInput, type CreateAccountFormValues } from "./schema";
 import { useCreateAccount } from "./useCreateAccount";
+import {
+  saveEmailVerificationFlow,
+  useEmailVerificationFlow,
+} from "./emailVerificationState";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { toast } from "sonner-native";
@@ -28,8 +32,8 @@ const getErrorMessage = (error: unknown) => {
 
 export function CreateAccountScreen() {
   const router = useRouter();
-  const { establishSession } = useAuth();
   const { createAccount, isCreating } = useCreateAccount();
+  const { flow: pendingVerification } = useEmailVerificationFlow();
   const form = useForm<CreateAccountFormValues>({
     resolver: zodResolver(createAccountSchema),
     defaultValues: {
@@ -42,13 +46,25 @@ export function CreateAccountScreen() {
     reValidateMode: "onChange",
   });
 
+  useEffect(() => {
+    if (pendingVerification) {
+      router.replace({
+        pathname: "/auth/email-otp",
+        params: { purpose: "email-verification" },
+      });
+    }
+  }, [pendingVerification, router]);
+
   const handleSubmit = form.handleSubmit(
     async (values) => {
       try {
         const response = await createAccount(toSignUpInput(values));
-        await establishSession(response);
-        toast.success("Account created.");
-        router.replace("/private/(tabs)");
+        saveEmailVerificationFlow(values.email, response);
+        toast.success("Check your email for the verification code.");
+        router.replace({
+          pathname: "/auth/email-otp",
+          params: { purpose: "email-verification" },
+        });
       } catch (error) {
         toast.error(getErrorMessage(error));
       }

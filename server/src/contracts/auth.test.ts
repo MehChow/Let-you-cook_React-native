@@ -2,6 +2,9 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import {
+  authChallengeConfirmationSchema,
+  authChallengeRequestSchema,
+  authChallengeResponseSchema,
   authCredentialsSchema,
   authSessionResponseSchema,
   authTokensSchema,
@@ -109,6 +112,42 @@ test("token and logout responses use strict current shapes", () => {
   assert.deepEqual(logoutResponseSchema.parse({ ok: true }), { ok: true });
   assert.equal(
     logoutResponseSchema.safeParse({ ok: true, revokedCount: 1 }).success,
+    false,
+  );
+});
+
+test("email challenge contracts normalize requests and reject malformed codes", () => {
+  assert.deepEqual(
+    authChallengeRequestSchema.parse({ email: " COOK@EXAMPLE.COM " }),
+    { email: "cook@example.com" },
+  );
+  assert.deepEqual(
+    authChallengeConfirmationSchema.parse({
+      challengeId: validUser.id,
+      code: "123456",
+    }),
+    { challengeId: validUser.id, code: "123456" },
+  );
+  assert.equal(
+    authChallengeConfirmationSchema.safeParse({
+      challengeId: validUser.id,
+      code: "12345",
+    }).success,
+    false,
+  );
+});
+
+test("challenge responses expose only resumable public state", () => {
+  const response = {
+    ok: true,
+    challengeId: validUser.id,
+    expiresAt: "2026-08-09T10:10:00.000Z",
+    resendAvailableAt: "2026-08-09T10:01:00.000Z",
+  } as const;
+
+  assert.deepEqual(authChallengeResponseSchema.parse(response), response);
+  assert.equal(
+    authChallengeResponseSchema.safeParse({ ...response, code: "123456" }).success,
     false,
   );
 });

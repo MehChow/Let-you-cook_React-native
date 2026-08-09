@@ -204,10 +204,11 @@ A small administrative review surface is recommended before a public beta.
 ### First Session
 
 1. Open app and reach authentication.
-2. Create account and persist the returned session.
-3. Complete or edit basic profile.
-4. Enter Home.
-5. On a later app start, restore the session and refresh once if necessary.
+2. Create an account and receive the verification OTP.
+3. Confirm the OTP and persist the first returned session.
+4. Complete or edit basic profile.
+5. Enter Home.
+6. On a later app start, restore the session and refresh once if necessary.
 
 ### Discover and Save
 

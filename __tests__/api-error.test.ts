@@ -159,6 +159,14 @@ describe("toErrorPresentation", () => {
       retryable: false,
     });
     expect(toErrorPresentation(new ApiError({
+      code: "email_verification_required",
+      status: 403,
+    }))).toMatchObject({
+      kind: "authentication",
+      message: "Verify your email to continue.",
+      retryable: false,
+    });
+    expect(toErrorPresentation(new ApiError({
       code: "refresh_token_expired",
       status: 401,
       requestId: REQUEST_ID,
@@ -166,6 +174,17 @@ describe("toErrorPresentation", () => {
       kind: "authentication",
       message: "Your session has expired. Please sign in again.",
       requestId: REQUEST_ID,
+    });
+  });
+
+  it("maps invalid auth challenges without exposing server prose", () => {
+    expect(toErrorPresentation(new ApiError({
+      code: "invalid_auth_challenge",
+      status: 400,
+    }))).toMatchObject({
+      kind: "authentication",
+      message: "That code is invalid or expired. Request a new one.",
+      retryable: false,
     });
   });
 

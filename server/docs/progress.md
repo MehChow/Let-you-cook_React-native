@@ -52,6 +52,8 @@ account deletion or rate-limit hardening next.
 - [x] `AUTH-06` Best-effort refresh revocation with unconditional local logout.
 - [x] `AUTH-07` Application-owned email sender, local SMTP/Mailpit adapter, and
   in-memory automated-test fake.
+- [x] `AUTH-08` Mandatory email verification, resend cooldown/replacement,
+  unverified-login denial, and first-session issuance on confirmation.
 
 Latest Auth branch verification:
 

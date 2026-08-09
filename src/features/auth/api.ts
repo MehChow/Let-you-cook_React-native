@@ -25,6 +25,22 @@ export interface SignUpInput extends AuthCredentials {
   displayName?: string;
 }
 
+export interface AuthChallengeResponse {
+  ok: true;
+  challengeId: string;
+  expiresAt: string;
+  resendAvailableAt: string;
+}
+
+export interface AuthChallengeRequest {
+  email: string;
+}
+
+export interface AuthChallengeConfirmation {
+  challengeId: string;
+  code: string;
+}
+
 export interface RefreshTokenInput {
   refreshToken: string;
 }
@@ -69,13 +85,27 @@ export const createAuthApi = (options: AuthApiOptions = {}) => {
 
   return {
     signUp: (body: SignUpInput) =>
-      postJson<AuthResponse>(fetchImpl, baseUrl, "/v1/auth/signup", body),
+      postJson<AuthChallengeResponse>(fetchImpl, baseUrl, "/v1/auth/signup", body),
     login: (body: AuthCredentials) =>
       postJson<AuthResponse>(fetchImpl, baseUrl, "/v1/auth/login", body),
     refresh: (body: RefreshTokenInput) =>
       postJson<AuthTokens>(fetchImpl, baseUrl, "/v1/auth/refresh", body),
     logout: (body: RefreshTokenInput) =>
       postJson<LogoutResponse>(fetchImpl, baseUrl, "/v1/auth/logout", body),
+    requestEmailVerification: (body: AuthChallengeRequest) =>
+      postJson<AuthChallengeResponse>(
+        fetchImpl,
+        baseUrl,
+        "/v1/auth/email-verification/requests",
+        body,
+      ),
+    confirmEmailVerification: (body: AuthChallengeConfirmation) =>
+      postJson<AuthResponse>(
+        fetchImpl,
+        baseUrl,
+        "/v1/auth/email-verification/confirmations",
+        body,
+      ),
     sendPasswordResetCode: async (body: PasswordResetCodeInput) => {
       if (!body.email.trim()) {
         throw new Error("Enter your email address.");

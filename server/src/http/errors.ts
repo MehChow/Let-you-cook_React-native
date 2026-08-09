@@ -37,6 +37,14 @@ export const errorDefinitions = {
     message: "Authentication is invalid or expired.",
   },
   invalid_credentials: { status: 401, message: "Email or password is incorrect." },
+  email_verification_required: {
+    status: 403,
+    message: "Email verification is required.",
+  },
+  invalid_auth_challenge: {
+    status: 400,
+    message: "The verification code is invalid or expired.",
+  },
   invalid_refresh_token: { status: 401, message: "Refresh token is invalid." },
   refresh_token_expired: { status: 401, message: "Refresh token has expired." },
   refresh_token_reuse_detected: {

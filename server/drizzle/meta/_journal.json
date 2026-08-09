@@ -8,6 +8,13 @@
       "when": 1782966766229,
       "tag": "0000_large_miss_america",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1786275939806,
+      "tag": "0001_yellow_captain_britain",
+      "breakpoints": true
     }
   ]
 }

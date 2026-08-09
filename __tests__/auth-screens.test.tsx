@@ -18,6 +18,26 @@ const authResponse = {
   user: { id: "user-1", email: "mei@example.com" },
   tokens: { accessToken: "access", refreshToken: "refresh" },
 };
+const challengeResponse = {
+  ok: true as const,
+  challengeId: "f6822e40-7c3a-40ec-a77f-c3291888dc0c",
+  expiresAt: "2026-08-09T10:10:00.000Z",
+  resendAvailableAt: "2026-08-09T10:01:00.000Z",
+};
+const mockRequestEmailVerification = jest.fn();
+const mockConfirmEmailVerification = jest.fn();
+const mockSaveEmailVerificationFlow = jest.fn();
+const mockClearEmailVerificationFlow = jest.fn();
+const mockVerificationFlow = {
+  email: "meh@example.com",
+  challengeId: challengeResponse.challengeId,
+  expiresAt: Date.parse(challengeResponse.expiresAt),
+  resendAvailableAt: Date.parse(challengeResponse.resendAvailableAt),
+};
+const mockEmailVerificationState: {
+  flow: typeof mockVerificationFlow | null;
+  remainingSeconds: number;
+} = { flow: null, remainingSeconds: 0 };
 const mockSendPasswordResetCode = jest.fn();
 const mockVerifyOtp = jest.fn();
 const mockResetPassword = jest.fn();
@@ -107,7 +127,11 @@ const mockPush = jest.fn();
 const mockReplace = jest.fn();
 const mockBack = jest.fn();
 const mockDismissTo = jest.fn();
-const mockSearchParams = { email: "meh@example.com", mode: undefined as string | undefined };
+const mockSearchParams = {
+  email: "meh@example.com",
+  mode: undefined as string | undefined,
+  purpose: undefined as string | undefined,
+};
 
 jest.mock("expo-router", () => ({
   useRouter: () => ({
@@ -122,10 +146,18 @@ jest.mock("expo-router", () => ({
 jest.mock("@/features/auth/useAuth", () => ({
   useAuth: () => ({
     establishSession: mockEstablishSession,
+    requestEmailVerification: mockRequestEmailVerification,
+    confirmEmailVerification: mockConfirmEmailVerification,
     sendPasswordResetCode: mockSendPasswordResetCode,
     verifyOtp: mockVerifyOtp,
     resetPassword: mockResetPassword,
   }),
+}));
+
+jest.mock("@/features/auth/emailVerificationState", () => ({
+  saveEmailVerificationFlow: (...args: unknown[]) => mockSaveEmailVerificationFlow(...args),
+  clearEmailVerificationFlow: () => mockClearEmailVerificationFlow(),
+  useEmailVerificationFlow: () => mockEmailVerificationState,
 }));
 
 jest.mock("@/features/auth/useCreateAccount", () => ({
@@ -154,6 +186,10 @@ describe("auth screens", () => {
       isCreating: false,
     });
     mockSendPasswordResetCode.mockReset();
+    mockRequestEmailVerification.mockReset();
+    mockConfirmEmailVerification.mockReset();
+    mockSaveEmailVerificationFlow.mockReset();
+    mockClearEmailVerificationFlow.mockReset();
     mockVerifyOtp.mockReset();
     mockResetPassword.mockReset();
     mockSendCode.mockReset();
@@ -169,6 +205,9 @@ describe("auth screens", () => {
     mockReplace.mockReset();
     mockDismissTo.mockReset();
     mockSearchParams.mode = undefined;
+    mockSearchParams.purpose = undefined;
+    mockEmailVerificationState.flow = null;
+    mockEmailVerificationState.remainingSeconds = 0;
   });
 
   it("renders the login screen copy and actions from the approved mockup", () => {
@@ -202,8 +241,8 @@ describe("auth screens", () => {
     expect(mockCreateAccount).not.toHaveBeenCalled();
   });
 
-  it("normalizes valid create-account values before establishing the server session", async () => {
-    mockCreateAccount.mockResolvedValueOnce(authResponse);
+  it("normalizes signup values and persists the verification challenge without a session", async () => {
+    mockCreateAccount.mockResolvedValueOnce(challengeResponse);
 
     render(<CreateAccountScreen />);
     fireEvent.changeText(screen.getByPlaceholderText("Your name"), "  Mei Lin  ");
@@ -219,9 +258,16 @@ describe("auth screens", () => {
         password: "cook1234",
       }),
     );
-    expect(mockEstablishSession).toHaveBeenCalledWith(authResponse);
-    expect(mockToastSuccess).toHaveBeenCalledWith("Account created.");
-    expect(mockReplace).toHaveBeenCalledWith("/private/(tabs)");
+    expect(mockEstablishSession).not.toHaveBeenCalled();
+    expect(mockSaveEmailVerificationFlow).toHaveBeenCalledWith(
+      "mei@example.com",
+      challengeResponse,
+    );
+    expect(mockToastSuccess).toHaveBeenCalledWith("Check your email for the verification code.");
+    expect(mockReplace).toHaveBeenCalledWith({
+      pathname: "/auth/email-otp",
+      params: { purpose: "email-verification" },
+    });
   });
 
   it("shows the local mutation failure as a toast", async () => {
@@ -283,6 +329,19 @@ describe("auth screens", () => {
     expect(screen.queryByText("Invalid credentials.")).toBeNull();
   });
 
+  it("resumes a persisted signup verification flow", async () => {
+    mockEmailVerificationState.flow = mockVerificationFlow;
+
+    render(<CreateAccountScreen />);
+
+    await waitFor(() =>
+      expect(mockReplace).toHaveBeenCalledWith({
+        pathname: "/auth/email-otp",
+        params: { purpose: "email-verification" },
+      }),
+    );
+  });
+
   it("normalizes login values before establishing the real server session", async () => {
     mockValidateLogin.mockResolvedValueOnce(authResponse);
     mockEstablishSession.mockResolvedValueOnce(undefined);
@@ -319,6 +378,31 @@ describe("auth screens", () => {
     expect(mockReplace).not.toHaveBeenCalled();
   });
 
+  it("routes an unverified login into its resumable verification challenge", async () => {
+    mockValidateLogin.mockRejectedValueOnce(
+      new ApiError({ code: "email_verification_required", status: 403 }),
+    );
+    mockRequestEmailVerification.mockResolvedValueOnce(challengeResponse);
+
+    render(<LoginScreen />);
+    fireEvent.changeText(screen.getByPlaceholderText("name@example.com"), "mei@example.com");
+    fireEvent.changeText(screen.getByPlaceholderText("Enter your password"), "cook1234");
+    fireEvent.press(screen.getByText("Log in"));
+
+    await waitFor(() =>
+      expect(mockRequestEmailVerification).toHaveBeenCalledWith("mei@example.com"),
+    );
+    expect(mockSaveEmailVerificationFlow).toHaveBeenCalledWith(
+      "mei@example.com",
+      challengeResponse,
+    );
+    expect(mockReplace).toHaveBeenCalledWith({
+      pathname: "/auth/email-otp",
+      params: { purpose: "email-verification" },
+    });
+    expect(mockEstablishSession).not.toHaveBeenCalled();
+  });
+
   it("shows password-reset failures as a toast instead of inline text", async () => {
     mockCooldown.remainingSeconds = 0;
     mockCooldown.isCoolingDown = false;
@@ -343,6 +427,26 @@ describe("auth screens", () => {
       expect(mockToastError).toHaveBeenCalledWith("Enter the 6-digit code."),
     );
     expect(screen.queryByText("Enter the 6-digit code.")).toBeNull();
+  });
+
+  it("confirms signup verification before entering the private app", async () => {
+    mockSearchParams.purpose = "email-verification";
+    mockEmailVerificationState.flow = mockVerificationFlow;
+    mockConfirmEmailVerification.mockResolvedValueOnce(undefined);
+
+    render(<EmailOtpScreen />);
+    fireEvent.changeText(screen.getByPlaceholderText("123456"), "123456");
+    fireEvent.press(screen.getByText("Verify"));
+
+    await waitFor(() =>
+      expect(mockConfirmEmailVerification).toHaveBeenCalledWith({
+        challengeId: challengeResponse.challengeId,
+        code: "123456",
+      }),
+    );
+    expect(mockClearEmailVerificationFlow).toHaveBeenCalledTimes(1);
+    expect(mockReplace).toHaveBeenCalledWith("/private/(tabs)");
+    expect(mockClearPasswordResetFlow).not.toHaveBeenCalled();
   });
 
   it("shows new-password failures as a toast instead of inline text", async () => {

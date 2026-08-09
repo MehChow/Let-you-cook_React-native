@@ -49,6 +49,9 @@ Do not resume the historical whole-MVP Goal and do not use the obsolete
   unreachable.
 - `AUTH-07`: Server email delivery is application-owned, local development uses
   SMTP/Mailpit, and automated auth tests can inject an in-memory sender.
+- `AUTH-08`: Signup creates an unverified account and resumable email challenge;
+  login blocks unverified users, resend rotates after the server cooldown, and
+  confirmation issues and persists the first full session.
 - `AUTH-01` through `AUTH-06` are integrated into `dev`; the latest Auth code
   checkpoint is `5bd56d9`.
 - Latest integrated Auth verification:
@@ -63,8 +66,9 @@ Do not resume the historical whole-MVP Goal and do not use the obsolete
 - The mobile app is a polished Android-first Expo prototype whose recipe,
   discovery, favourite, review, and profile content is still mostly mocked or
   in memory.
-- Sign-up and login reach the backend through `/v1`; successful responses are
-  converted to the mobile session model and stored through SecureStore.
+- Sign-up reaches `/v1`, persists only resumable verification state, and issues
+  no tokens; confirmed verification and verified login persist sessions through
+  the SecureStore boundary.
 - Server login, refresh rotation/reuse revocation, logout, access-token auth,
   and protected current-profile routes exist.
 - Auth/profile callers are canonicalized to `/v1`; unrelated legacy aliases
@@ -125,16 +129,9 @@ one relevant.
 
 Use `docs/mvp-roadmap.md` for every task ID, dependency, branch, and exit gate.
 
-## Evidence and history
-
-- Latest pre-Auth handoff: `docs/mvp-handoff-2026-08-09-0400.md`
-- API ledgers: `.superpowers/sdd/2026-08-09-*/progress.md`
-- Designs remain under `docs/superpowers/specs/`; Git preserves detail.
-
 ## Progress maintenance rules
 
-- Keep this file below 140 lines; record verified state and blockers, not
-  command narration. Put detailed RED/GREEN evidence in Git or dated handoffs.
+- Keep this file below 140 lines; keep detailed evidence in Git or handoffs.
 - Check roadmap items only when complete and update the backend supplement only
   for backend state.
 - Before stopping, integrate the verified branch into `dev` and confirm the

@@ -38,8 +38,10 @@ describe("useCreateAccount", () => {
 
   it("creates an account through the auth API", async () => {
     const response = {
-      user: { id: "user-1", email: "mei@example.com" },
-      tokens: { accessToken: "access", refreshToken: "refresh" },
+      ok: true as const,
+      challengeId: "f6822e40-7c3a-40ec-a77f-c3291888dc0c",
+      expiresAt: "2026-08-09T10:10:00.000Z",
+      resendAvailableAt: "2026-08-09T10:01:00.000Z",
     };
     jest.mocked(authApi.signUp).mockResolvedValueOnce(response);
 

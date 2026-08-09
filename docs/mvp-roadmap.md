@@ -79,7 +79,7 @@ Dependencies: API contracts.
 - [x] `AUTH-05` Handle concurrent refresh and session-expired navigation.
 - [x] `AUTH-06` Revoke refresh on logout and clear local credentials.
 - [x] `AUTH-07` Add `EmailSender`, SMTP/Mailpit, and the test fake.
-- [ ] `AUTH-08` Add mandatory email verification and resend behavior.
+- [x] `AUTH-08` Add mandatory email verification and resend behavior.
 - [ ] `AUTH-09` Implement password-reset request, OTP, grant, and completion.
 - [ ] `AUTH-10` Implement account deletion and retention/anonymization.
 - [ ] `AUTH-11` Add rate limits, redacted logging, and concurrency/failure tests.

@@ -59,7 +59,7 @@ export class SmtpEmailSender implements EmailSender {
 
 // Builds the development SMTP sender from validated server-only settings.
 export const createSmtpEmailSenderFromEnv = (
-  env: NodeJS.ProcessEnv = process.env,
+  env: Readonly<Record<string, string | undefined>> = process.env,
   createSmtpTransport: SmtpTransportFactory = createTransport,
 ): EmailSender => {
   const host = env.SMTP_HOST?.trim();

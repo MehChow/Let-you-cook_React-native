@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { images } from "@/data/images";
 import { useAuth } from "@/features/auth/useAuth";
+import { toErrorPresentation } from "@/lib/apiError";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
@@ -15,15 +16,23 @@ import { AuthPrimaryButton } from "./components/AuthPrimaryButton";
 import { AuthShell } from "./components/AuthShell";
 import { maskEmailAddress } from "./presentation";
 import {
+  clearEmailVerificationFlow,
+  saveEmailVerificationFlow,
+  useEmailVerificationFlow,
+} from "./emailVerificationState";
+import {
   clearPasswordResetFlow,
   usePasswordResetCooldown,
   useSendPasswordResetCode,
 } from "./useSendPasswordResetCode";
 
-const getErrorMessage = (error: unknown) =>
-  error instanceof Error
+// Maps verification failures through the shared safe presentation policy.
+const getErrorMessage = (error: unknown) => {
+  const presentation = toErrorPresentation(error);
+  return presentation.kind === "unknown" && error instanceof Error
     ? error.message
-    : "Unable to verify the code right now.";
+    : presentation.message;
+};
 
 const formatCountdown = (remainingSeconds: number) => {
   const minutes = Math.floor(remainingSeconds / 60)
@@ -36,14 +45,40 @@ const formatCountdown = (remainingSeconds: number) => {
 
 export function EmailOtpScreen() {
   const router = useRouter();
-  const { email } = useLocalSearchParams<{ email?: string }>();
-  const { verifyOtp } = useAuth();
+  const { email, purpose } = useLocalSearchParams<{
+    email?: string;
+    purpose?: string;
+  }>();
+  const isEmailVerification = purpose === "email-verification";
+  const {
+    confirmEmailVerification,
+    requestEmailVerification,
+    verifyOtp,
+  } = useAuth();
   const { sendCode, isSending } = useSendPasswordResetCode();
-  const { remainingSeconds, isCoolingDown } = usePasswordResetCooldown();
+  const passwordResetCooldown = usePasswordResetCooldown();
+  const emailVerification = useEmailVerificationFlow();
+  const activeEmail = isEmailVerification
+    ? emailVerification.flow?.email
+    : email;
+  const remainingSeconds = isEmailVerification
+    ? emailVerification.remainingSeconds
+    : passwordResetCooldown.remainingSeconds;
+  const isCoolingDown = isEmailVerification
+    ? remainingSeconds > 0
+    : passwordResetCooldown.isCoolingDown;
   const [code, setCode] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const isResendPending = isSending || isResending;
 
   const handleUseAnotherEmail = () => {
+    if (isEmailVerification) {
+      clearEmailVerificationFlow();
+      router.replace("/auth/create-account");
+      return;
+    }
+
     router.dismissTo({
       pathname: "/auth/forgot-password",
       params: { mode: "another-email" },
@@ -51,28 +86,46 @@ export function EmailOtpScreen() {
   };
 
   const handleResend = async () => {
-    if (!email) {
+    if (!activeEmail) {
       toast.error("Unable to resend the code without an email address.");
       return;
     }
 
     try {
-      await sendCode(email);
+      if (isEmailVerification) {
+        setIsResending(true);
+        const challenge = await requestEmailVerification(activeEmail);
+        saveEmailVerificationFlow(activeEmail, challenge);
+      } else {
+        await sendCode(activeEmail);
+      }
       toast.success("A new code was sent.");
     } catch (error) {
       toast.error(getErrorMessage(error));
+    } finally {
+      setIsResending(false);
     }
   };
 
   const handleContinue = async () => {
     try {
       setIsSubmitting(true);
-      await verifyOtp(code);
-      clearPasswordResetFlow();
-      router.push({
-        pathname: "/auth/create-new-password",
-        params: email ? { email } : undefined,
-      });
+      if (isEmailVerification) {
+        const challengeId = emailVerification.flow?.challengeId;
+        if (!challengeId) {
+          throw new Error("Request a new verification code.");
+        }
+        await confirmEmailVerification({ challengeId, code });
+        clearEmailVerificationFlow();
+        router.replace("/private/(tabs)");
+      } else {
+        await verifyOtp(code);
+        clearPasswordResetFlow();
+        router.push({
+          pathname: "/auth/create-new-password",
+          params: email ? { email } : undefined,
+        });
+      }
     } catch (error) {
       toast.error(getErrorMessage(error));
     } finally {
@@ -93,7 +146,7 @@ export function EmailOtpScreen() {
               Enter the 6-digit code we sent to
             </Text>
             <Text className="text-lg font-semibold text-sage-900">
-              {maskEmailAddress(email)}
+              {maskEmailAddress(activeEmail)}
             </Text>
           </View>
           <Image
@@ -112,7 +165,7 @@ export function EmailOtpScreen() {
           </Text>
           <Pressable
             accessibilityRole="button"
-            disabled={isCoolingDown || isSending}
+            disabled={isCoolingDown || isResendPending}
             onPress={() => void handleResend()}
           >
             <Text
@@ -122,7 +175,9 @@ export function EmailOtpScreen() {
                   : "text-sm font-semibold text-sage-600"
               }
             >
-              {isCoolingDown
+              {isResendPending
+                ? "Sending..."
+                : isCoolingDown
                 ? `Resend in ${formatCountdown(remainingSeconds)}`
                 : "Resend code"}
             </Text>

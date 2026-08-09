@@ -213,10 +213,10 @@ resend cooldown, and consumption. An injected `EmailSender` owns delivery.
 Development SMTP points to Mailpit in Docker and tests inject an in-memory fake.
 A verified sender domain/provider is required before public beta.
 
-The current transitional login/signup session DTO contains only public
-`user.id`, `user.email`, `tokens.accessToken`, and `tokens.refreshToken`.
-Internal refresh-token row IDs are never response fields. Mandatory
-verification will replace signup's temporary session response in `AUTH-08`.
+Login and email confirmation session DTOs contain only public `user.id`,
+`user.email`, `tokens.accessToken`, and `tokens.refreshToken`. Internal
+refresh-token row IDs are never response fields. Signup instead returns only
+the opaque verification challenge ID, expiry, and resend-available timestamp.
 
 ### Profiles
 

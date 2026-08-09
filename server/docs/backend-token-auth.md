@@ -31,13 +31,19 @@ POST /v1/auth/signup
 POST /v1/auth/login
 POST /v1/auth/refresh
 POST /v1/auth/logout
-POST /v1/auth/verify-email
-POST /v1/auth/forgot-password
-POST /v1/auth/reset-password
-DELETE /v1/auth/me
+POST /v1/auth/email-verification/requests
+POST /v1/auth/email-verification/confirmations
+POST /v1/auth/password-reset/requests
+POST /v1/auth/password-reset/verifications
+POST /v1/auth/password-reset/completions
+DELETE /v1/users/me
 ```
 
-`/v1/auth/login` and `/v1/auth/refresh` return:
+`/v1/auth/login`, email confirmation, and `/v1/auth/refresh` return tokens.
+Signup returns a resumable verification challenge and never returns tokens.
+Unverified login is denied until email confirmation creates the first session.
+
+Token responses contain:
 
 ```ts
 interface AuthTokens {

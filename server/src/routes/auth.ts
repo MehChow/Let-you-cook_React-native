@@ -2,7 +2,8 @@ import { zValidator } from "@hono/zod-validator";
 import { and, eq, gt, isNull } from "drizzle-orm";
 import { Hono } from "hono";
 
-import { hashPassword, verifyPassword } from "../auth/password";
+import { createEmailVerificationService } from "../auth/emailVerification";
+import { verifyPassword } from "../auth/password";
 import {
   createAccessToken,
   createRefreshToken,
@@ -10,6 +11,8 @@ import {
   refreshTokenExpiry,
 } from "../auth/tokens";
 import {
+  authChallengeConfirmationSchema,
+  authChallengeRequestSchema,
   authCredentialsSchema,
   authSessionResponseSchema,
   authTokensSchema,
@@ -18,7 +21,8 @@ import {
   signUpInputSchema,
 } from "../contracts/auth";
 import { db } from "../db/client";
-import { profiles, refreshTokens, users } from "../db/schema";
+import { refreshTokens, users } from "../db/schema";
+import type { EmailSender } from "../email/emailSender";
 import { errorResponse, validationErrorHook } from "../http/errors";
 import type { RequestIdEnv } from "../http/requestId";
 
@@ -69,20 +73,19 @@ const toAuthTokens = (
     refreshToken: tokens.refreshToken,
   });
 
-export const authRoutes = new Hono<RequestIdEnv>()
+// Creates auth routes with application-owned email delivery injected.
+export const createAuthRoutes = (emailSender: EmailSender) => {
+  const emailVerification = createEmailVerificationService({ emailSender });
+
+  return new Hono<RequestIdEnv>()
   .post(
     "/signup",
     zValidator("json", signUpInputSchema, validationErrorHook),
     async (c) => {
       const body = c.req.valid("json");
-      const passwordHash = await hashPassword(body.password);
-      let user: { id: string; email: string };
-
       try {
-        [user] = await db
-          .insert(users)
-          .values({ email: body.email, passwordHash })
-          .returning({ id: users.id, email: users.email });
+        const challenge = await emailVerification.register(body);
+        return c.json(challenge, 201);
       } catch (error) {
         if (isUsersEmailUniqueViolation(error)) {
           return errorResponse(c, "email_already_registered");
@@ -90,21 +93,6 @@ export const authRoutes = new Hono<RequestIdEnv>()
 
         throw error;
       }
-
-      await db.insert(profiles).values({
-        userId: user.id,
-        displayName: body.displayName ?? body.email.split("@")[0],
-      });
-
-      const tokens = await createTokenPair(user.id);
-
-      return c.json(
-        authSessionResponseSchema.parse({
-          user,
-          tokens: toAuthTokens(tokens),
-        }),
-        201,
-      );
     },
   )
   .post(
@@ -117,6 +105,7 @@ export const authRoutes = new Hono<RequestIdEnv>()
           id: users.id,
           email: users.email,
           passwordHash: users.passwordHash,
+          emailVerifiedAt: users.emailVerifiedAt,
         })
         .from(users)
         .where(eq(users.email, body.email))
@@ -124,6 +113,10 @@ export const authRoutes = new Hono<RequestIdEnv>()
 
       if (!user || !(await verifyPassword(body.password, user.passwordHash))) {
         return errorResponse(c, "invalid_credentials");
+      }
+
+      if (!user.emailVerifiedAt) {
+        return errorResponse(c, "email_verification_required");
       }
 
       const tokens = await createTokenPair(user.id);
@@ -135,6 +128,26 @@ export const authRoutes = new Hono<RequestIdEnv>()
         }),
         200,
       );
+    },
+  )
+  .post(
+    "/email-verification/requests",
+    zValidator("json", authChallengeRequestSchema, validationErrorHook),
+    async (c) => {
+      const challenge = await emailVerification.request(c.req.valid("json").email);
+      return c.json(challenge, 202);
+    },
+  )
+  .post(
+    "/email-verification/confirmations",
+    zValidator("json", authChallengeConfirmationSchema, validationErrorHook),
+    async (c) => {
+      const { challengeId, code } = c.req.valid("json");
+      const result = await emailVerification.confirm(challengeId, code);
+
+      return result.ok && result.session
+        ? c.json(result.session, 200)
+        : errorResponse(c, "invalid_auth_challenge");
     },
   )
   .post(
@@ -216,3 +229,4 @@ export const authRoutes = new Hono<RequestIdEnv>()
       return c.json(logoutResponseSchema.parse({ ok: true }), 200);
     },
   );
+};

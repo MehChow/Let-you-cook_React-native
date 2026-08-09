@@ -1,5 +1,7 @@
 import {
   boolean,
+  check,
+  index,
   integer,
   jsonb,
   numeric,
@@ -9,6 +11,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 export const users = pgTable(
   "users",
@@ -21,6 +24,37 @@ export const users = pgTable(
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [uniqueIndex("users_email_unique").on(table.email)],
+);
+
+export const authChallenges = pgTable(
+  "auth_challenges",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+    purpose: text("purpose").notNull(),
+    targetHash: text("target_hash").notNull(),
+    codeHash: text("code_hash").notNull(),
+    attemptCount: integer("attempt_count").default(0).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    consumedAt: timestamp("consumed_at", { withTimezone: true }),
+    lastSentAt: timestamp("last_sent_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    index("auth_challenges_target_purpose_sent_idx").on(
+      table.targetHash,
+      table.purpose,
+      table.lastSentAt,
+    ),
+    check(
+      "auth_challenges_purpose_check",
+      sql`${table.purpose} in ('email_verification', 'password_reset')`,
+    ),
+    check(
+      "auth_challenges_attempt_count_check",
+      sql`${table.attemptCount} between 0 and 5`,
+    ),
+  ],
 );
 
 export const profiles = pgTable("profiles", {
