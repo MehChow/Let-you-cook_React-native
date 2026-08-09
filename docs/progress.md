@@ -43,6 +43,9 @@ Do not resume the historical whole-MVP Goal and do not use the obsolete
 - `AUTH-05`: Concurrent protected-request failures share one refresh; a
   rejected refresh clears credentials and invalidates private navigation once
   per established session, including subscription races.
+- `AUTH-06`: Logout presents the stored refresh token for server revocation,
+  then clears SecureStore and private session state even when revocation is
+  unreachable.
 - `AUTH-01` through `AUTH-03` are integrated into `dev` at `dbf887d`.
 - Latest integrated Auth verification:
   - `npm.cmd run check`: passed;

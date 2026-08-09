@@ -48,6 +48,7 @@ not begin email delivery, verification, password reset, or deletion next.
 - [x] `AUTH-03` Real mobile login and persisted session establishment.
 - [x] `AUTH-04` Mobile hydration refresh and rotated-session persistence.
 - [x] `AUTH-05` Single-flight invalid-session handling and private-route exit.
+- [x] `AUTH-06` Best-effort refresh revocation with unconditional local logout.
 
 Latest Auth branch verification:
 

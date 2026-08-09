@@ -75,10 +75,21 @@ export function AuthProvider({ children }: PropsWithChildren) {
     };
   }, []);
 
-  // Clears the current session locally until server logout is integrated.
+  // Revokes the current refresh token before clearing local state.
   const logout = async () => {
-    await authTokenStorage.clearTokens();
-    setSession(null);
+    try {
+      if (session?.tokens.refreshToken) {
+        await authApi.logout({ refreshToken: session.tokens.refreshToken });
+      }
+    } catch {
+      // Revocation is best-effort when the backend is unreachable.
+    } finally {
+      try {
+        await authTokenStorage.clearTokens();
+      } finally {
+        setSession(null);
+      }
+    }
   };
 
   // Converts and persists a successful server authentication response.

@@ -32,6 +32,7 @@ const mockGetSession = authTokenStorage.getSession as jest.Mock;
 const mockSaveSession = authTokenStorage.saveSession as jest.Mock;
 const mockClearTokens = authTokenStorage.clearTokens as jest.Mock;
 const mockRefresh = authApi.refresh as jest.Mock;
+const mockLogout = authApi.logout as jest.Mock;
 
 // Supplies the authentication provider to hook tests.
 const wrapper = ({ children }: PropsWithChildren) => (
@@ -49,6 +50,7 @@ describe("AuthProvider", () => {
     });
     mockSaveSession.mockResolvedValue(undefined);
     mockClearTokens.mockResolvedValue(undefined);
+    mockLogout.mockResolvedValue({ ok: true });
   });
 
   it("hydrates an expired session through the refresh boundary", async () => {
@@ -79,6 +81,42 @@ describe("AuthProvider", () => {
       authSessionInvalidation.notify();
     });
 
+    expect(result.current.session).toBeNull();
+    expect(result.current.isLoggedIn).toBe(false);
+  });
+
+  it("revokes the stored refresh token before clearing logout state", async () => {
+    mockGetSession.mockResolvedValue({
+      ...expiredSession,
+      accessTokenExpiresAt: Number.MAX_SAFE_INTEGER,
+    });
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await waitFor(() => expect(result.current.isHydrating).toBe(false));
+
+    await act(async () => {
+      await result.current.logout();
+    });
+
+    expect(mockLogout).toHaveBeenCalledWith({ refreshToken: "old-refresh" });
+    expect(mockClearTokens).toHaveBeenCalledTimes(1);
+    expect(result.current.session).toBeNull();
+  });
+
+  it("clears logout state when refresh-token revocation is unreachable", async () => {
+    mockGetSession.mockResolvedValue({
+      ...expiredSession,
+      accessTokenExpiresAt: Number.MAX_SAFE_INTEGER,
+    });
+    mockLogout.mockRejectedValue(new TypeError("Network request failed"));
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await waitFor(() => expect(result.current.isHydrating).toBe(false));
+
+    await act(async () => {
+      await expect(result.current.logout()).resolves.toBeUndefined();
+    });
+
+    expect(mockLogout).toHaveBeenCalledTimes(1);
+    expect(mockClearTokens).toHaveBeenCalledTimes(1);
     expect(result.current.session).toBeNull();
     expect(result.current.isLoggedIn).toBe(false);
   });
