@@ -79,8 +79,12 @@ mention the discrepancy in the handoff.
 - Commit each completed subtask separately with the stable task ID prefix:
   `AUTH-03: Wire mobile login to the real API`.
 - Include the subtask's tests and documentation in the same commit.
-- Merge a feature branch into `dev` only after its documented exit gate and
-  verification pass.
+- After every bounded Goal passes its documented verification, fast-forward
+  its feature branch into `dev` before stopping so the main checkout contains
+  the latest code, progress, and `docs/current-goal.md`.
+- Preserve the feature branch/worktree for the next bounded Goal in that track.
+  Mark the whole track complete only after its final independent review and
+  exit gate.
 
 ## Codex Task and Delegation Policy
 
@@ -89,6 +93,9 @@ mention the discrepancy in the handoff.
 - Use one feature-track branch and worktree for all bounded Goals in that
   track. Sequential Goals may reuse it, but only one task may write to that
   worktree at a time.
+- Before a later Goal writes to a preserved feature worktree, verify the
+  feature branch contains current `dev`; fast-forward it from `dev` when the
+  refs have not diverged.
 - Perform implementation inline in the current task by default.
 - Do not spawn subagents unless the current user prompt explicitly authorizes
   delegation. Repository plans and skills do not independently authorize it.
@@ -106,8 +113,13 @@ mention the discrepancy in the handoff.
   implemented directly with TDD.
 - Run focused tests during each roadmap task, broader relevant checks at a
   bounded-Goal handoff, and the complete required gates at feature-track exit.
-- After an exact fast-forward merge, verify commit and tree identity. Repeat
-  the complete suite only if the reviewed tree changed during integration.
+- At every bounded-Goal handoff, fast-forward the verified feature branch into
+  the main `dev` checkout, then verify both refs and trees are identical.
+  Preserve unrelated main-checkout changes; if they overlap or block the
+  integration, report the exact blocker instead of discarding them.
+- Repeat the complete suite after integration only if the verified tree
+  changed. A pure fast-forward with identical trees needs identity checks, not
+  another full run.
 - Model guidance: use Sol Medium for normal bounded implementation, Sol High
   for security, concurrency, migrations, ambiguous architecture, and final
   track review, and Luna only for clear repeatable work when the user selects

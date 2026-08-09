@@ -36,8 +36,13 @@ handoff is durable.
 - Sequential Goal tasks may reuse the same feature worktree.
 - Only one task may write to a worktree at a time.
 - Commit each completed roadmap item separately with its stable task ID.
-- Merge the feature branch into `dev` only after the complete track exit gate
-  and fresh independent review.
+- After every bounded Goal, fast-forward its verified feature branch into
+  `dev`, prove the refs/trees match, and ensure the next `docs/current-goal.md`
+  is visible from the main checkout before stopping.
+- Preserve the feature branch/worktree for the next Goal. Before later writes,
+  fast-forward it from `dev` when the refs have not diverged.
+- Mark a feature track complete only after its final independent review and
+  exit gate.
 - Run parallel writer tasks only for dependency-independent feature branches
   with separate worktrees.
 
@@ -58,10 +63,11 @@ handoff is durable.
 
 - During a task ID: focused RED/GREEN tests and the smallest relevant check.
 - At a bounded-Goal handoff: relevant feature suites and affected typechecks.
+- Before a bounded Goal stops: fast-forward its verified branch into `dev` and
+  prove branch/ref and tree identity without disturbing unrelated user changes.
 - At feature-track exit: all commands required by `AGENTS.md`, plus Android
   verification when rendered or native behavior changed.
-- After an exact fast-forward merge: prove the reviewed commit/tree is the
-  integrated tree. Rerun the complete suite only if integration changed it.
+- Rerun the complete suite after integration only if the verified tree changed.
 - Never use Expo web.
 
 ## Model Selection
@@ -89,4 +95,5 @@ Later Auth Goals continue on the same branch in this order:
 4. Fresh Sol High task — whole-track read-only-first review and exit gate.
 
 After each bounded Goal, update `docs/current-goal.md` to the next exact
-assignment and keep the compact progress snapshot current.
+assignment, keep the compact progress snapshot current, and fast-forward the
+verified checkpoint into `dev` before stopping.

@@ -17,7 +17,10 @@ Do not check a feature merely because its UI or endpoint exists.
 ## Branch and Commit Rules
 
 Each feature track starts from `dev` on its dedicated branch. Each completed
-subtask receives a separate commit whose subject starts with the task ID.
+subtask receives a separate commit whose subject starts with the task ID. After
+each bounded Goal, fast-forward its verified checkpoint into `dev` while
+preserving the feature branch/worktree for the next Goal. The track is complete
+only after its final independent review and exit gate.
 
 | Order | Track | Branch | Planning |
 | --- | --- | --- | --- |

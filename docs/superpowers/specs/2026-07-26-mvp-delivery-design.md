@@ -89,8 +89,10 @@ codex/mvp-operations
 codex/mvp-ai-nutrition
 ```
 
-Do not mix unrelated feature tracks on one branch. If concurrent agents work on
-independent tracks, give each branch a separate Git worktree. Dependent tracks
+Do not mix unrelated feature tracks on one branch. After each bounded Goal,
+fast-forward its verified checkpoint into `dev`, prove ref/tree identity, and
+preserve the feature branch/worktree for the next Goal. If concurrent agents
+work on independent tracks, give each branch a separate Git worktree. Dependent tracks
 start only after their required contract branch is integrated or from an
 explicitly approved dependency branch.
 
@@ -104,8 +106,9 @@ MEDIA-05: Verify uploaded R2 objects before attachment
 ```
 
 Include the subtask's tests and documentation in the same commit. Do not use
-ambiguous subjects such as "updates", "fixes", or "work in progress". Merge a
-feature branch into `dev` only after its feature exit gate and verification pass.
+ambiguous subjects such as "updates", "fixes", or "work in progress". Integrate
+each verified bounded-Goal checkpoint into `dev` before stopping. Mark the
+feature track complete only after its final independent review and exit gate.
 
 ## Shared Architecture
 

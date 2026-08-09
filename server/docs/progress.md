@@ -8,6 +8,7 @@ and schema contract remains `docs/api-and-data-model.md`.
 - Active feature track: Authentication and account lifecycle
 - Next bounded Goal: `AUTH-04` through `AUTH-06`
 - Feature branch: `codex/mvp-auth-account`
+- Last integrated Goal checkpoint: `dbf887d` (`AUTH-03`)
 - Goal prompt: `docs/current-goal.md`
 
 The API contract track and `AUTH-01` through `AUTH-03` are complete. Continue
@@ -104,4 +105,6 @@ tests are not passing evidence.
 
 Keep this file under roughly 120 lines. Record only current backend state,
 verification, blockers, and the next bounded responsibility. Detailed execution
-history belongs in Git, dated handoffs, or task ledgers.
+history belongs in Git, dated handoffs, or task ledgers. Before each bounded
+Goal stops, integrate its verified checkpoint into `dev` so this file and the
+next Goal are available from the main checkout.

@@ -23,6 +23,7 @@ passes, and the next exact Goal is recorded. Do not start `AUTH-07`.
 - Integration branch: `dev`
 - Feature branch: `codex/mvp-auth-account`
 - Worktree: `C:\Let-you-cook_React-native\.worktrees\mvp-auth-account`
+- Integrated checkpoint: `dbf887d` (`AUTH-03`)
 - Completed roadmap range: `BASE-01` through `BASE-06`, `API-01` through
   `API-07`, and `AUTH-01` through `AUTH-03`.
 - Auth routes/mobile wrappers use `/v1`; real signup and login persist the
@@ -60,8 +61,10 @@ unless a concrete dependency requires them.
 ## Branch and Worktree
 
 Reuse `codex/mvp-auth-account` and the existing Auth worktree. Do not create a
-second Auth branch or worktree. If the worktree is not clean, inspect and
-preserve its changes before acting.
+second Auth branch or worktree. Before writing, verify the feature branch
+contains current `dev`; fast-forward it from `dev` if the refs have not
+diverged. If either checkout is not clean, inspect and preserve unrelated user
+changes before acting.
 
 ## Execution Rules
 
@@ -76,8 +79,7 @@ preserve its changes before acting.
 - Logout must clear local state even when revocation is unreachable.
 - Do not implement email delivery/verification, password reset, deletion, rate
   limits, or later Auth work.
-- Preserve unrelated user changes; do not push, open a pull request, or merge
-  the Auth branch into `dev`.
+- Preserve unrelated user changes; do not push or open a pull request.
 - Do not run Expo web.
 
 ## Verification
@@ -108,7 +110,12 @@ If none is available, record the exact pending device checks in
   describe the verified state.
 - `docs/current-goal.md` is replaced with the next bounded assignment for
   `AUTH-07` through `AUTH-09` on the same branch using Sol High.
-- The worktree is clean.
+- The Auth worktree is clean.
+- The verified Auth branch is fast-forwarded into the main `dev` checkout.
+- `git rev-parse dev` and `git rev-parse codex/mvp-auth-account` return the same
+  commit, their trees are identical, and the updated `docs/current-goal.md` is
+  readable from `C:\Let-you-cook_React-native`.
 
-Do not merge the Auth branch into `dev` yet. Do not mark the entire Auth track
-complete, and do not continue into the next Goal in this task.
+Do not mark the entire Auth track complete, remove its worktree, or continue
+into the next Goal in this task. Stop only after the bounded checkpoint is
+integrated into `dev`.

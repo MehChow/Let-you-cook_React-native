@@ -24,7 +24,9 @@ planning, review, worktree, and full-suite costs.
 Git and repository documentation are the durable supervisor. A feature track
 uses one branch and worktree, while two to five tightly related roadmap items
 form one bounded Goal task. Sequential Goals may reuse that track worktree, but
-only one task may write to it at a time.
+only one task may write to it at a time. Every verified bounded-Goal checkpoint
+fast-forwards into `dev` before the Goal stops so the main checkout always owns
+the next resume contract.
 
 Implementation stays inline by default. Subagents require explicit
 authorization in the current user prompt and are limited to at most two
@@ -40,8 +42,9 @@ cross-layer work; do not create a new design and plan for every task ID.
 
 Use focused RED/GREEN tests during each task. Run the relevant broader checks
 at a bounded-Goal handoff and the complete required gates at the feature-track
-exit. After an exact fast-forward merge, verify commit and tree identity; rerun
-the complete suite only if the reviewed tree changed.
+exit. Fast-forward every verified Goal checkpoint into `dev`, verify commit and
+tree identity, and rerun the complete suite only if integration changed the
+verified tree.
 
 ## Durable Documents
 
@@ -75,3 +78,5 @@ No permanent AI supervisor is introduced.
 - Branch ownership and task boundaries no longer conflict.
 - Routine execution no longer mandates subagents or per-task independent
   review.
+- The main `dev` checkout always exposes the next `docs/current-goal.md` after a
+  bounded Goal stops.

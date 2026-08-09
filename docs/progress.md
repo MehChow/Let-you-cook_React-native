@@ -5,7 +5,7 @@
 
 - Last audited: 2026-08-09
 - Current integration branch: `dev`
-- Last delivery handoff commit: `9f99a6f`
+- Last integrated Goal checkpoint: `dbf887d` (`AUTH-03`)
 - Active feature track: Authentication and account lifecycle
 - Next bounded Goal: `AUTH-04` through `AUTH-06`
 - Feature branch: `codex/mvp-auth-account`
@@ -17,8 +17,10 @@
 2. Select Sol High and enable Goal mode.
 3. Use `docs/current-goal.md` as the complete Goal prompt.
 4. Reuse `codex/mvp-auth-account` and its existing Auth worktree after verifying
-   the clean branch state.
+   it contains current `dev` and has no unpreserved changes.
 5. Stop that Goal after `AUTH-06`; do not begin email delivery or verification.
+6. Before stopping, the Goal must fast-forward its verified checkpoint into
+   `dev` so the next Goal file is visible from this main checkout.
 
 Do not resume the historical whole-MVP Goal and do not use the obsolete
 `codex/mvp-auth-integration` branch name.
@@ -29,14 +31,14 @@ Do not resume the historical whole-MVP Goal and do not use the obsolete
 - `API-01` through `API-07`: API contract/mobile data foundation exit gate
   complete and merged into `dev`.
 - `AUTH-01`: Auth/profile mobile wrappers and refresh transport now use `/v1`;
-  the server's temporary unversioned auth/profile aliases are retired on the
-  Auth feature branch.
+  the server's temporary unversioned auth/profile aliases are retired.
 - `AUTH-02`: Real PostgreSQL coverage verifies persisted user/profile/session
-  rows, duplicate isolation, and `/v1` validation; signup failures now retain
-  safe structured API metadata for mobile presentation.
-- `AUTH-03`: Mobile login now calls the real `/v1/auth/login` API and stores the
+  rows, duplicate isolation, and `/v1` validation; signup failures retain safe
+  structured API metadata for mobile presentation.
+- `AUTH-03`: Mobile login calls the real `/v1/auth/login` API and stores the
   returned session through the existing SecureStore-backed session boundary.
-- Latest Auth branch verification at AUTH-03 closure:
+- `AUTH-01` through `AUTH-03` are integrated into `dev` at `dbf887d`.
+- Latest integrated Auth verification:
   - `npm.cmd run check`: passed;
   - `npm.cmd test -- --runInBand`: 19 suites/95 tests passed;
   - `npm.cmd run server:check`: passed;
@@ -52,8 +54,8 @@ Do not resume the historical whole-MVP Goal and do not use the obsolete
   converted to the mobile session model and stored through SecureStore.
 - Server login, refresh rotation/reuse revocation, logout, access-token auth,
   and protected current-profile routes exist.
-- `/v1` mounts all current application route families. Auth/profile callers are
-  canonicalized to `/v1`; unrelated legacy aliases remain outside this Goal.
+- Auth/profile callers are canonicalized to `/v1`; unrelated legacy aliases
+  remain outside the completed Goal.
 - The mobile project has a typed Hono client, SecureStore-backed auth transport,
   single-flight refresh/replay support, bounded query retry defaults, and safe
   API-error presentation mapping.
@@ -62,15 +64,12 @@ Do not resume the historical whole-MVP Goal and do not use the obsolete
 
 ## Blockers and local-state snapshot
 
-- No code-review or automated-verification blocker remains from the API track.
-- Android interaction remains pending because `agent-device` found no attached
-  device/emulator. Verify real login opens Home and survives an immediate app
+- Android interaction remains pending because no attached device/emulator was
+  available. Verify real login opens Home and survives an immediate app
   relaunch while the access token remains valid; do not use Expo web.
-- `dev` was local-only and 58 commits ahead of `origin/dev` before this workflow
-  documentation change. No push or pull request was created.
-- `letyoucook-postgres` and `letyoucook-mailpit` were running healthy for the
-  AUTH-03 exit suite; Android, Metro, and the backend development listener were
-  not running.
+- `dev` is local-only. No push or pull request was created.
+- PostgreSQL and Mailpit were healthy for the AUTH-03 exit suite; Android,
+  Metro, and the backend development listener were not running.
 - A registered historical Foundation worktree remains at
   `.worktrees/mvp-foundation`.
 - An empty Windows-locked `.worktrees/mvp-typed-client` directory was not a
@@ -113,12 +112,12 @@ Use `docs/mvp-roadmap.md` for every task ID, dependency, branch, and exit gate.
 
 ## Evidence and history
 
-- Latest exact handoff: `docs/mvp-handoff-2026-08-09-0400.md`
-- API-05 through API-07 ledgers: `.superpowers/sdd/2026-08-09-*/progress.md`
+- Latest pre-Auth handoff: `docs/mvp-handoff-2026-08-09-0400.md`
+- API ledgers: `.superpowers/sdd/2026-08-09-*/progress.md`
 - Approved MVP design: `docs/superpowers/specs/2026-07-26-mvp-delivery-design.md`
 - Current workflow design:
   `docs/superpowers/specs/2026-08-09-codex-workflow-optimization-design.md`
-- Git history retains the prior detailed `docs/progress.md` execution stream.
+- Git history retains prior detailed execution streams.
 
 ## Progress maintenance rules
 
@@ -134,3 +133,5 @@ After meaningful implementation:
    handoff when it materially helps later diagnosis.
 6. Never use chat history as the only record of an architectural decision or
    resume point.
+7. Before a bounded Goal stops, fast-forward its verified branch into `dev` and
+   confirm the next Goal file is visible from the main checkout.
