@@ -36,6 +36,20 @@
       "when": 1786283542777,
       "tag": "0004_common_krista_starr",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1786288476666,
+      "tag": "0005_sharp_taskmaster",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1786288490747,
+      "tag": "0006_violet_hawkeye",
+      "breakpoints": true
     }
   ]
 }

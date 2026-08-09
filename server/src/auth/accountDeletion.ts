@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { and, eq, inArray, isNull, or } from "drizzle-orm";
+import { and, eq, inArray, isNull, ne, or } from "drizzle-orm";
 
 import { db } from "../db/client";
 import {
@@ -61,7 +61,7 @@ export const deleteAccount = async (
                 .select({ id: recipes.id })
                 .from(recipes)
                 .where(
-                  and(eq(recipes.userId, userId), eq(recipes.isPublished, false)),
+                  and(eq(recipes.userId, userId), ne(recipes.status, "published")),
                 ),
             ),
           ),

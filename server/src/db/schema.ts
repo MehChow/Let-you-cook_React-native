@@ -1,5 +1,4 @@
 import {
-  boolean,
   check,
   index,
   integer,
@@ -12,6 +11,15 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+
+export const RECIPE_STATUSES = [
+  "draft",
+  "published",
+  "archived",
+  "removed",
+] as const;
+
+export type RecipeStatus = (typeof RECIPE_STATUSES)[number];
 
 export const users = pgTable(
   "users",
@@ -103,22 +111,51 @@ export const refreshTokens = pgTable(
   ],
 );
 
-export const recipes = pgTable("recipes", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: uuid("user_id")
-    .notNull()
-    .references(() => users.id, { onDelete: "cascade" }),
-  title: text("title").notNull(),
-  description: text("description").notNull(),
-  categoryId: text("category_id").notNull(),
-  cookTimeMinutes: integer("cook_time_minutes").notNull(),
-  servings: integer("servings").notNull(),
-  calories: integer("calories"),
-  tags: jsonb("tags").$type<string[]>().default([]).notNull(),
-  isPublished: boolean("is_published").default(false).notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-});
+export const recipes = pgTable(
+  "recipes",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    description: text("description").notNull(),
+    categoryId: text("category_id").notNull(),
+    cookTimeMinutes: integer("cook_time_minutes").notNull(),
+    servings: integer("servings").notNull(),
+    calories: integer("calories"),
+    tags: jsonb("tags").$type<string[]>().default([]).notNull(),
+    status: text("status").$type<RecipeStatus>().default("draft").notNull(),
+    version: integer("version").default(1).notNull(),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+    removedAt: timestamp("removed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    check(
+      "recipes_status_check",
+      sql`${table.status} in ('draft', 'published', 'archived', 'removed')`,
+    ),
+    check("recipes_version_check", sql`${table.version} >= 1`),
+    index("recipes_status_published_id_idx").on(
+      table.status,
+      table.publishedAt,
+      table.id,
+    ),
+    index("recipes_category_status_published_idx").on(
+      table.categoryId,
+      table.status,
+      table.publishedAt,
+    ),
+    index("recipes_author_status_updated_idx").on(
+      table.userId,
+      table.status,
+      table.updatedAt,
+    ),
+  ],
+);
 
 export const recipeImages = pgTable("recipe_images", {
   id: uuid("id").primaryKey().defaultRandom(),

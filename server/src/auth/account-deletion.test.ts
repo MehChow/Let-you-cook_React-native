@@ -73,7 +73,7 @@ test("account deletion irreversibly anonymizes identity and invalidates every se
         categoryId: "soups",
         cookTimeMinutes: 20,
         servings: 2,
-        isPublished: true,
+        status: "published",
       })
       .returning({ id: recipes.id });
     const [report] = await db
@@ -93,7 +93,7 @@ test("account deletion irreversibly anonymizes identity and invalidates every se
         categoryId: "soups",
         cookTimeMinutes: 10,
         servings: 1,
-        isPublished: false,
+        status: "draft",
       })
       .returning({ id: recipes.id });
     const retainedImages = await db
