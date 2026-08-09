@@ -6,14 +6,14 @@ and schema contract remains `docs/api-and-data-model.md`.
 ## Current backend resume point
 
 - Active feature track: Authentication and account lifecycle
-- Next bounded Goal: `AUTH-07` through `AUTH-09`
+- Next bounded Goal: `AUTH-10` through `AUTH-11`
 - Feature branch: `codex/mvp-auth-account`
-- Last integrated Goal checkpoint: `5bd56d9` (`AUTH-06` code checkpoint)
+- Last integrated Goal checkpoint: `83dfefa` (`AUTH-09` code checkpoint; the
+  later docs handoff commit is the current branch tip)
 - Goal prompt: `docs/current-goal.md`
 
-The API contract track and `AUTH-01` through `AUTH-06` are complete. Continue
-with email delivery, mandatory verification, and password reset. Do not begin
-account deletion or rate-limit hardening next.
+The API contract track and `AUTH-01` through `AUTH-09` are complete. Continue
+with the deletion-policy gate and Auth hardening; do not begin exit review.
 
 ## Current state
 
@@ -23,8 +23,9 @@ account deletion or rate-limit hardening next.
   auth/profile aliases are retired.
 - Stable request IDs, error envelopes, pagination primitives, and current
   auth/profile DTO contracts exist.
-- Server signup, login, refresh rotation/reuse revocation, logout,
-  access-token authentication, and protected current-profile read/update exist.
+- Server signup, verification, login, refresh rotation/reuse revocation,
+  logout, password reset, access-token authentication, and protected
+  current-profile read/update exist.
 - The mobile app uses real signup and login through `/v1`; successful sessions
   are stored through the SecureStore-backed boundary, expired access refreshes
   once during hydration, and logout revokes before unconditional local clear.
@@ -60,32 +61,30 @@ account deletion or rate-limit hardening next.
 Latest Auth branch verification:
 
 - server typecheck passed;
-- backend tests passed 74/74 with zero skips;
+- backend tests passed 89/89 with zero skips;
 - mobile/root checks passed;
-- native-focused mobile tests passed 20 suites/105 tests;
+- native-focused mobile tests passed 21 suites/114 tests;
 - diff check passed.
 
-Android verification passed for real login, valid and expired-session relaunch,
-one database-confirmed refresh rotation, and logout navigation. Temporary QA
-token settings and the exact QA account were removed before handoff.
-
-See `docs/mvp-handoff-2026-08-09-0400.md` and the API task ledgers for exact
-historical evidence.
+Real SMTP/PostgreSQL verification passed for verification and reset delivery,
+session issuance, reset revocation, password replacement, and subsequent login.
+No Android device was available for the exact native checks in
+`docs/progress.md`; the exact QA account was removed before handoff.
 
 ## Next backend responsibilities
 
-Within the next Goal, `AUTH-07` through `AUTH-09` own application email
-delivery, mandatory verification, and password reset. Later Auth Goals own
-deletion, rate limits, redacted logging, and concurrency/failure hardening.
+Within the next Goal, `AUTH-10` and `AUTH-11` own the confirmed deletion policy,
+account deletion, Auth-scoped rate limits, redacted logging, and adversarial
+concurrency/failure coverage. A later fresh task owns independent Auth exit
+review before Recipe Data starts.
 
 ## Do not redo or expand
 
-- Do not recreate the backend package, initial migration, current API contract
-  primitives, or typed client.
-- Do not add Redis, queues, GraphQL, tRPC, NestJS, or another database.
+- Do not recreate the backend package, migrations, contract primitives, or
+  typed client, and do not add another service/database architecture.
 - Do not import mobile runtime code into `server/`.
-- Do not implement recipe, media, or later Auth behavior inside the current
-  bounded Goal.
+- Do not implement recipe, media, Profile UI, or Auth exit-review fixes inside
+  the next bounded Goal.
 - Do not expose secrets, tokens, signed URLs, or personal data in logs.
 
 ## Local database
@@ -116,8 +115,6 @@ tests are not passing evidence.
 
 ## Maintenance
 
-Keep this file under roughly 120 lines. Record only current backend state,
-verification, blockers, and the next bounded responsibility. Detailed execution
-history belongs in Git, dated handoffs, or task ledgers. Before each bounded
-Goal stops, integrate its verified checkpoint into `dev` so this file and the
-next Goal are available from the main checkout.
+Keep this file under roughly 120 lines; detailed history belongs in Git. Before
+each Goal stops, integrate its verified checkpoint into `dev` so the next Goal
+is available from the main checkout.

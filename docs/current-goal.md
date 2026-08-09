@@ -1,21 +1,39 @@
-# Current Goal: Auth Verification and Recovery
+# Current Goal: Account Lifecycle Hardening
 
 Use this document as the complete prompt in a new Codex Goal-mode task with
 Sol High.
 
 ## Outcome
 
-Complete `AUTH-07` through `AUTH-09` on the existing Auth feature branch:
+Complete `AUTH-10` and `AUTH-11` on the existing Auth feature branch:
 
-1. Add an application-owned `EmailSender`, local SMTP delivery to Mailpit, and
-   an in-memory test fake.
-2. Enforce mandatory email verification with secure OTP request/resend and
-   confirmation behavior; only confirmation may issue the first full session.
-3. Implement the password-reset request, OTP verification, short-lived reset
-   grant, password completion, and refresh-session revocation lifecycle.
+1. Implement authenticated account deletion with an explicit, documented
+   retention/anonymization policy and immediate session invalidation.
+2. Harden Auth with scoped rate limits, redacted logging, and adversarial
+   concurrency/failure coverage.
 
-Stop after these three tasks are separately committed, relevant verification
-passes, and the next exact Goal is recorded. Do not start `AUTH-10`.
+Stop after both tasks are separately committed, relevant verification passes,
+and a fresh independent Auth-track exit-review Goal is recorded. Do not begin
+the exit review, `DATA-01`, or any Profile-track UI work.
+
+## Required Product-Policy Gate
+
+`docs/brief.md` deliberately leaves account deletion, content retention, and
+moderation-evidence handling unresolved. Before changing implementation, ask
+the owner to confirm one concrete policy covering at least:
+
+- whether the identity row is retained as an opaque tombstone or erased;
+- when email, password credentials, profile fields, and media references are
+  erased or anonymized;
+- whether and how authored public content remains visible;
+- how reports and moderation evidence retain referential integrity;
+- whether the deleted email may register again and when;
+- whether deletion is immediate or has a reversible pending period.
+
+Do not infer approval from this handoff. Record the confirmed policy in
+`docs/brief.md`, `docs/api-and-data-model.md`, and `docs/progress.md` before
+implementing it. If the owner does not decide, stop at this gate without
+marking `AUTH-10` complete.
 
 ## Verified Starting State
 
@@ -23,22 +41,22 @@ passes, and the next exact Goal is recorded. Do not start `AUTH-10`.
 - Integration branch: `dev`
 - Feature branch: `codex/mvp-auth-account`
 - Worktree: `C:\Let-you-cook_React-native\.worktrees\mvp-auth-account`
-- Latest Auth code checkpoint: `5bd56d9` (`AUTH-06`); verify current refs and
-  the later Goal-handoff commit instead of assuming that code hash is HEAD.
+- Latest Auth code checkpoint: `83dfefa` (`AUTH-09`); verify the later Goal
+  handoff commit and current refs rather than assuming this code hash is HEAD.
 - Completed roadmap range: `BASE-01` through `BASE-06`, `API-01` through
-  `API-07`, and `AUTH-01` through `AUTH-06`.
-- Auth routes/mobile wrappers use `/v1`; real signup and login persist sessions
-  through SecureStore, hydration refreshes expired access once, concurrent
-  invalid refreshes leave private navigation once, and logout revokes then
-  clears locally even when revocation is unreachable.
-- Latest automated Auth verification: mobile 20 suites/105 tests; backend
-  74/74 tests with zero skips; root and server checks passed.
-- Android verification passed for real login, valid-session relaunch, expired
-  access hydration with one database-confirmed refresh rotation, and logout
-  navigation back to login.
+  `API-07`, and `AUTH-01` through `AUTH-09`.
+- Signup, verification, verified login, hydration refresh, single-flight
+  invalidation, logout, and password reset use `/v1` and real PostgreSQL state.
+- Latest automated verification: mobile 21 suites/114 tests; backend 89/89
+  tests with zero skips; root and server checks passed.
+- Real SMTP/Mailpit verification passed for verification and reset delivery,
+  first-session issuance, old-refresh revocation, old-password denial, and
+  new-password login. The temporary QA account was removed afterward.
+- No Android emulator/device was available for the exact native verification
+  listed in `docs/progress.md`; preserve or resolve those pending checks.
 
-Verify the current clean Auth branch and its integrated handoff state rather
-than assuming historical hashes or process state.
+Verify the current clean Auth branch and integrated handoff state rather than
+assuming historical hashes, processes, containers, or device availability.
 
 ## Read Before Acting
 
@@ -46,19 +64,19 @@ Read only the context required for this bounded Goal:
 
 1. `AGENTS.md`
 2. The top `Current progress` section of `docs/progress.md`
-3. `docs/mvp-roadmap.md`, especially `AUTH-07` through `AUTH-09`
-4. Authentication/session sections of `docs/brief.md` and
+3. `docs/mvp-roadmap.md`, especially `AUTH-10`, `AUTH-11`, and the Auth exit
+4. Account/auth/privacy sections of `docs/brief.md` and
    `docs/api-and-data-model.md`
 5. `docs/backend-integration/opt-setup.md`
 6. `server/docs/progress.md` and `server/docs/backend-token-auth.md`
-7. Current auth contracts, schema, migrations, routes, token services, config,
-   and PostgreSQL smoke tests
-8. Current mobile signup/login/OTP/password-reset screens, pending-reset state,
-   API wrappers, provider, session, and SecureStore boundaries
-9. `compose.dev.yaml` and existing Mailpit/local-service configuration
+7. Current auth middleware, routes, services, schema, migrations, logging,
+   request IDs, error mapping, configuration, and PostgreSQL tests
+8. Current mobile Auth provider, API wrappers, session invalidation, token
+   storage, and any existing profile account/logout entry points
+9. `compose.dev.yaml` and local PostgreSQL/Mailpit configuration
 
-Do not load AI nutrition, media, recipe, Home, Search, or later-track documents
-unless a concrete dependency requires them.
+Do not load AI nutrition, recipe/media implementation plans, Home, Search, or
+later-track documents unless a concrete dependency requires them.
 
 ## Branch and Worktree
 
@@ -71,41 +89,47 @@ changes before acting.
 ## Execution Rules
 
 - Work inline in this task. Do not spawn subagents.
-- Treat approved product/API decisions as settled; do not repeat brainstorming.
+- Treat approved product/API decisions as settled; only the deletion-policy
+  gate above requires a new product decision.
 - Use TDD for every behavior change and commit each roadmap item separately:
-  - `AUTH-07: Add auth email delivery`
-  - `AUTH-08: Enforce email verification`
-  - `AUTH-09: Implement password reset lifecycle`
-- Keep email delivery behind an application-owned interface. Local development
-  sends SMTP to Mailpit; automated tests inject an in-memory fake. Do not choose
-  or integrate a production provider in this Goal.
-- Use cryptographically secure OTP generation, keyed hashes at rest, expiry,
-  attempt limits, resend cooldowns, and replacement invalidation. Never log or
-  return OTPs outside the explicit in-memory test fake.
-- Keep verification and reset request responses non-enumerating. Persist only
-  the opaque challenge identifiers and cooldown state needed to resume mobile
-  flows.
-- Change signup so it creates an unverified account and sends verification but
-  does not issue a session. Email confirmation issues the first access/refresh
-  pair and enters Home; unverified login must not enter the private app.
-- Password-reset verification must issue a short-lived, purpose-bound grant;
-  completion changes the password and revokes existing refresh sessions.
-- Keep the existing single-flight refresh, invalid-session navigation,
-  cancellation behavior, safe error mapping, typed Hono boundary, and
-  SecureStore-only token storage intact.
-- Follow the migration rules for every schema change; never edit an applied
-  migration.
-- Do not implement account deletion, rate limits, production email-provider
-  setup, recipe/media work, or later Auth tasks.
+  - `AUTH-10: Implement account deletion policy`
+  - `AUTH-11: Harden authentication operations`
+- Keep `DELETE /v1/users/me` authenticated and service-backed. Derive identity
+  only from the access token and enforce the confirmed deletion policy in one
+  transaction.
+- Ensure deletion immediately revokes refresh sessions and prevents still-live
+  access tokens from using protected routes. Preserve current error envelopes,
+  request IDs, `/v1` contracts, and non-enumerating auth behavior.
+- Evolve the schema only through forward Drizzle migrations. Preserve future
+  recipe/profile/moderation relationships according to the confirmed policy;
+  do not make unrelated recipe-data migrations.
+- Add only Auth-scoped rate limiting here. Return stable `429` errors with a
+  safe delta-seconds `Retry-After`; keep known and unknown account responses
+  indistinguishable where enumeration resistance requires it.
+- Keep limiter/time/key behavior injectable and deterministic in tests. Do not
+  add Redis or another service; document any single-process limitation for the
+  later operations track.
+- Never log request bodies, raw emails, passwords, OTPs, challenge IDs, tokens,
+  reset grants, signed URLs, or secrets. Test the redaction boundary and retain
+  safe request IDs and operational error classification.
+- Add deterministic concurrency/failure tests for at least duplicate signup,
+  OTP single consumption/replacement, refresh rotation/reuse, password-reset
+  grant single consumption, deletion versus session use, limiter boundaries,
+  and injected email/database failures. Do not call a skipped database test a
+  pass.
+- Keep SecureStore-only token storage, cancellation, bounded retries, typed
+  Hono client boundaries, and invalid-session navigation intact.
+- `PROFILE-06` owns the eventual visible Profile deletion/logout entry points.
+  Add the typed mobile deletion operation and session cleanup boundary needed
+  by that task, but do not redesign or expand Profile UI in this Goal.
 - Preserve unrelated user changes; do not push or open a pull request.
 - Do not run Expo web.
 
 ## Verification
 
 During each task, run focused RED/GREEN tests and the smallest relevant type
-check. For schema changes, generate and apply a forward Drizzle migration
-against the guarded local development database. Before this Goal stops, run at
-least:
+check. Generate and apply every forward migration against only the guarded
+local development database. Before this Goal stops, run at least:
 
 ```powershell
 npm.cmd run check
@@ -115,29 +139,31 @@ npm.cmd run server:test
 git diff --check
 ```
 
-Use Mailpit plus an Android emulator/device to verify signup verification,
-resend/resume behavior, unverified-login denial, password-reset completion,
-old-session revocation, and successful login with the new password. If no
-device is available, record the exact pending device checks in
-`docs/progress.md`; do not substitute web.
+Use real local PostgreSQL to verify deletion, immediate refresh revocation,
+still-live access-token denial, and policy-prescribed anonymization/retention.
+Use Mailpit for rate-limit and failure regressions where delivery matters. Use
+an Android emulator/device for the affected Auth session-clear and pending
+verification flows; if no device is available, record every exact pending
+native check in `docs/progress.md` and never substitute web.
 
 ## Done When
 
-- `AUTH-07`, `AUTH-08`, and `AUTH-09` satisfy their roadmap definitions and are
-  separately committed on `codex/mvp-auth-account`.
-- Relevant automated checks pass without skipped required coverage.
-- Mailpit and Android verification pass or their exact pending checks are
-  recorded.
-- `docs/progress.md`, `server/docs/progress.md`, and `docs/mvp-roadmap.md`
-  describe the verified state.
-- `docs/current-goal.md` is replaced with the next bounded assignment for
-  `AUTH-10` through `AUTH-11` on the same branch using Sol High.
-- The Auth worktree is clean.
+- The deletion policy is owner-confirmed and documented consistently.
+- `AUTH-10` and `AUTH-11` satisfy their roadmap definitions and are separately
+  committed on `codex/mvp-auth-account`.
+- Relevant automated checks pass without skipped required coverage, and exact
+  unavailable native checks are recorded.
+- `docs/progress.md`, `server/docs/progress.md`, `docs/mvp-roadmap.md`, and all
+  policy/contract docs describe the verified state.
+- `docs/current-goal.md` is replaced with a fresh independent Auth-track exit
+  review assignment. Its first pass must be read-only; do not perform that
+  review in the implementation task.
+- The Auth worktree is clean and preserved.
 - The verified Auth branch is fast-forwarded into the main `dev` checkout.
 - `git rev-parse dev` and `git rev-parse codex/mvp-auth-account` return the same
-  commit, their trees are identical, and the updated `docs/current-goal.md` is
-  readable from `C:\Let-you-cook_React-native`.
+  commit, their trees are identical, and the next Goal is readable from the
+  main checkout.
 
-Do not mark the entire Auth track complete, remove its worktree, or continue
-into the next Goal in this task. Stop only after the bounded checkpoint is
-integrated into `dev`.
+Do not mark the Auth track complete, delete its feature branch/worktree, or
+start Recipe Data. Stop only after this bounded checkpoint is integrated into
+`dev`.

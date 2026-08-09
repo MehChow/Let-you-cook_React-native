@@ -5,9 +5,10 @@
 
 - Last audited: 2026-08-09
 - Current integration branch: `dev`
-- Last integrated Goal checkpoint: `5bd56d9` (`AUTH-06` code checkpoint)
+- Last integrated Goal checkpoint: `83dfefa` (`AUTH-09` code checkpoint; the
+  later docs handoff commit is the current branch tip)
 - Active feature track: Authentication and account lifecycle
-- Next bounded Goal: `AUTH-07` through `AUTH-09`
+- Next bounded Goal: `AUTH-10` through `AUTH-11`
 - Feature branch: `codex/mvp-auth-account`
 - Standalone Goal prompt: `docs/current-goal.md`
 
@@ -18,8 +19,8 @@
 3. Use `docs/current-goal.md` as the complete Goal prompt.
 4. Reuse `codex/mvp-auth-account` and its existing Auth worktree after verifying
    it contains current `dev` and has no unpreserved changes.
-5. Stop that Goal after `AUTH-09`; do not begin account deletion or rate-limit
-   hardening.
+5. Resolve the documented account-deletion policy gate, then stop after
+   `AUTH-11`; do not begin the independent Auth exit review.
 6. Before stopping, the Goal must fast-forward its verified checkpoint into
    `dev` so the next Goal file is visible from this main checkout.
 
@@ -42,7 +43,9 @@ Do not resume the historical whole-MVP Goal and do not use the obsolete
 - `AUTH-09`: Password recovery uses a generic request, purpose-bound OTP,
   in-memory short-lived reset grant, atomic password completion, and refresh
   session revocation.
-- Latest AUTH-09 worktree verification:
+- `AUTH-01` through `AUTH-09` are integrated into `dev`; the latest Auth code
+  checkpoint is `83dfefa`.
+- Latest integrated Auth verification:
   - `npm.cmd run check`: passed;
   - `npm.cmd test -- --runInBand`: 21 suites/114 tests passed;
   - `npm.cmd run server:check`: passed;
