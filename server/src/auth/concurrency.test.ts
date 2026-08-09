@@ -376,3 +376,69 @@ test("account deletion serializes against an observed refresh lookup", async () 
     }
   }
 });
+
+test("password reset and account deletion share account-first lock order", async () => {
+  const email = `reset-delete-concurrency-${Date.now()}@example.com`;
+  const password = "correct-horse-batter";
+  const resetGate = createGate();
+  const raceApp = createApp({
+    emailSender,
+    authConcurrency: {
+      afterPasswordResetAccountLock: resetGate.wait,
+    },
+  });
+  let userId: string | undefined;
+
+  try {
+    const session = await signUpAndVerify(raceApp, email, password);
+    userId = session.user.id;
+    const requestResponse = await postJson(
+      raceApp,
+      "/v1/auth/password-reset/requests",
+      { email },
+    );
+    assert.equal(requestResponse.status, 202);
+    const challenge = (await requestResponse.json()) as AuthChallengeResponse;
+    const code = emailSender.messages.at(-1)?.text.match(/\b\d{6}\b/)?.[0];
+    assert.ok(code);
+    const verification = await postJson(
+      raceApp,
+      "/v1/auth/password-reset/verifications",
+      { challengeId: challenge.challengeId, code },
+    );
+    assert.equal(verification.status, 200);
+    const grant = (await verification.json()) as { resetGrant: string };
+
+    const resetPromise = postJson(
+      raceApp,
+      "/v1/auth/password-reset/completions",
+      { resetGrant: grant.resetGrant, password: "replacement-password" },
+    );
+    await waitForGate(resetGate.entered);
+
+    const deletionPromise = raceApp.request("/v1/users/me", {
+      method: "DELETE",
+      headers: { authorization: `Bearer ${session.tokens.accessToken}` },
+    });
+    resetGate.release();
+
+    const resetResponse = await resetPromise;
+    const deletionResponse = await deletionPromise;
+    assert.equal(resetResponse.status, 200);
+    assert.equal(deletionResponse.status, 200);
+
+    const [deletedUser] = await db
+      .select({ accountStatus: users.accountStatus })
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+    assert.equal(deletedUser?.accountStatus, "deleted");
+  } finally {
+    resetGate.release();
+    if (userId) {
+      await db.delete(users).where(eq(users.id, userId));
+    } else {
+      await db.delete(users).where(eq(users.email, email));
+    }
+  }
+});

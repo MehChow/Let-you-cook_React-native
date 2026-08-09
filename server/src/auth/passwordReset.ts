@@ -38,6 +38,7 @@ interface PasswordResetServiceOptions {
   now?: () => Date;
   generateCode?: () => string;
   generateGrant?: () => string;
+  afterAccountLock?: () => Promise<void>;
 }
 
 interface ResetRecipient {
@@ -70,6 +71,7 @@ export const createPasswordResetService = ({
   now = () => new Date(),
   generateCode = generateOtp,
   generateGrant = generateResetGrant,
+  afterAccountLock,
 }: PasswordResetServiceOptions) => {
   // Produces a purpose-separated keyed digest for persisted reset secrets.
   const hashValue = (scope: string, value: string) =>
@@ -262,6 +264,38 @@ export const createPasswordResetService = ({
 
     return database.transaction(async (tx) => {
       const completedAt = now();
+      const grantHash = hashValue("grant", resetGrant);
+      const [candidate] = await tx
+        .select({
+          id: authChallenges.id,
+          userId: authChallenges.userId,
+        })
+        .from(authChallenges)
+        .where(
+          and(
+            eq(authChallenges.purpose, PASSWORD_RESET_PURPOSE),
+            eq(authChallenges.grantHash, grantHash),
+          ),
+        )
+        .limit(1);
+
+      if (!candidate?.userId) {
+        return null;
+      }
+
+      const [account] = await tx
+        .select({ accountStatus: users.accountStatus })
+        .from(users)
+        .where(eq(users.id, candidate.userId))
+        .limit(1)
+        .for("update");
+
+      if (!account || account.accountStatus !== "active") {
+        return null;
+      }
+
+      await afterAccountLock?.();
+
       const [challenge] = await tx
         .select({
           id: authChallenges.id,
@@ -272,8 +306,9 @@ export const createPasswordResetService = ({
         .from(authChallenges)
         .where(
           and(
+            eq(authChallenges.id, candidate.id),
             eq(authChallenges.purpose, PASSWORD_RESET_PURPOSE),
-            eq(authChallenges.grantHash, hashValue("grant", resetGrant)),
+            eq(authChallenges.grantHash, grantHash),
           ),
         )
         .limit(1)
@@ -281,6 +316,7 @@ export const createPasswordResetService = ({
 
       if (
         !challenge?.userId ||
+        challenge.userId !== candidate.userId ||
         challenge.grantConsumedAt ||
         !challenge.grantExpiresAt ||
         challenge.grantExpiresAt <= completedAt
@@ -291,13 +327,13 @@ export const createPasswordResetService = ({
       await tx
         .update(users)
         .set({ passwordHash, updatedAt: completedAt })
-        .where(eq(users.id, challenge.userId));
+        .where(eq(users.id, candidate.userId));
       await tx
         .update(refreshTokens)
         .set({ revokedAt: completedAt })
         .where(
           and(
-            eq(refreshTokens.userId, challenge.userId),
+            eq(refreshTokens.userId, candidate.userId),
             isNull(refreshTokens.revokedAt),
           ),
         );

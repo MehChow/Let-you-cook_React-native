@@ -53,7 +53,11 @@ export const createAuthRoutes = (
     emailSender,
     database,
   });
-  const passwordReset = createPasswordResetService({ emailSender, database });
+  const passwordReset = createPasswordResetService({
+    emailSender,
+    database,
+    afterAccountLock: concurrencyHooks.afterPasswordResetAccountLock,
+  });
   const sessions = createAuthSessionService({
     database,
     afterRefreshLookup: concurrencyHooks.afterRefreshLookup,
