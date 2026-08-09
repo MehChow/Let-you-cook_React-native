@@ -1,4 +1,5 @@
 import {
+  boolean,
   check,
   index,
   integer,
@@ -111,6 +112,21 @@ export const refreshTokens = pgTable(
   ],
 );
 
+export const categories = pgTable(
+  "categories",
+  {
+    id: uuid("id").primaryKey(),
+    slug: text("slug").notNull(),
+    displayName: text("display_name").notNull(),
+    sortOrder: integer("sort_order").notNull(),
+    isActive: boolean("is_active").default(true).notNull(),
+  },
+  (table) => [
+    uniqueIndex("categories_slug_unique").on(table.slug),
+    uniqueIndex("categories_sort_order_unique").on(table.sortOrder),
+  ],
+);
+
 export const recipes = pgTable(
   "recipes",
   {
@@ -120,7 +136,9 @@ export const recipes = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
     title: text("title").notNull(),
     description: text("description").notNull(),
-    categoryId: text("category_id").notNull(),
+    categoryId: uuid("category_id")
+      .notNull()
+      .references(() => categories.id),
     cookTimeMinutes: integer("cook_time_minutes").notNull(),
     servings: integer("servings").notNull(),
     calories: integer("calories"),

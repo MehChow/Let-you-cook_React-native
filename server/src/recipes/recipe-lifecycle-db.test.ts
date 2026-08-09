@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { after, test } from "node:test";
 
 import { pool } from "../db/client";
+import { OTHER_CATEGORY_ID } from "./categories";
 
 // Creates one isolated recipe author for lifecycle database assertions.
 const createAuthor = async (suffix: string): Promise<string> => {
@@ -38,9 +39,9 @@ test("new recipes persist as version-one drafts without lifecycle timestamps", a
     }>(
       `insert into recipes
         (user_id, title, description, category_id, cook_time_minutes, servings)
-       values ($1, 'Lifecycle defaults', 'Defaults stay private.', 'other', 10, 1)
+       values ($1, 'Lifecycle defaults', 'Defaults stay private.', $2, 10, 1)
        returning status, version, published_at, archived_at, removed_at`,
-      [authorId],
+      [authorId, OTHER_CATEGORY_ID],
     );
 
     assert.deepEqual(result.rows[0], {
@@ -70,12 +71,12 @@ test("recipes accept every approved lifecycle value and explicit transition time
         (user_id, title, description, category_id, cook_time_minutes, servings,
          status, published_at, archived_at, removed_at)
        values
-        ($1, 'Draft', 'Lifecycle value.', 'other', 10, 1, 'draft', null, null, null),
-        ($1, 'Published', 'Lifecycle value.', 'other', 10, 1, 'published', $2, null, null),
-        ($1, 'Archived', 'Lifecycle value.', 'other', 10, 1, 'archived', null, $2, null),
-        ($1, 'Removed', 'Lifecycle value.', 'other', 10, 1, 'removed', null, null, $2)
+        ($1, 'Draft', 'Lifecycle value.', $3, 10, 1, 'draft', null, null, null),
+        ($1, 'Published', 'Lifecycle value.', $3, 10, 1, 'published', $2, null, null),
+        ($1, 'Archived', 'Lifecycle value.', $3, 10, 1, 'archived', null, $2, null),
+        ($1, 'Removed', 'Lifecycle value.', $3, 10, 1, 'removed', null, null, $2)
        returning status, published_at, archived_at, removed_at`,
-      [authorId, transitionTime],
+      [authorId, transitionTime, OTHER_CATEGORY_ID],
     );
 
     assert.deepEqual(
@@ -104,8 +105,8 @@ test("recipes reject unknown lifecycle values and nonpositive versions", async (
           `insert into recipes
             (user_id, title, description, category_id, cook_time_minutes, servings,
              status, version)
-           values ($1, 'Invalid lifecycle', 'Must be rejected.', 'other', 10, 1, $2, $3)`,
-          [authorId, value.status, value.version],
+           values ($1, 'Invalid lifecycle', 'Must be rejected.', $4, 10, 1, $2, $3)`,
+          [authorId, value.status, value.version, OTHER_CATEGORY_ID],
         ),
         (error: unknown) =>
           typeof error === "object" &&

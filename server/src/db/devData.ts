@@ -1,8 +1,9 @@
 import { sql } from "drizzle-orm";
 
 import { hashPassword } from "../auth/password";
+import { CURATED_CATEGORIES } from "../recipes/categories";
 import { db } from "./client";
-import { profiles, users } from "./schema";
+import { categories, profiles, users } from "./schema";
 
 const DEVELOPMENT_DATABASE_NAME = "letyoucook";
 const LOCAL_DATABASE_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
@@ -79,6 +80,7 @@ export const resetDevelopmentData = async (): Promise<void> => {
       ingredients,
       recipe_images,
       recipes,
+      categories,
       refresh_tokens,
       profiles,
       users
@@ -86,9 +88,26 @@ export const resetDevelopmentData = async (): Promise<void> => {
   `);
 };
 
+// Restores the fixed ordered category taxonomy for local development.
+export const seedDevelopmentCategories = async (): Promise<void> => {
+  await db
+    .insert(categories)
+    .values([...CURATED_CATEGORIES])
+    .onConflictDoUpdate({
+      target: categories.id,
+      set: {
+        slug: sql`excluded.slug`,
+        displayName: sql`excluded.display_name`,
+        sortOrder: sql`excluded.sort_order`,
+        isActive: sql`excluded.is_active`,
+      },
+    });
+};
+
 // Seeds verified and unverified accounts for repeatable local testing.
 export const seedDevelopmentData = async (): Promise<DevelopmentSeedResult> => {
   assertSafeDevelopmentDatabase(process.env.DATABASE_URL ?? "");
+  await seedDevelopmentCategories();
   const passwordHash = await hashPassword(DEVELOPMENT_SEED_PASSWORD);
   const seeds = [
     {

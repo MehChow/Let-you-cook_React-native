@@ -11,6 +11,7 @@ import type {
 import { db, pool } from "../db/client";
 import { recipeImages, recipes, reports, users } from "../db/schema";
 import { InMemoryEmailSender } from "../email/emailSender";
+import { OTHER_CATEGORY_ID } from "../recipes/categories";
 
 process.env.JWT_SECRET ??= "test-secret";
 
@@ -70,7 +71,7 @@ test("account deletion irreversibly anonymizes identity and invalidates every se
         userId,
         title: "Retained soup",
         description: "Published content remains available.",
-        categoryId: "soups",
+        categoryId: OTHER_CATEGORY_ID,
         cookTimeMinutes: 20,
         servings: 2,
         status: "published",
@@ -90,7 +91,7 @@ test("account deletion irreversibly anonymizes identity and invalidates every se
         userId,
         title: "Private draft",
         description: "Private media must be detached.",
-        categoryId: "soups",
+        categoryId: OTHER_CATEGORY_ID,
         cookTimeMinutes: 10,
         servings: 1,
         status: "draft",
