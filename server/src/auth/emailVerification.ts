@@ -30,6 +30,7 @@ import {
   users,
 } from "../db/schema";
 import type { EmailSender } from "../email/emailSender";
+import { OperationalFailure } from "../observability/operationalLogger";
 
 const EMAIL_VERIFICATION_PURPOSE = "email_verification";
 const CHALLENGE_TTL_MS = 10 * 60 * 1_000;
@@ -40,6 +41,7 @@ type AuthTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 interface EmailVerificationServiceOptions {
   emailSender: EmailSender;
+  database?: typeof db;
   secret?: string;
   now?: () => Date;
   generateCode?: () => string;
@@ -77,6 +79,7 @@ const hashesMatch = (left: string, right: string) => {
 // Builds email-verification transactions around injected delivery and time.
 export const createEmailVerificationService = ({
   emailSender,
+  database = db,
   secret = process.env.AUTH_CHALLENGE_SECRET ?? getRequiredEnv("JWT_SECRET"),
   now = () => new Date(),
   generateCode = generateOtp,
@@ -173,11 +176,15 @@ export const createEmailVerificationService = ({
       });
 
     if (recipient) {
-      await emailSender.send({
-        to: recipient.email,
-        subject: "Verify your Let You Cook email",
-        text: `Your Let You Cook verification code is ${code}. It expires in 10 minutes.`,
-      });
+      try {
+        await emailSender.send({
+          to: recipient.email,
+          subject: "Verify your Let You Cook email",
+          text: `Your Let You Cook verification code is ${code}. It expires in 10 minutes.`,
+        });
+      } catch {
+        throw new OperationalFailure("email_delivery_failure");
+      }
     }
 
     return toChallengeResponse(challenge);
@@ -187,7 +194,7 @@ export const createEmailVerificationService = ({
   const register = async (input: SignUpInput) => {
     const passwordHash = await hashPassword(input.password);
 
-    return db.transaction(async (tx) => {
+    return database.transaction(async (tx) => {
       const [user] = await tx
         .insert(users)
         .values({ email: input.email, passwordHash })
@@ -207,7 +214,7 @@ export const createEmailVerificationService = ({
 
   // Sends or reuses a generic challenge without revealing account existence.
   const request = async (normalizedEmail: string) =>
-    db.transaction(async (tx) => {
+    database.transaction(async (tx) => {
       const [user] = await tx
         .select({
           id: users.id,
@@ -232,7 +239,7 @@ export const createEmailVerificationService = ({
     challengeId: string,
     code: string,
   ): Promise<ConfirmationResult> =>
-    db.transaction(async (tx) => {
+    database.transaction(async (tx) => {
       const verifiedAt = now();
       const [challenge] = await tx
         .select()

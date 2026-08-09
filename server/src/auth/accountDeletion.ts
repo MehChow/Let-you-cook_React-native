@@ -18,6 +18,7 @@ import {
 export const deleteAccount = async (
   userId: string,
   now: Date = new Date(),
+  afterUserLock?: () => Promise<void>,
 ): Promise<boolean> =>
   db.transaction(async (tx) => {
     const [user] = await tx
@@ -30,6 +31,8 @@ export const deleteAccount = async (
     if (!user || user.accountStatus !== "active") {
       return false;
     }
+
+    await afterUserLock?.();
 
     await tx
       .update(refreshTokens)

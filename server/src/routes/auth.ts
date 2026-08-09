@@ -1,32 +1,26 @@
 import { zValidator } from "@hono/zod-validator";
-import { and, eq, gt, isNull } from "drizzle-orm";
 import { Hono } from "hono";
 
+import type { AuthConcurrencyHooks } from "../auth/concurrencyHooks";
 import { createEmailVerificationService } from "../auth/emailVerification";
 import { createPasswordResetService } from "../auth/passwordReset";
-import { verifyPassword } from "../auth/password";
-import {
-  createAccessToken,
-  createRefreshToken,
-  hashRefreshToken,
-  refreshTokenExpiry,
-} from "../auth/tokens";
+import { createAuthSessionService } from "../auth/sessions";
 import {
   authChallengeConfirmationSchema,
   authChallengeRequestSchema,
   authCredentialsSchema,
-  authSessionResponseSchema,
-  authTokensSchema,
-  logoutResponseSchema,
   passwordResetCompletionSchema,
   refreshTokenInputSchema,
   signUpInputSchema,
 } from "../contracts/auth";
 import { db } from "../db/client";
-import { refreshTokens, users } from "../db/schema";
 import type { EmailSender } from "../email/emailSender";
 import { errorResponse, validationErrorHook } from "../http/errors";
 import type { RequestIdEnv } from "../http/requestId";
+import {
+  createAuthRateLimitMiddleware,
+  type AuthRateLimitOptions,
+} from "../auth/rateLimit";
 
 // Identifies duplicate emails from only the users email index.
 export const isUsersEmailUniqueViolation = (error: unknown): boolean => {
@@ -48,39 +42,25 @@ export const isUsersEmailUniqueViolation = (error: unknown): boolean => {
   );
 };
 
-const createTokenPair = async (userId: string) => {
-  const refreshToken = createRefreshToken();
-  const [row] = await db
-    .insert(refreshTokens)
-    .values({
-      userId,
-      tokenHash: hashRefreshToken(refreshToken),
-      expiresAt: refreshTokenExpiry(),
-    })
-    .returning({ id: refreshTokens.id });
-
-  return {
-    accessToken: await createAccessToken(userId),
-    refreshToken,
-    refreshTokenId: row.id,
-  };
-};
-
-// Projects internal token metadata into the public token DTO.
-const toAuthTokens = (
-  tokens: Awaited<ReturnType<typeof createTokenPair>>,
-) =>
-  authTokensSchema.parse({
-    accessToken: tokens.accessToken,
-    refreshToken: tokens.refreshToken,
+// Creates auth routes with application-owned email delivery injected.
+export const createAuthRoutes = (
+  emailSender: EmailSender,
+  rateLimitOptions?: AuthRateLimitOptions,
+  database: typeof db = db,
+  concurrencyHooks: AuthConcurrencyHooks = {},
+) => {
+  const emailVerification = createEmailVerificationService({
+    emailSender,
+    database,
+  });
+  const passwordReset = createPasswordResetService({ emailSender, database });
+  const sessions = createAuthSessionService({
+    database,
+    afterRefreshLookup: concurrencyHooks.afterRefreshLookup,
   });
 
-// Creates auth routes with application-owned email delivery injected.
-export const createAuthRoutes = (emailSender: EmailSender) => {
-  const emailVerification = createEmailVerificationService({ emailSender });
-  const passwordReset = createPasswordResetService({ emailSender });
-
   return new Hono<RequestIdEnv>()
+  .use("*", createAuthRateLimitMiddleware(rateLimitOptions))
   .post(
     "/signup",
     zValidator("json", signUpInputSchema, validationErrorHook),
@@ -102,35 +82,10 @@ export const createAuthRoutes = (emailSender: EmailSender) => {
     "/login",
     zValidator("json", authCredentialsSchema, validationErrorHook),
     async (c) => {
-      const body = c.req.valid("json");
-      const [user] = await db
-        .select({
-          id: users.id,
-          email: users.email,
-          passwordHash: users.passwordHash,
-          emailVerifiedAt: users.emailVerifiedAt,
-        })
-        .from(users)
-        .where(eq(users.email, body.email))
-        .limit(1);
-
-      if (!user || !(await verifyPassword(body.password, user.passwordHash))) {
-        return errorResponse(c, "invalid_credentials");
-      }
-
-      if (!user.emailVerifiedAt) {
-        return errorResponse(c, "email_verification_required");
-      }
-
-      const tokens = await createTokenPair(user.id);
-
-      return c.json(
-        authSessionResponseSchema.parse({
-          user: { id: user.id, email: user.email },
-          tokens: toAuthTokens(tokens),
-        }),
-        200,
-      );
+      const result = await sessions.login(c.req.valid("json"));
+      return result.ok
+        ? c.json(result.session, 200)
+        : errorResponse(c, result.error);
     },
   )
   .post(
@@ -187,79 +142,18 @@ export const createAuthRoutes = (emailSender: EmailSender) => {
     "/refresh",
     zValidator("json", refreshTokenInputSchema, validationErrorHook),
     async (c) => {
-      const tokenHash = hashRefreshToken(c.req.valid("json").refreshToken);
-      const [currentToken] = await db
-        .select()
-        .from(refreshTokens)
-        .where(eq(refreshTokens.tokenHash, tokenHash))
-        .limit(1);
-
-      if (!currentToken) {
-        return errorResponse(c, "invalid_refresh_token");
-      }
-
-      if (currentToken.revokedAt) {
-        await db
-          .update(refreshTokens)
-          .set({ revokedAt: new Date() })
-          .where(
-            and(
-              eq(refreshTokens.userId, currentToken.userId),
-              isNull(refreshTokens.revokedAt),
-            ),
-          );
-        return errorResponse(c, "refresh_token_reuse_detected");
-      }
-
-      const [activeToken] = await db
-        .select()
-        .from(refreshTokens)
-        .where(
-          and(
-            eq(refreshTokens.id, currentToken.id),
-            isNull(refreshTokens.revokedAt),
-            gt(refreshTokens.expiresAt, new Date()),
-          ),
-        )
-        .limit(1);
-
-      if (!activeToken) {
-        return errorResponse(c, "refresh_token_expired");
-      }
-
-      const tokens = await createTokenPair(currentToken.userId);
-      await db
-        .update(refreshTokens)
-        .set({
-          revokedAt: new Date(),
-          replacedByTokenId: tokens.refreshTokenId,
-        })
-        .where(eq(refreshTokens.id, currentToken.id));
-
-      return c.json(
-        authTokensSchema.parse({
-          accessToken: tokens.accessToken,
-          refreshToken: tokens.refreshToken,
-        }),
-        200,
-      );
+      const result = await sessions.refresh(c.req.valid("json").refreshToken);
+      return result.ok
+        ? c.json(result.tokens, 200)
+        : errorResponse(c, result.error);
     },
   )
   .post(
     "/logout",
     zValidator("json", refreshTokenInputSchema, validationErrorHook),
     async (c) => {
-      await db
-        .update(refreshTokens)
-        .set({ revokedAt: new Date() })
-        .where(
-          eq(
-            refreshTokens.tokenHash,
-            hashRefreshToken(c.req.valid("json").refreshToken),
-          ),
-        );
-
-      return c.json(logoutResponseSchema.parse({ ok: true }), 200);
+      const result = await sessions.logout(c.req.valid("json").refreshToken);
+      return c.json(result, 200);
     },
   );
 };

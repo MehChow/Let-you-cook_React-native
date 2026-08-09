@@ -230,6 +230,25 @@ and free-text evidence not needed for the audit outcome is erased. This later
 retention cleanup belongs to moderation operations; account deletion must not
 break or prematurely erase those records.
 
+Versioned Auth operations use separate fixed-window, process-memory buckets.
+Default limits are: signup 5/15 minutes; login 10/15 minutes; refresh and logout
+30/minute each; verification request 3/10 minutes; verification confirmation
+10/10 minutes; password-reset request 3/10 minutes; reset verification 10/10
+minutes; and reset completion 5/10 minutes. Keys combine operation scope, a
+coarse client identity, and only the route-relevant selector. The selector is
+stored only as a keyed HMAC; emails are normalized while tokens, challenge IDs,
+and reset grants remain case-sensitive. Known and unknown account requests use
+the same limiter and response. Rejected requests return `429 rate_limited` with
+a positive delta-seconds `Retry-After` and the normal request-ID envelope.
+
+The limiter is intentionally single-process for the local MVP: counters reset
+on restart and are not coordinated across replicas. Distributed enforcement
+belongs to the later operations track before horizontal scaling. Operational
+failure logs are strict allowlisted events containing only level, safe
+classification, request ID, method, coarse route scope, and status. They never
+include request bodies, raw identifiers, credentials, challenges, tokens,
+provider/SQL prose, URLs, or secrets.
+
 Login and email confirmation session DTOs contain only public `user.id`,
 `user.email`, `tokens.accessToken`, and `tokens.refreshToken`. Internal
 refresh-token row IDs are never response fields. Signup instead returns only

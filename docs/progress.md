@@ -50,13 +50,16 @@ Do not resume the historical whole-MVP Goal and do not use the obsolete
 - `AUTH-10`: Account deletion immediately and irreversibly tombstones identity,
   erases credentials/profile/private media references, revokes sessions, keeps
   published recipe and moderation references, and allows immediate email reuse.
-- `AUTH-01` through `AUTH-09` are integrated into `dev`; the latest Auth code
-  checkpoint is `83dfefa`.
-- Latest integrated Auth verification:
+- `AUTH-11`: Versioned Auth operations have isolated keyed-HMAC process-memory
+  limits with stable `429`/`Retry-After`; logs are allowlisted and redacted; and
+  deterministic PostgreSQL races cover signup, OTP, refresh, reset, and deletion.
+- `AUTH-01` through `AUTH-09` are integrated into `dev`; `AUTH-10` and `AUTH-11`
+  are verified on the Auth feature branch pending this Goal's final integration.
+- Latest Auth branch verification:
   - `npm.cmd run check`: passed;
-  - `npm.cmd test -- --runInBand`: 21 suites/114 tests passed;
+  - `npm.cmd test -- --runInBand`: 21 suites/115 tests passed;
   - `npm.cmd run server:check`: passed;
-  - `npm.cmd run server:test`: 89/89 passed with zero skips;
+  - `npm.cmd run server:test`: 102/102 passed with zero skips;
   - `git diff --check`: passed.
 
 ## Current implementation truth
@@ -73,6 +76,13 @@ Do not resume the historical whole-MVP Goal and do not use the obsolete
   one transaction; protected middleware denies still-live access tokens for a
   deleted account, and the mobile boundary clears persisted session state after
   a successful deletion response.
+- Refresh rotation now locks account and token state transactionally, so
+  concurrent reuse revokes the newly rotated session. Auth limits use injectable
+  clocks/keys in tests and remain intentionally single-process pending the
+  operations track.
+- Unexpected Auth failures log only level, safe classification, request ID,
+  method, coarse route scope, and status; request bodies and sensitive exception
+  data never cross the logging boundary.
 - Auth/profile callers are canonicalized to `/v1`; unrelated legacy aliases
   remain outside the completed Goal.
 - The mobile project has a typed Hono client, SecureStore-backed auth transport,
@@ -95,6 +105,10 @@ Do not resume the historical whole-MVP Goal and do not use the obsolete
 - `dev` is local-only. No push or pull request was created.
 - PostgreSQL and Mailpit were healthy for AUTH-09 verification; the temporary
   backend development listener was stopped afterward.
+- AUTH-11 real SMTP/Mailpit verification returned `202`, `202`, `202`, then
+  `429` with a positive delta-seconds `Retry-After`; exactly one reset message
+  was delivered. The temporary QA database row and uniquely prefixed Mailpit
+  message were removed afterward.
 - A registered historical Foundation worktree remains at
   `.worktrees/mvp-foundation`.
 - An empty Windows-locked `.worktrees/mvp-typed-client` directory was not a

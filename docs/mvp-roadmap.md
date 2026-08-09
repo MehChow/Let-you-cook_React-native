@@ -82,7 +82,7 @@ Dependencies: API contracts.
 - [x] `AUTH-08` Add mandatory email verification and resend behavior.
 - [x] `AUTH-09` Implement password-reset request, OTP, grant, and completion.
 - [x] `AUTH-10` Implement account deletion and retention/anonymization.
-- [ ] `AUTH-11` Add rate limits, redacted logging, and concurrency/failure tests.
+- [x] `AUTH-11` Add rate limits, redacted logging, and concurrency/failure tests.
 
 Exit: sign-up, verification, login, restore, refresh, logout, reset, and deletion
 work end to end; unverified users cannot enter Home.

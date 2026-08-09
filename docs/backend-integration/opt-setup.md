@@ -58,6 +58,13 @@ Successful requests should preferably return a generic response to prevent accou
 Requests during cooldown return the same generic `202` challenge state and do
 not send another message, avoiding an account-existence side channel.
 
+The cooldown and abuse limit are separate controls. Password-reset requests use
+a keyed-HMAC bucket per normalized email/client and allow three requests per 10
+minutes; the fourth receives the stable `429 rate_limited` envelope and a safe
+delta-seconds `Retry-After`. Known and unknown emails follow the same boundary.
+The current bucket store is process-memory only and must be replaced or
+coordinated before horizontally scaling the API.
+
 Be careful that different responses for known and unknown email addresses can leak account existence. Generate OTPs with a cryptographically secure source, store only their hashes, limit verification attempts, and never log or return the OTP.
 
 ## OTP challenge session

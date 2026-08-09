@@ -77,6 +77,27 @@ after JWT verification, so an otherwise live access JWT for a deleted account
 is denied immediately. The mobile deletion boundary clears SecureStore state
 only after the server confirms deletion.
 
+## Auth hardening
+
+Every `/v1/auth` operation has an independent fixed-window limit keyed by a
+server-secret HMAC of its client/route selector. Email selectors normalize;
+opaque tokens, challenge IDs, and reset grants remain case-sensitive. Rejected
+requests use `429 rate_limited`, the shared request-ID envelope, and a positive
+delta-seconds `Retry-After`. Known and unknown account flows are
+indistinguishable at this boundary.
+
+The current limiter is process-memory only. It resets on restart and does not
+coordinate replicas; the operations track must provide coordinated enforcement
+before horizontal scaling. Logs contain only an allowlisted operational event:
+level, safe classification, request ID, method, coarse route scope, and status.
+They never include Auth request bodies, emails, passwords, OTPs, challenge IDs,
+tokens, reset grants, provider errors, or database connection prose.
+
+Refresh rotation locks the account row and refresh row in one transaction.
+Concurrent use permits one rotation, then treats the second request as reuse
+and revokes the active family. Account deletion takes the same account lock, so
+deletion and refresh cannot leave a surviving session.
+
 ## Retry Rules
 
 - Retry the original request once after refresh.

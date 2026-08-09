@@ -204,6 +204,12 @@ MVP safety includes:
 - rate limits and basic moderation audit history;
 - privacy policy and terms before external testing.
 
+Auth rate limits are scoped per operation and keep known/unknown account
+responses indistinguishable. Their current local-MVP counters are
+single-process; deployment must provide coordinated enforcement before the API
+is horizontally scaled. Operational logs retain safe request IDs and coarse
+failure categories only, never user-entered Auth data or credentials.
+
 A small administrative review surface is recommended before a public beta.
 
 ## Canonical User Flows

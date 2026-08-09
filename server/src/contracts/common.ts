@@ -14,6 +14,7 @@ export const nonValidationErrorCodes = [
   "invalid_refresh_token",
   "refresh_token_expired",
   "refresh_token_reuse_detected",
+  "rate_limited",
   "resource_not_found",
   "route_not_found",
   "email_already_registered",

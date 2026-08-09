@@ -60,25 +60,31 @@ with the deletion-policy gate and Auth hardening; do not begin exit review.
 - [x] `AUTH-10` Immediate irreversible account tombstoning, credential/profile
   erasure, private media-reference cleanup, refresh revocation, live-access
   denial, published-content/moderation reference retention, and mobile cleanup.
+- [x] `AUTH-11` Scoped keyed-HMAC Auth limits, stable `429`/`Retry-After`,
+  allowlisted operational logging, transactional refresh serialization, and
+  deterministic concurrency/delivery/database failure coverage.
 
-Latest Auth branch verification:
+Latest Auth branch verification after `AUTH-11`:
 
 - server typecheck passed;
-- backend tests passed 89/89 with zero skips;
+- backend tests passed 102/102 with zero skips;
 - mobile/root checks passed;
-- native-focused mobile tests passed 21 suites/114 tests;
+- native-focused mobile tests passed 21 suites/115 tests;
 - diff check passed.
 
 Real SMTP/PostgreSQL verification passed for verification and reset delivery,
 session issuance, reset revocation, password replacement, and subsequent login.
+AUTH-11 Mailpit verification also proved three accepted reset requests produce
+one cooldown-controlled delivery and the fourth returns `429` with a positive
+`Retry-After`; its QA row and message were removed.
 No Android device was available for the exact native checks in
 `docs/progress.md`; the exact QA account was removed before handoff.
 
 ## Next backend responsibilities
 
-The active Goal continues with `AUTH-11`: Auth-scoped rate limits, redacted
-logging, and adversarial concurrency/failure coverage. A later fresh task owns
-independent Auth exit review before Recipe Data starts.
+`AUTH-10` and `AUTH-11` are implemented. A fresh task owns independent Auth exit
+review before Recipe Data starts; do not mark the track complete until that
+read-only-first review and its complete exit gate pass.
 
 ## Do not redo or expand
 

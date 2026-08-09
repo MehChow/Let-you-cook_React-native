@@ -21,6 +21,7 @@ import { getRequiredEnv } from "../config";
 import { db } from "../db/client";
 import { authChallenges, refreshTokens, users } from "../db/schema";
 import type { EmailSender } from "../email/emailSender";
+import { OperationalFailure } from "../observability/operationalLogger";
 
 const PASSWORD_RESET_PURPOSE = "password_reset";
 const CHALLENGE_TTL_MS = 10 * 60 * 1_000;
@@ -32,6 +33,7 @@ type AuthTransaction = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 interface PasswordResetServiceOptions {
   emailSender: EmailSender;
+  database?: typeof db;
   secret?: string;
   now?: () => Date;
   generateCode?: () => string;
@@ -63,6 +65,7 @@ const hashesMatch = (left: string, right: string) => {
 // Builds the complete password-reset challenge and grant lifecycle.
 export const createPasswordResetService = ({
   emailSender,
+  database = db,
   secret = process.env.AUTH_CHALLENGE_SECRET ?? getRequiredEnv("JWT_SECRET"),
   now = () => new Date(),
   generateCode = generateOtp,
@@ -159,11 +162,15 @@ export const createPasswordResetService = ({
       });
 
     if (recipient) {
-      await emailSender.send({
-        to: recipient.email,
-        subject: "Reset your Let You Cook password",
-        text: `Your Let You Cook password reset code is ${code}. It expires in 10 minutes.`,
-      });
+      try {
+        await emailSender.send({
+          to: recipient.email,
+          subject: "Reset your Let You Cook password",
+          text: `Your Let You Cook password reset code is ${code}. It expires in 10 minutes.`,
+        });
+      } catch {
+        throw new OperationalFailure("email_delivery_failure");
+      }
     }
 
     return toChallengeResponse(challenge);
@@ -171,7 +178,7 @@ export const createPasswordResetService = ({
 
   // Starts a generic reset request without revealing account existence.
   const request = async (normalizedEmail: string) =>
-    db.transaction(async (tx) => {
+    database.transaction(async (tx) => {
       const [user] = await tx
         .select({
           id: users.id,
@@ -192,7 +199,7 @@ export const createPasswordResetService = ({
     challengeId: string,
     code: string,
   ): Promise<PasswordResetGrantResponse | null> =>
-    db.transaction(async (tx) => {
+    database.transaction(async (tx) => {
       const verifiedAt = now();
       const [challenge] = await tx
         .select()
@@ -253,7 +260,7 @@ export const createPasswordResetService = ({
   ): Promise<PasswordResetCompletionResponse | null> => {
     const passwordHash = await hashPassword(password);
 
-    return db.transaction(async (tx) => {
+    return database.transaction(async (tx) => {
       const completedAt = now();
       const [challenge] = await tx
         .select({

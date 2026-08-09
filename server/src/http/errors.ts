@@ -55,6 +55,10 @@ export const errorDefinitions = {
     status: 403,
     message: "This session is no longer valid.",
   },
+  rate_limited: {
+    status: 429,
+    message: "Too many requests. Try again later.",
+  },
   resource_not_found: {
     status: 404,
     message: "The requested resource was not found.",
