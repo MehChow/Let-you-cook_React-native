@@ -32,11 +32,14 @@ target.
 npm.cmd ci
 npm.cmd --prefix server ci
 Copy-Item .env.example .env
+Copy-Item .env.docker.example .env.docker.local
 Copy-Item server\.env.example server\.env
 ```
 
-Replace `JWT_SECRET` in `server/.env` with a long local secret. The documented
-development database URL is:
+Replace the placeholder Postgres password in `.env.docker.local`, then use the
+same password in `DATABASE_URL` inside `server/.env`. Also replace `JWT_SECRET`
+in `server/.env` with a long local secret. The documented default development
+database URL is:
 
 ```text
 postgres://postgres:postgres@localhost:5432/letyoucook
@@ -58,6 +61,10 @@ Start the local PostgreSQL and Mailpit services:
 ```powershell
 npm.cmd run dev:services:up
 ```
+
+Compose loads the PostgreSQL initialization values from the git-ignored
+`.env.docker.local`; never put local credentials directly in
+`compose.dev.yaml`.
 
 PostgreSQL is available at `localhost:5432`. Mailpit is development-only:
 SMTP listens at `localhost:1025`, and its inspection UI/API is at

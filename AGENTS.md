@@ -67,6 +67,8 @@ mention the discrepancy in the handoff.
 - Do not edit generated native folders as the source of truth; use Expo config
   plugins/app config where appropriate.
 - Never commit secrets or put server credentials in `EXPO_PUBLIC_*` variables.
+- Never hard-code credentials in Compose files. Load local values from a
+  git-ignored `*.local` environment file and commit only a placeholder example.
 - Preserve unrelated user changes in a dirty worktree.
 
 ## Git Workflow
