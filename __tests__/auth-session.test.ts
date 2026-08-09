@@ -1,4 +1,5 @@
 import {
+  createSessionInvalidation,
   createAuthSession,
   isAccessTokenExpired,
   restoreAuthSession,
@@ -105,5 +106,31 @@ describe("auth session helpers", () => {
 
     expect(restored).toBeNull();
     expect(clearTokens).toHaveBeenCalledTimes(1);
+  });
+
+  it("notifies session expiry once until a new session resets it", () => {
+    const invalidation = createSessionInvalidation();
+    const listener = jest.fn();
+    invalidation.subscribe(listener);
+
+    invalidation.notify();
+    invalidation.notify();
+
+    expect(listener).toHaveBeenCalledTimes(1);
+
+    invalidation.reset();
+    invalidation.notify();
+
+    expect(listener).toHaveBeenCalledTimes(2);
+  });
+
+  it("delivers a latched invalidation to a late session subscriber", () => {
+    const invalidation = createSessionInvalidation();
+    const listener = jest.fn();
+
+    invalidation.notify();
+    invalidation.subscribe(listener);
+
+    expect(listener).toHaveBeenCalledTimes(1);
   });
 });

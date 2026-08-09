@@ -11,6 +11,8 @@ interface AuthSessionRestoration {
   now?(): number;
 }
 
+type SessionInvalidationListener = () => void;
+
 // Reads the expiry timestamp from a JWT-shaped access token.
 const readAccessTokenExpiry = (accessToken: string) => {
   const payload = accessToken.split(".")[1];
@@ -50,6 +52,40 @@ export const isAccessTokenExpired = (
   session: Pick<StoredAuthSession, "accessTokenExpiresAt"> | null,
   now = Date.now(),
 ) => !session || session.accessTokenExpiresAt <= now;
+
+// Coordinates one invalid-session transition per established session.
+export const createSessionInvalidation = () => {
+  const listeners = new Set<SessionInvalidationListener>();
+  let invalidated = false;
+
+  return {
+    // Registers a session-expiry listener until its caller unsubscribes.
+    subscribe(listener: SessionInvalidationListener) {
+      listeners.add(listener);
+      if (invalidated) {
+        listener();
+      }
+      return () => {
+        listeners.delete(listener);
+      };
+    },
+    // Notifies listeners only for the first invalidation transition.
+    notify() {
+      if (invalidated) {
+        return;
+      }
+
+      invalidated = true;
+      listeners.forEach((listener) => listener());
+    },
+    // Allows the next established session to invalidate independently.
+    reset() {
+      invalidated = false;
+    },
+  };
+};
+
+export const authSessionInvalidation = createSessionInvalidation();
 
 // Restores valid credentials or rotates one expired access token.
 export const restoreAuthSession = async ({

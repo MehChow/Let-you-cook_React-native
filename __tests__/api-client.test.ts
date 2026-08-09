@@ -242,4 +242,30 @@ describe("createApiClient", () => {
     expect(refreshCalls).toBe(1);
     expect(responses.map((response) => response.status)).toEqual([200, 200]);
   });
+
+  it("reports one invalid session across concurrent rejected refreshes", async () => {
+    const onSessionExpired = jest.fn();
+    const tokenStorage = createMemoryTokenStorage({
+      accessToken: "old-access",
+      refreshToken: "invalid-refresh",
+    });
+    const apiClient = createApiClient({
+      baseUrl: "http://api.test",
+      tokenStorage,
+      onSessionExpired,
+      fetch: async (url, init) =>
+        new Request(url, init).url.endsWith("/v1/auth/refresh")
+          ? jsonResponse({ message: "Invalid refresh token" }, 401)
+          : jsonResponse({ message: "Expired" }, 401),
+    });
+
+    const responses = await Promise.all([
+      apiClient.request("/v1/profiles/me"),
+      apiClient.request("/v1/profiles/me"),
+    ]);
+
+    expect(responses.map((response) => response.status)).toEqual([401, 401]);
+    expect(tokenStorage.cleared).toBe(true);
+    expect(onSessionExpired).toHaveBeenCalledTimes(1);
+  });
 });

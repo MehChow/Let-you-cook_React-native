@@ -9,6 +9,7 @@ import {
 import type { StoredAuthSession } from "./authTypes";
 import { authApi, type AuthResponse } from "./api";
 import {
+  authSessionInvalidation,
   createAuthSession,
   isAccessTokenExpired,
   restoreAuthSession,
@@ -36,6 +37,11 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const [isHydrating, setIsHydrating] = useState(true);
   const [session, setSession] = useState<StoredAuthSession | null>(null);
 
+  useEffect(
+    () => authSessionInvalidation.subscribe(() => setSession(null)),
+    [],
+  );
+
   useEffect(() => {
     let mounted = true;
 
@@ -50,6 +56,9 @@ export function AuthProvider({ children }: PropsWithChildren) {
         });
 
         if (mounted) {
+          if (nextSession) {
+            authSessionInvalidation.reset();
+          }
           setSession(nextSession);
         }
       } finally {
@@ -76,6 +85,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
   const establishSession = async (response: AuthResponse) => {
     const nextSession = createAuthSession(response);
     await authTokenStorage.saveSession(nextSession);
+    authSessionInvalidation.reset();
     setSession(nextSession);
   };
 

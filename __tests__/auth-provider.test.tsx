@@ -1,8 +1,9 @@
-import { renderHook, waitFor } from "@testing-library/react-native";
+import { act, renderHook, waitFor } from "@testing-library/react-native";
 import type { PropsWithChildren } from "react";
 
 import { AuthProvider, useAuth } from "@/features/auth/AuthProvider";
 import { authApi } from "@/features/auth/api";
+import { authSessionInvalidation } from "@/features/auth/session";
 import { authTokenStorage } from "@/features/auth/tokenStorage";
 
 const expiredSession = {
@@ -40,6 +41,7 @@ const wrapper = ({ children }: PropsWithChildren) => (
 describe("AuthProvider", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    authSessionInvalidation.reset();
     mockGetSession.mockResolvedValue(expiredSession);
     mockRefresh.mockResolvedValue({
       accessToken: "new-access",
@@ -62,5 +64,22 @@ describe("AuthProvider", () => {
       refreshToken: "new-refresh",
     });
     expect(result.current.isLoggedIn).toBe(true);
+  });
+
+  it("leaves the private session once when refresh invalidates it", async () => {
+    mockGetSession.mockResolvedValue({
+      ...expiredSession,
+      accessTokenExpiresAt: Number.MAX_SAFE_INTEGER,
+    });
+    const { result } = renderHook(() => useAuth(), { wrapper });
+    await waitFor(() => expect(result.current.isHydrating).toBe(false));
+
+    act(() => {
+      authSessionInvalidation.notify();
+      authSessionInvalidation.notify();
+    });
+
+    expect(result.current.session).toBeNull();
+    expect(result.current.isLoggedIn).toBe(false);
   });
 });

@@ -11,6 +11,7 @@ interface ApiClientOptions {
   baseUrl?: string;
   fetch?: typeof fetch;
   tokenStorage: ApiTokenStorage;
+  onSessionExpired?(): void | Promise<void>;
 }
 
 const AUTH_PATHS = new Set([
@@ -60,6 +61,7 @@ export const createApiClient = (options: ApiClientOptions) => {
       .then(async (response) => {
         if (response.status === 401 || response.status === 403) {
           await options.tokenStorage.clearTokens();
+          await options.onSessionExpired?.();
           return null;
         }
 
